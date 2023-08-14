@@ -1,0 +1,64 @@
+.camadaUm {
+    width: 99%;
+    display: flex;
+    padding-left: 1vw;
+}
+
+.camadaUm p {
+    color: #000;
+    font-size: 1.5rem;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.divCamadaDois {
+    width: 100%;
+    height: 38vh;
+    display: flex;
+}
+
+.camadaDois{
+    width: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.camadaDois p {
+    color: #000;
+    text-align: right;
+    font-size: 1.5rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.camadaDoisStrong{
+    width: 100%;
+    display: flex;
+    align-items: start;
+}
+
+.camadaTres {
+    width: 100%;
+    display: flex;
+    align-items: end;
+    justify-content: end;
+}
+
+.camadaTres p,
+.camadaDoisStrong p {
+    color: #000;
+    font-family: "archivoBlack";
+    font-size: 5.7rem;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.svg{
+    height: 4vh;
+    width: 100%;
+    display: flex;
+    justify-content: end;
+
+}

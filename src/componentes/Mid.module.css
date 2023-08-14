@@ -1,0 +1,20 @@
+.textoUm {
+    width: 34vw;
+    height: 26vh;
+}
+
+.textoUm p {
+    color: #000;
+    font-family: Inika;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}
+
+.mountain img{
+    width: 57rem;
+    height: 24rem;
+    
+    
+}
