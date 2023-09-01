@@ -22,11 +22,12 @@
   display: flex;
   justify-content: center;
   flex-direction: column;
-  width: 99.8vw;
+
 }
 
 *{
   font-family: "inika-regular";
+  box-sizing: border-box;
 }
 
 p{
@@ -37,5 +38,5 @@ p{
   display: flex;
   justify-content: center;
   flex-direction: column;
-  width: 100%;
+  width: 100vw;
 }

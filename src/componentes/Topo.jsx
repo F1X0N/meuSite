@@ -15,7 +15,7 @@ function Topo() {
                     <div className={style.camadaDoisStrong}>
                         <p>DESENVOLVEDOR WEB</p>
                     </div>
-                    <div className={style.camadaTres}>
+                    <div className={style.camadaDoisStrong}>
                         <p>FRONT END</p>
                     </div>
                 </div>

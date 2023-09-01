@@ -1,6 +1,7 @@
 .textoUm {
     width: 34vw;
-    height: 26vh;
+    height: 24vh;
+    padding-left: 1vw;
 }
 
 .textoUm p {
@@ -10,11 +11,63 @@
     font-style: normal;
     font-weight: 700;
     line-height: normal;
+    height: 100%;
+    width: 100%;
 }
 
-.mountain img{
+.divImagens {
+    width: 100vw;
+    height: 43vh;
+    padding-left: 1vw;
+    padding-right: 1vw;
+    display: flex;
+    justify-content: center;
+}
+
+.mountain {
+    width: 50%;
+}
+
+.mountain img {
     width: 57rem;
     height: 24rem;
-    
-    
 }
+
+.mountain p {
+    color: #000;
+    font-family: Inika;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}
+
+.divRelaxin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 50%;
+}
+
+.imgRelaxin {
+    display: flex;
+    flex-direction: column;
+    height: 35%;
+    width: 100%;
+}
+
+.textRelaxin {
+    height: 50%;
+    width: 50%;
+}
+
+.textRelaxin p {
+    color: #000;
+    font-family: Inika;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}
+

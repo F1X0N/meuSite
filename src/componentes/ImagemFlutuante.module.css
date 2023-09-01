@@ -1,0 +1,26 @@
+.imgRelaxin {
+    position: relative;
+    width: 350px;
+    height: 186px;
+    margin: 100px auto;
+    perspective: 1000px;
+}
+
+.pessoa {
+    position: absolute;
+    width: 100%;
+    height: auto;
+    transform-origin: center bottom;
+    transition: transform 2s ease;
+    bottom: 1%;
+}
+
+.sombra {
+    position: absolute;
+    width: 80%;
+    height: auto;
+    transform-origin: center top;
+    filter: grayscale(100%);
+    box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.2);
+    transition: width 2s ease, transform 2s ease;
+}
