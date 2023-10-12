@@ -39,33 +39,33 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mx-auto">
           <li class="nav-item">
-            <a href="#about" class="nav-link"><span data-hover="About">Sobre</span></a>
+            <a href="#sobre" class="nav-link"><span data-hover="Sobre">Sobre</span></a>
           </li>
           <li class="nav-item">
-            <a href="#project" class="nav-link"><span data-hover="Projects">Projetos</span></a>
+            <a href="#projetos" class="nav-link"><span data-hover="Projetos">Projetos</span></a>
           </li>
           <li class="nav-item">
-            <a href="#resume" class="nav-link"><span data-hover="Resume">Resumo</span></a>
+            <a href="#resumo" class="nav-link"><span data-hover="Resumo">Resumo</span></a>
           </li>
           <li class="nav-item">
-            <a href="#contact" class="nav-link"><span data-hover="Contact">Contato</span></a>
+            <a href="#contatos" class="nav-link"><span data-hover="Contatos">Contatos</span></a>
           </li>
         </ul>
 
-        <ul class="navbar-nav ml-lg-auto">
-          <ul class="navbar-nav ml-lg-auto">
-            <div class="ml-lg-4">
-              <label class="color-mode-switch">
-                <input type="checkbox" id="color-mode-checkbox">
-                <span class="color-mode-slider"></span>
-              </label>
-            </div>
-          </ul>
+        <ul class="navbar-nav ml-lg-auto d-flex justify-content-center align-items-end">
+          <p class="tema">Tema</p>
+          <div class="ml-lg-4">
+            <label class="color-mode-switch">
+              <input type="checkbox" id="color-mode-checkbox">
+              <i class="color-mode-slider "></i>
+            </label>
+          </div>
+        </ul>
       </div>
     </div>
   </nav>
 
-  <section class="about full-screen d-lg-flex justify-content-center align-items-center" id="about">
+  <section class="about full-screen d-lg-flex justify-content-center align-items-center" id="sobre">
     <div class="container">
       <div class="row">
 
@@ -102,7 +102,7 @@
     </div>
   </section>
 
-  <section class="project py-5" id="project">
+  <section class="project py-5" id="projetos">
     <div class="container">
 
       <div class="row">
@@ -115,13 +115,13 @@
           <div class="owl-carousel owl-theme">
             <div class="item">
               <div class="project-info">
-                <img src="#" class="img-fluid" alt="project image">
+                <a href="https://i-movels.vercel.app/"><img src="./images/project/imovels.png" class="img-fluid" alt="project image"></a>
               </div>
             </div>
 
             <div class="item">
               <div class="project-info">
-                <img src="#" class="img-fluid" alt="project image">
+                <a href="https://art-cool.vercel.app/"><img src="./images/project/artcool.png" class="img-fluid" alt="project image"></a>
               </div>
             </div>
 
@@ -132,7 +132,7 @@
     </div>
   </section>
 
-  <section class="resume py-5 d-lg-flex justify-content-center align-items-center" id="resume">
+  <section class="resume py-5 d-lg-flex justify-content-center align-items-center" id="resumo">
     <div class="container">
       <div class="row">
 
@@ -205,17 +205,15 @@
     </div>
   </section>
 
-  <section class="contact py-5" id="contact">
+  <section class="contact py-5" id="contatos">
     <div class="container">
       <div class="row">
 
-        <div class="col-lg-5 mr-lg-5 col-12">
+        <div class="col-lg-5 mr-lg-5 col-12 d-flex justify-content-center align-items-center">
           <div class="contact-info d-flex justify-content-between align-items-center py-4 px-lg-5 col-12">
             <div class="contact-info-item">
               <h3 class="mb-3 text-white">Diga "Olá!", vamos trabalhar juntos?</h3>
-              <p><a href="mailto:amorimjosivan7@gmail.com">amorimjosivan7@gmail.com</a></p>
             </div>
-
             <ul class="social-links">
               <li><a href="https://github.com/F1X0N" class="bi bi-github" data-toggle="tooltip" data-placement="left"
                   title="Github"></a>
@@ -236,19 +234,21 @@
             <form action="https://formsubmit.co/21fa9448254505d25fb3693d68b488bc" method="POST">
               <div class="row">
                 <div class="col-lg-6 col-12">
-                  <input type="text" class="form-control" name="name" placeholder="Seu nome" id="name">
+                  <input type="text" class="form-control" name="name" placeholder="Seu nome" id="name" tabindex="1"
+                    autofocus>
                 </div>
 
                 <div class="col-lg-6 col-12">
-                  <input type="email" class="form-control" name="email" placeholder="Email" id="email">
+                  <input type="email" class="form-control" name="email" placeholder="Email" id="email" tabindex="2">
                 </div>
 
                 <div class="col-12">
-                  <textarea name="message" rows="6" class="form-control" id="message" placeholder="Mensagem"></textarea>
+                  <textarea name="message" rows="6" class="form-control" id="message" placeholder="Mensagem"
+                    tabindex="3"></textarea>
                 </div>
 
                 <div class="ml-lg-auto col-lg-5 col-12">
-                  <input type="submit" class="form-control submit-btn" value="Enviar">
+                  <input type="submit" class="form-control submit-btn" value="Enviar" tabindex="4">
                 </div>
               </div>
             </form>

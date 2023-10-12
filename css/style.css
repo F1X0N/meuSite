@@ -1,4 +1,8 @@
-/* Estilize o input checkbox como um interruptor */
+.tema{
+    font-weight: bold;
+    font-size: 16px
+}
+
 .color-mode-switch {
     position: relative;
     display: inline-block;
@@ -36,9 +40,8 @@
     border-radius: 50%;
 }
 
-/* Aplicar estilos quando o checkbox está checado */
 .color-mode-switch input:checked+.color-mode-slider {
-    background-color: #2196F3;
+    background-color: #0070ff;
 }
 
 .color-mode-switch input:checked+.color-mode-slider:before {

@@ -12,6 +12,17 @@
       $('body').removeClass('dark-mode');
     }
   });
+
+function isHorarioNoIntervalo() {
+  const agora = new Date();
+  const hora = agora.getHours();
+
+  return hora >= 18 || hora < 6;
+}
+
+const horarioCheckbox = document.getElementById("color-mode-checkbox");
+
+horarioCheckbox.checked = isHorarioNoIntervalo();
   
 
   // HEADER
