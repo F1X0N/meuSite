@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="css/unicons.css">
   <link rel="stylesheet" href="css/owl.carousel.min.css">
   <link rel="stylesheet" href="css/owl.theme.default.min.css">
+  <link rel="stylesheet" href="css/style.css">
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
 
@@ -52,13 +53,14 @@
         </ul>
 
         <ul class="navbar-nav ml-lg-auto">
-          <div class="ml-lg-4">
-            <div class="color-mode d-lg-flex justify-content-center align-items-center">
-              <i class="color-mode-icon"></i>
-              Modo de cores
+          <ul class="navbar-nav ml-lg-auto">
+            <div class="ml-lg-4">
+              <label class="color-mode-switch">
+                <input type="checkbox" id="color-mode-checkbox">
+                <span class="color-mode-slider"></span>
+              </label>
             </div>
-          </div>
-        </ul>
+          </ul>
       </div>
     </div>
   </nav>
@@ -113,15 +115,16 @@
           <div class="owl-carousel owl-theme">
             <div class="item">
               <div class="project-info">
-                <iframe src="https://i-movels.vercel.app/" class="iframeItem w-75" alt="iMoveLs"></iframe>
+                <img src="#" class="img-fluid" alt="project image">
               </div>
             </div>
 
             <div class="item">
               <div class="project-info">
-                <iframe src="https://art-cool.vercel.app/" class="iframeItem w-75" alt="Artcool"></iframe>
+                <img src="#" class="img-fluid" alt="project image">
               </div>
             </div>
+
           </div>
 
         </div>
@@ -157,7 +160,8 @@
               </div>
               <div class="timeline-info">
                 <h3><span>Cronometrista</span><small>Grupo Dass</small></h3>
-                <p>No setor de cronoanálise, desenvolvi skills muito importantes que com certeza irei levar para toda a
+                <p>No setor de cronoanálise, desenvolvi skills muito importantes que, com certeza, irei levar para toda
+                  a
                   vida. Metodologias ágeis como o Kanban, Scrum, Lean e Kaizen,
                   princípios que hoje utilizo nas minhas aplicações, e tenhos ótimos resultados. Tanto na experiência do
                   desenvolvimento quanto na experiência do usuário.</p>
@@ -171,10 +175,10 @@
               <div class="timeline-info">
                 <h3><span>Programador entusiasta</span><small>Autônomo</small></h3>
                 <p>Foi o ano em que eu começei a escrever minhas primeiras linhas de código, inicialmente em C,
-                  aprendendo lógica de programação, depois em Java aprendendo POO
-                  , dentre todas as inseguranças do aluno recém saído do ensino médio, foi alí onde eu tive a maior
+                  aprendendo lógica de programação, depois em Java aprendendo POO.
+                  dentre todas as inseguranças do aluno recém saído do ensino médio, foi alí onde eu tive a maior
                   certeza da área que queria desenvolver uma carreira. De fato
-                  eu sou apaiconado pelo que faço</p>
+                  eu sou apaixonado pelo que faço</p>
               </div>
             </div>
           </div>
@@ -190,7 +194,7 @@
               </div>
               <div class="timeline-info">
                 <h3><span>Análise e Desenvolvimento de Sistemas</span><small>Universidade Salvador</small></h3>
-                <p>Neste ano concluí a graduação Em análise e desenvolvimento de sistemas pela Unifacs.
+                <p>Neste ano concluí a graduação Em análise e desenvolvimento de sistemas pela UNIFACS.
                 </p>
               </div>
             </div>
@@ -206,7 +210,6 @@
       <div class="row">
 
         <div class="col-lg-5 mr-lg-5 col-12">
-
           <div class="contact-info d-flex justify-content-between align-items-center py-4 px-lg-5 col-12">
             <div class="contact-info-item">
               <h3 class="mb-3 text-white">Diga "Olá!", vamos trabalhar juntos?</h3>
@@ -223,6 +226,32 @@
                   data-toggle="tooltip" data-placement="left" title="LinkedIn"></a>
               </li>
             </ul>
+          </div>
+        </div>
+
+        <div class="col-lg-6 col-12">
+          <div class="contact-form">
+            <h2 class="mb-4">Me mande um e-mail, vamos conversar</h2>
+
+            <form action="https://formspree.io/amorimjosivan7@gmail.com" method="POST">
+              <div class="row">
+                <div class="col-lg-6 col-12">
+                  <input type="text" class="form-control" name="name" placeholder="Seu nome" id="name">
+                </div>
+
+                <div class="col-lg-6 col-12">
+                  <input type="email" class="form-control" name="email" placeholder="Email" id="email">
+                </div>
+
+                <div class="col-12">
+                  <textarea name="message" rows="6" class="form-control" id="message" placeholder="Mensagem"></textarea>
+                </div>
+
+                <div class="ml-lg-auto col-lg-5 col-12">
+                  <input type="submit" class="form-control submit-btn" value="Enviar">
+                </div>
+              </div>
+            </form>
           </div>
         </div>
 
