@@ -12,11 +12,6 @@
       $('body').removeClass('dark-mode');
     }
   });
-  
-const horarioCheckbox = document.getElementById("color-mode-checkbox");
-
-horarioCheckbox.checked = isHorarioNoIntervalo();
-  
 
   // HEADER
   $(".navbar").headroom();
