@@ -1,0 +1,6 @@
+# robots.txt for Portfolio Técnico
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://josivan.dev/sitemap.xml

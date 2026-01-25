@@ -86,6 +86,8 @@ const ModeToggle = ({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => voi
                 }
             `}
             type="button"
+            aria-label="Modo Perguntar"
+            aria-pressed={mode === 'ask'}
         >
             <GIcon name="chat" size={14} />
             Perguntar
@@ -100,6 +102,8 @@ const ModeToggle = ({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => voi
                 }
             `}
             type="button"
+            aria-label="Modo Verificar Fit"
+            aria-pressed={mode === 'job_fit'}
         >
             <GIcon name="target" size={14} />
             Verificar Fit
@@ -169,84 +173,219 @@ export const AITools = () => {
         }
     }, [isFocused])
 
+    // ============ URL Detection ============
+    const isUrl = (text: string): boolean => {
+        try {
+            const url = new URL(text.trim())
+            return url.protocol === 'http:' || url.protocol === 'https:'
+        } catch {
+            return false
+        }
+    }
+
+    // ============ Fetch Job Description from URL ============
+    const fetchJobFromUrl = async (url: string): Promise<string | null> => {
+        try {
+            const response = await fetch('/api/ai/extract-job', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url }),
+            })
+            if (!response.ok) return null
+            const data = await response.json()
+            return data.jobDescription || null
+        } catch {
+            return null
+        }
+    }
+
+    // ============ Normalize Job Fit Response ============
+    const normalizeJobFitResponse = (data: Record<string, unknown>): JobFitResponse | null => {
+        // Handle different response formats from the API
+        const score = data.match_score_0_100 ?? data.fitScore ?? data.score ?? 0
+        const summary = data.summary_md ?? data.summary ?? ''
+
+        // Normalize requirements
+        let requirements: JobFitRequirement[] = []
+        if (Array.isArray(data.requirements)) {
+            requirements = data.requirements.map((r: Record<string, unknown>) => ({
+                requirement: String(r.requirement || r.skill || ''),
+                status: (r.status as 'match' | 'partial' | 'unknown') || 'unknown',
+                evidence_links: Array.isArray(r.evidence_links) ? r.evidence_links : [],
+                notes: String(r.notes || r.evidence || ''),
+            }))
+        } else if (Array.isArray(data.skillsMatch)) {
+            requirements = (data.skillsMatch as Record<string, unknown>[]).map((s) => ({
+                requirement: String(s.skill || ''),
+                status: 'match' as const,
+                evidence_links: [],
+                notes: String(s.evidence || ''),
+            }))
+        }
+
+        // Normalize gaps
+        const gaps = Array.isArray(data.gaps)
+            ? data.gaps.map(String)
+            : Array.isArray(data.skillsGap)
+                ? data.skillsGap.map(String)
+                : []
+
+        // Normalize sources
+        const sources = Array.isArray(data.sources)
+            ? data.sources.map((s: Record<string, unknown>) => ({
+                label: String(s.label || ''),
+                href: String(s.href || ''),
+            }))
+            : []
+
+        return {
+            match_score_0_100: Number(score),
+            summary_md: String(summary),
+            requirements,
+            gaps,
+            open_questions: Array.isArray(data.open_questions) ? data.open_questions.map(String) : [],
+            sources,
+        }
+    }
+
     // ============ Submit ============
     const handleSubmit = async (e?: React.FormEvent) => {
         e?.preventDefault()
         if (!input.trim() || loading) return
 
-        const userMessage = input.trim()
+        const originalInput = input.trim()
         setInput('')
-
-        const newUserMessage: Message = {
-            role: 'user',
-            content: userMessage,
-            mode
-        }
-
-        setMessages(prev => [...prev, newUserMessage])
         setLoading(true)
 
         try {
+            let messageToSend = originalInput
+            let isExtractedUrl = false
+
+            // 1. Check URL Extraction (Job Fit Mode)
+            if (mode === 'job_fit' && isUrl(originalInput)) {
+                // Show extracting status
+                setMessages(prev => [
+                    ...prev,
+                    { role: 'user', content: originalInput, mode },
+                    { role: 'assistant', content: '🔗 Acessando link e extraindo descrição da vaga...', mode, type: 'answer' }
+                ])
+
+                const extractedText = await fetchJobFromUrl(originalInput)
+
+                if (extractedText) {
+                    messageToSend = extractedText
+                    isExtractedUrl = true
+
+                    // Update extracting message to success
+                    setMessages(prev => {
+                        const newMsgs = [...prev]
+                        newMsgs[newMsgs.length - 1] = {
+                            role: 'assistant',
+                            content: `✅ Descrição extraída (${extractedText.length} caracteres). Analisando compatibilidade...`,
+                            mode,
+                            type: 'answer'
+                        }
+                        return newMsgs
+                    })
+                } else {
+                    // Fail gracefully
+                    setMessages(prev => {
+                        const newMsgs = [...prev]
+                        newMsgs[newMsgs.length - 1] = {
+                            role: 'assistant',
+                            content: '❌ Não foi possível ler o conteúdo deste link. Sites como LinkedIn bloqueiam acesso externo.\n\nPor favor, copie e cole o texto da vaga manualmente.',
+                            mode,
+                            type: 'error'
+                        }
+                        return newMsgs
+                    })
+                    setLoading(false)
+                    return // Stop execution
+                }
+            } else {
+                // Normal flow
+                setMessages(prev => [...prev, { role: 'user', content: originalInput, mode }])
+            }
+
+            // 2. Send to AI Chat
             const response = await fetch('/api/ai/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    message: userMessage,
+                    message: messageToSend,
                     mode,
                     sessionId,
-                    history: messages.slice(-6).map(m => ({ role: m.role, content: m.content })),
+                    history: messages
+                        .filter(m => m.type !== 'error' && m.type !== 'rate_limit') // Filter valid history
+                        .slice(-6)
+                        .map(m => ({ role: m.role, content: m.content })),
+                    extractedFromUrl: isExtractedUrl,
                 }),
             })
 
             const data = await response.json()
 
+            // 3. Handle Rate Limit
             if (data.type === 'rate_limit') {
-                const rateLimitMessage: Message = {
+                setMessages(prev => [...prev, {
                     role: 'assistant',
-                    content: data.message,
+                    content: data.message || 'Limite de mensagens atingido.',
                     mode,
                     type: 'rate_limit'
-                }
-                setMessages(prev => [...prev, rateLimitMessage])
+                }])
                 setRemaining(0)
+                setLoading(false)
                 return
             }
 
-            // Resposta baseada no modo
-            if (mode === 'ask') {
-                const assistantMessage: Message = {
+            // 4. Handle Response by Mode
+            if (mode === 'job_fit' || data.type === 'job_fit') {
+                const fitData = normalizeJobFitResponse(data)
+
+                // Validate if we have a valid fit response
+                if (fitData && (fitData.match_score_0_100 > 0 || fitData.summary_md)) {
+                    setMessages(prev => [...prev, {
+                        role: 'assistant',
+                        content: '',
+                        mode: 'job_fit',
+                        type: 'job_fit',
+                        fitData
+                    }])
+                } else {
+                    // Fallback to text if structured data is missing
+                    setMessages(prev => [...prev, {
+                        role: 'assistant',
+                        content: data.content || data.summary_md || data.summary || 'Análise concluída, mas o formato da resposta não pôde ser processado.',
+                        mode,
+                        type: 'answer'
+                    }])
+                }
+            } else {
+                // Ask Mode
+                setMessages(prev => [...prev, {
                     role: 'assistant',
                     content: data.content || data.answer_md || '',
                     mode,
                     type: 'answer',
-                    askData: data.type === 'structured' ? data : undefined
-                }
-                setMessages(prev => [...prev, assistantMessage])
+                    askData: data.sources ? {
+                        answer_md: data.content || '',
+                        sources: data.sources || [],
+                        followups: data.followups
+                    } : undefined
+                }])
             }
 
-            if (mode === 'job_fit') {
-                const assistantMessage: Message = {
-                    role: 'assistant',
-                    content: '',
-                    mode,
-                    type: 'job_fit',
-                    fitData: data
-                }
-                setMessages(prev => [...prev, assistantMessage])
-            }
+            // Update quota
+            if (data.remaining !== undefined) setRemaining(data.remaining)
 
-            if (data.remaining !== undefined) {
-                setRemaining(data.remaining)
-            }
-
-        } catch {
-            const errorMessage: Message = {
+        } catch (error) {
+            console.error('[AITools] Error:', error)
+            setMessages(prev => [...prev, {
                 role: 'assistant',
-                content: 'Desculpe, ocorreu um erro na conexão. Tente novamente mais tarde.',
+                content: 'Desculpe, ocorreu um erro ao processar sua solicitação. Tente novamente.',
                 mode,
                 type: 'error'
-            }
-            setMessages(prev => [...prev, errorMessage])
+            }])
         } finally {
             setLoading(false)
         }
@@ -576,6 +715,7 @@ export const AITools = () => {
                                     type="submit"
                                     disabled={loading || !input.trim()}
                                     size="sm"
+                                    aria-label={loading ? 'Enviando mensagem' : 'Enviar mensagem'}
                                     className={`
                                         self-end rounded-xl transition-all
                                         ${isFocused ? 'h-10 w-10' : 'h-[44px] w-[44px]'}
