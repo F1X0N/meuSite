@@ -3,7 +3,7 @@ import { Highlights } from '@/components/sections/Highlights'
 import { FeaturedCaseStudies } from '@/components/sections/FeaturedCaseStudies'
 import { FeaturedBlog } from '@/components/sections/FeaturedBlog'
 import { Experience } from '@/components/sections/Experience'
-import { AIChat } from '@/components/sections/AIChat'
+import { AITools } from '@/components/sections/AITools'
 import { About } from '@/components/sections/About'
 import { Contact } from '@/components/sections/Contact'
 
@@ -11,10 +11,10 @@ export default function HomePage() {
   return (
     <main>
       <Hero />
-      
-      {/* 🤖 AI CHAT — DESTAQUE MÁXIMO (DIFERENCIAL) */}
-      <section id="ai-chat" className="scroll-mt-24 py-16 md:py-20 lg:py-24 bg-gradient-to-b from-background to-muted/30">
-        <AIChat />
+
+      {/* 🤖 AI TOOLS — DESTAQUE MÁXIMO (DIFERENCIAL) */}
+      <section id="ai-tools" className="scroll-mt-24 py-16 md:py-20 lg:py-24 bg-gradient-to-b from-background to-muted/30">
+        <AITools />
       </section>
 
       <section id="highlights" className="scroll-mt-24 py-16 md:py-20 lg:py-24">

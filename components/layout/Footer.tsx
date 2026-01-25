@@ -1,20 +1,30 @@
 import Link from 'next/link'
 import { site } from '@/config/site'
+import { GIcon } from '@/components/icons/GIcon'
 
-const renderSocialLink = ([platform, url]) => (
-  <Link
-    key={platform}
-    href={url}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="text-muted-foreground hover:text-foreground transition-colors"
-  >
-    {platform}
-  </Link>
-)
+const socialIcons: Record<string, string> = {
+  github: 'code',
+  linkedin: 'link',
+  whatsapp: 'chat',
+}
 
-const renderSocialLinks = (social) =>
-  Object.entries(social).map(renderSocialLink)
+const renderSocialLink = ([platform, url]: [string, string]) => {
+  const icon = socialIcons[platform]
+  if (!icon) return null
+
+  return (
+    <Link
+      key={platform}
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+      aria-label={`Visitar ${platform}`}
+    >
+      <GIcon name={icon} size={20} />
+    </Link>
+  )
+}
 
 const getCurrentYear = () => new Date().getFullYear()
 
@@ -26,10 +36,11 @@ export const Footer = () => (
           © {getCurrentYear()} {site.name}
         </p>
 
-        <div className="flex gap-4">
-          {renderSocialLinks(site.social)}
+        <div className="flex items-center gap-1">
+          {Object.entries(site.social).map(renderSocialLink)}
         </div>
       </div>
     </div>
   </footer>
 )
+

@@ -10,10 +10,10 @@ import { Button } from '@/components/ui/Button'
 const buildNavItemClasses = () =>
   'text-sm font-medium transition-colors hover:text-primary'
 
-const getIconForSection = (id) => {
-  const icons = {
-    'ask-ai': 'bolt',
-    'job-fit': 'target',
+const getIconForSection = (id: string): string | null => {
+  const icons: Record<string, string> = {
+    'ai-tools': 'smart_toy',
+    'experience': 'work_history',
     'highlights': 'star',
     'about': 'person',
     'contact': 'mail',
@@ -21,14 +21,14 @@ const getIconForSection = (id) => {
   return icons[id] || null
 }
 
-const renderSection = (section) => {
+const renderSection = (section: { id: string; label: string }) => {
   const icon = getIconForSection(section.id)
-  
+
   return (
     <a key={section.id} href={`/#${section.id}`} className={buildNavItemClasses()}>
       <span className="flex items-center gap-1.5">
         {icon && <GIcon name={icon} size={16} />}
-        {section.label.replace('⚡', '').replace('🎯', '')}
+        {section.label}
       </span>
     </a>
   )
