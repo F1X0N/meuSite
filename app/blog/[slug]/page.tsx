@@ -1,0 +1,91 @@
+import { notFound } from 'next/navigation'
+import { MDXRemote } from 'next-mdx-remote/rsc'
+import { Badge } from '@/components/ui/Badge'
+import { getAllBlogPosts, getBlogPostBySlug } from '@/lib/mdx'
+
+export async function generateStaticParams() {
+  const posts = getAllBlogPosts()
+  return posts.map((post) => ({
+    slug: post.slug,
+  }))
+}
+
+export async function generateMetadata({ params }) {
+  const { slug } = await params
+  const post = getBlogPostBySlug(slug)
+
+  if (!post) {
+    return {
+      title: 'Post não encontrado',
+    }
+  }
+
+  return {
+    title: post.title,
+    description: post.description,
+  }
+}
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('pt-BR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
+const renderTag = (tag) => (
+  <Badge key={tag} variant="secondary">
+    {tag}
+  </Badge>
+)
+
+const renderTags = (tags) => (
+  <div className="flex flex-wrap gap-2">
+    {tags.map(renderTag)}
+  </div>
+)
+
+const renderPostHeader = (post) => (
+  <header className="border-b pb-8">
+    <div className="text-sm text-muted-foreground mb-4">
+      {formatDate(post.date)} · {post.readingTime}
+    </div>
+    <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
+      {post.title}
+    </h1>
+    <p className="mt-4 text-lg text-muted-foreground">
+      {post.description}
+    </p>
+    <div className="mt-6">
+      {renderTags(post.tags)}
+    </div>
+  </header>
+)
+
+const renderPostContent = (content) => (
+  <article className="prose prose-lg dark:prose-invert max-w-none">
+    <MDXRemote source={content} />
+  </article>
+)
+
+export default async function BlogPostPage({ params }) {
+  const { slug } = await params
+  const post = getBlogPostBySlug(slug)
+
+  if (!post) {
+    notFound()
+  }
+
+  return (
+    <div className="py-16 md:py-20 lg:py-24">
+      <div className="container max-w-3xl">
+        {renderPostHeader(post)}
+        <div className="mt-12">
+          {renderPostContent(post.content)}
+        </div>
+      </div>
+    </div>
+  )
+}

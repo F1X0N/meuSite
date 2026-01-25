@@ -1,0 +1,111 @@
+---
+title: "Telemetria Granular de Custos em IA"
+description: "Sistema de observabilidade com rastreamento de tokens, latência e custos por operação usando OpenTelemetry."
+date: "2026-01-22"
+tags: ["Telemetria", "Custo", "Observabilidade", "OpenTelemetry"]
+featured: true
+---
+
+## Contexto
+
+Pipeline de IA com múltiplos estágios (embedding, rerank, generation, structured extraction). Budget mensal de $5k com crescimento esperado de 3x nos próximos 6 meses.
+
+## Problema
+
+**Visibilidade zero de custos**:
+- Não sabíamos qual operação consumia mais budget
+- Impossível identificar anomalias (loops infinitos, retry storms)
+- Otimizações baseadas em "achismos"
+- Surpresas na fatura mensal
+
+## Decisão e Trade-offs
+
+Implementar observabilidade granular desde o início:
+
+1. **Rastreamento de tokens** por operação e usuário
+2. **Latência** por provider e modelo
+3. **Taxa de erro** e motivo de falha
+4. **Custo estimado** em tempo real
+
+**Trade-off**: Overhead de telemetria (~2-3% de latência adicional) aceito em troca de visibilidade total.
+
+## Implementação
+
+Wrapper funcional para todas as chamadas LLM:
+
+```python
+def execute_llm_with_telemetry(operation_name, model, prompt, **kwargs):
+    start_time = get_current_timestamp()
+    trace_id = generate_trace_id()
+    
+    try:
+        result = call_llm_provider(model, prompt, **kwargs)
+        
+        record_telemetry({
+            'operation': operation_name,
+            'model': model,
+            'trace_id': trace_id,
+            'status': 'success',
+            'input_tokens': result.usage.prompt_tokens,
+            'output_tokens': result.usage.completion_tokens,
+            'latency_ms': calculate_elapsed_time(start_time),
+            'estimated_cost_usd': calculate_cost(result.usage, model),
+        })
+        
+        return result
+        
+    except Exception as error:
+        record_telemetry({
+            'operation': operation_name,
+            'model': model,
+            'trace_id': trace_id,
+            'status': 'error',
+            'error_type': type(error).__name__,
+            'latency_ms': calculate_elapsed_time(start_time),
+        })
+        
+        raise error
+```
+
+**Dashboards criados**:
+- Custo por operação (diário/semanal/mensal)
+- Top 10 usuários por consumo
+- Latência P50/P95/P99 por modelo
+- Taxa de erro por provider
+
+## Validação
+
+Primeiras descobertas após 2 semanas de telemetria:
+
+**Insights de custo**:
+- 60% do budget consumido por apenas 3 operações
+- Embedding excessivo (re-indexação desnecessária)
+- GPT-4 usado onde GPT-3.5 seria suficiente
+
+**Insights de performance**:
+- P99 latency de embedding: 12s (threshold: 5s)
+- 8% de timeout em rerank (aumentado timeout e adicionado cache)
+
+## Impacto
+
+**Economia identificada**:
+- Substituição de GPT-4 → GPT-3.5 em 40% das operações: -$1200/mês
+- Cache de embeddings: -$600/mês
+- Otimização de prompts (redução de tokens): -$400/mês
+- **Total: -$2200/mês (44% do budget anterior)**
+
+**Prevenção de incidentes**:
+- Detectado retry storm (user com loop infinito): economia de $800 em 2h
+- Identificado downgrade de modelo por engano (qualidade impactada)
+
+**Tempo de resposta**:
+- Antes: descobrir anomalia na fatura (30 dias depois)
+- Depois: alertas em tempo real (Slack em menos de 5min)
+
+## Stack Evidenciada
+
+- OpenTelemetry (tracing e metrics)
+- Wrapper funcional para LLM calls
+- Dashboards (Grafana + Prometheus)
+- Alertas automatizados (budget threshold, latency spikes)
+- Cost attribution por operação e usuário

@@ -1,0 +1,95 @@
+---
+title: "OCR Híbrido: Balanceando Custo e Qualidade"
+description: "Pipeline multi-fase com fallback inteligente entre OCR tradicional e modelos de visão computacional para otimizar custos sem sacrificar qualidade."
+date: "2026-01-15"
+tags: ["OCR", "Visão", "FinOps", "Pipeline"]
+coverImage: null
+featured: true
+---
+
+## Contexto
+
+Sistema de processamento de documentos fiscais com volume diário de 50k+ páginas. Requisitos contraditórios: alta acurácia (obrigatório para compliance) vs custos controlados (margem apertada).
+
+## Problema
+
+Solução anterior usava apenas APIs de visão premium (GPT-4 Vision) com custo médio de $0.02/página. Com 50k páginas/dia = $1000/dia = $30k/mês apenas em OCR.
+
+OCR tradicional (Tesseract/Cloud Vision) custava $0.001/página mas falhava em:
+- Documentos escaneados com baixa qualidade
+- Layouts complexos (tabelas, múltiplas colunas)
+- Documentos manuscritos ou com distorções
+
+## Decisão e Trade-offs
+
+Implementar pipeline híbrido em 3 fases:
+
+1. **Fase 1 — OCR Tradicional** (Tesseract + pré-processamento)
+   - Executado primeiro sempre
+   - Custo: ~$0.001/página
+   - Taxa de sucesso: 60-70%
+
+2. **Fase 2 — Cloud Vision API** (Google/Azure)
+   - Ativado se Fase 1 falhar validação de qualidade
+   - Custo: ~$0.005/página
+   - Taxa de sucesso adicional: 25-30%
+
+3. **Fase 3 — Vision LLM** (GPT-4 Vision)
+   - Último recurso para casos complexos
+   - Custo: ~$0.02/página
+   - Taxa de sucesso final: ~98%
+
+**Trade-off aceito**: Latência maior (processamento sequencial) em troca de custo 80% menor.
+
+## Implementação
+
+Pipeline funcional com early returns:
+
+```python
+def extract_text_from_document(image_path):
+    quality_check_result = run_tesseract_with_preprocessing(image_path)
+    
+    if passes_quality_threshold(quality_check_result):
+        return quality_check_result
+    
+    cloud_vision_result = run_cloud_vision_ocr(image_path)
+    
+    if passes_quality_threshold(cloud_vision_result):
+        return cloud_vision_result
+    
+    return run_vision_llm_fallback(image_path)
+```
+
+Validação de qualidade baseada em:
+- Confiança média dos caracteres detectados
+- Presença de texto esperado (campos obrigatórios)
+- Estrutura do layout (tabelas, cabeçalhos)
+
+## Validação
+
+Testado com 10k documentos históricos anotados manualmente:
+
+- **Acurácia final**: 97.8% (vs 98.5% com Vision LLM puro)
+- **Distribuição real**:
+  - 65% resolvido na Fase 1 (Tesseract)
+  - 28% resolvido na Fase 2 (Cloud Vision)
+  - 7% escalado para Fase 3 (Vision LLM)
+
+## Impacto
+
+**Custos mensais**:
+- Antes: $30,000/mês (100% Vision LLM)
+- Depois: $6,500/mês (pipeline híbrido)
+- **Redução: 78%**
+
+**Performance**:
+- Acurácia: -0.7pp (dentro da margem aceitável)
+- Latência média: +1.2s/documento (trade-off aceito para custo)
+
+## Stack Evidenciada
+
+- OCR tradicional (Tesseract + OpenCV para pré-processamento)
+- Cloud Vision APIs (Google Cloud Vision)
+- Vision LLMs (GPT-4 Vision via Azure OpenAI)
+- Pipeline orchestration (validação de qualidade, fallback logic)
+- FinOps (telemetria granular por fase, controle de budget)
