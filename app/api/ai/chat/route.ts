@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server'
 import { OpenAI } from 'openai'
 import { getKnowledgeBase } from '@/lib/profile'
+import { logger } from '@/lib/logger'
+import { AUDIT_EVENTS } from '@/lib/audit-events'
+import { buildRequestContext } from '@/lib/request-context'
 
 const MAX_INPUT_TOKENS = 8000
 const MODEL_NAME = 'gpt-4o'
 const RATE_LIMIT_WINDOW_MS = 3600000
 const MAX_REQUESTS_PER_SESSION = 10
+const MAX_REQUESTS_PER_IP_HOUR = 30
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+const ipLimitMap = new Map<string, { count: number; resetAt: number }>()
 
 const createClient = () => {
   const apiKey = process.env.OPENAI_API_KEY
@@ -35,6 +40,19 @@ const checkRateLimit = (sessionId: string): { allowed: boolean; remaining: numbe
 
   userLimit.count++
   return { allowed: true, remaining: MAX_REQUESTS_PER_SESSION - userLimit.count }
+}
+
+const checkIpRateLimit = (ipHash: string | null): boolean => {
+  if (!ipHash) return true
+  const now = Date.now()
+  const bucket = ipLimitMap.get(ipHash)
+  if (!bucket || now > bucket.resetAt) {
+    ipLimitMap.set(ipHash, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
+    return true
+  }
+  if (bucket.count >= MAX_REQUESTS_PER_IP_HOUR) return false
+  bucket.count += 1
+  return true
 }
 
 // ============ GUARDRAILS V5 ============
@@ -140,7 +158,7 @@ const generateResponse = async (
     const parsed = JSON.parse(content)
     return parsed
   } catch {
-    console.error('[AI] Failed to parse JSON response:', content.substring(0, 200))
+    logger.error(AUDIT_EVENTS.CHAT_PARSE_FAILURE, { snippet_length: content.length })
     return {
       type: 'answer',
       content: 'Desculpe, houve um erro ao processar a resposta. Tente novamente.',
@@ -158,11 +176,20 @@ const sanitizeUserInput = (text: string): string => {
 }
 
 export async function POST(request: Request) {
+  const ctx = await buildRequestContext().catch(() => null)
+  const requestId = ctx?.request_id ?? null
+
   try {
     const { message: rawMessage, mode = 'ask', sessionId, history = [] } = await request.json()
     const message = typeof rawMessage === 'string' ? sanitizeUserInput(rawMessage) : ''
 
-    console.log('[Request] Mode:', mode, '| Message length:', message?.length, 'chars')
+    logger.info(AUDIT_EVENTS.CHAT_REQUEST_RECEIVED, {
+      request_id: requestId,
+      session_id: sessionId ?? null,
+      ip_hash: ctx?.ip_hash,
+      mode,
+      message_length: message?.length ?? 0,
+    })
 
     // Validação de entrada
     if (!message || message.length < 3) {
@@ -180,9 +207,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Session ID obrigatório' }, { status: 400 })
     }
 
-    // Rate limiting
+    // Rate limit por IP (defesa adicional contra abuso multi-sessão)
+    if (!checkIpRateLimit(ctx?.ip_hash ?? null)) {
+      logger.warn(AUDIT_EVENTS.CHAT_RATE_LIMIT_HIT, {
+        request_id: requestId,
+        session_id: sessionId,
+        ip_hash: ctx?.ip_hash,
+        scope: 'ip',
+      })
+      return NextResponse.json({
+        type: 'rate_limit',
+        remaining: 0,
+        message: 'Muitas requisições do mesmo IP. Tente novamente mais tarde.',
+      })
+    }
+
+    // Rate limiting por sessão
     const rateLimit = checkRateLimit(sessionId)
     if (!rateLimit.allowed) {
+      logger.warn(AUDIT_EVENTS.CHAT_RATE_LIMIT_HIT, {
+        request_id: requestId,
+        session_id: sessionId,
+        ip_hash: ctx?.ip_hash,
+        scope: 'session',
+      })
       return NextResponse.json({
         type: 'rate_limit',
         remaining: 0,
@@ -195,7 +243,7 @@ export async function POST(request: Request) {
 
     // MOCK MODE: Se não houver cliente, usar simulação para testes
     if (!client) {
-      console.log('[AI Chat] Running in MOCK MODE (No API Key found)')
+      logger.info(AUDIT_EVENTS.CHAT_MOCK_MODE, { request_id: requestId, mode })
 
       // Delay to simulate API
       await new Promise(resolve => setTimeout(resolve, 2000))
@@ -223,7 +271,6 @@ export async function POST(request: Request) {
 
     // Contexto do perfil
     const profileContext = getKnowledgeBase()
-    console.log('[Context] Knowledge base:', profileContext?.length || 0, 'chars')
 
     // Escolhe prompt baseado no modo
     const systemPrompt = mode === 'job_fit'
@@ -242,7 +289,6 @@ export async function POST(request: Request) {
 
     // Validação de tokens
     let currentTokens = countTokens(apiMessages)
-    console.log('[Tokens] Estimated:', currentTokens, '/ MAX:', MAX_INPUT_TOKENS)
 
     while (currentTokens > MAX_INPUT_TOKENS && apiMessages.length > 2) {
       apiMessages.splice(1, 1)
@@ -256,12 +302,30 @@ export async function POST(request: Request) {
     }
 
     // Gera resposta
+    logger.info(AUDIT_EVENTS.CHAT_OPENAI_DISPATCHED, {
+      request_id: requestId,
+      model: MODEL_NAME,
+      input_tokens_est: currentTokens,
+    })
+    const startedAt = Date.now()
     const response = await generateResponse(client, apiMessages, mode)
+    logger.info(AUDIT_EVENTS.CHAT_OPENAI_RESPONDED, {
+      request_id: requestId,
+      latency_ms: Date.now() - startedAt,
+      response_type: response.type ?? 'unknown',
+    })
 
-    return NextResponse.json({ ...response, remaining: rateLimit.remaining })
+    const headers = new Headers()
+    if (requestId) headers.set('x-request-id', requestId)
+    return NextResponse.json({ ...response, remaining: rateLimit.remaining }, { headers })
 
   } catch (error) {
-    console.error('[AI Chat] Critical error:', error)
+    logger.error(AUDIT_EVENTS.API_ERROR_UNHANDLED, {
+      request_id: requestId,
+      route: '/api/ai/chat',
+      error_class: error instanceof Error ? error.constructor.name : 'unknown',
+      error_message: error instanceof Error ? error.message.slice(0, 200) : 'unknown',
+    })
     return NextResponse.json({ error: 'Erro ao processar mensagem' }, { status: 500 })
   }
 }

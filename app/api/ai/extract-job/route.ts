@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
+import { AUDIT_EVENTS } from '@/lib/audit-events'
+import { buildRequestContext } from '@/lib/request-context'
 
 // Common job board selectors for extracting job descriptions
 const JOB_SELECTORS = [
@@ -107,6 +110,9 @@ const extractJobDescription = (html: string): string | null => {
 }
 
 export async function POST(request: Request) {
+    const ctx = await buildRequestContext().catch(() => null)
+    const requestId = ctx?.request_id ?? null
+
     try {
         const { url } = await request.json()
 
@@ -114,16 +120,19 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'URL is required' }, { status: 400 })
         }
 
-        // Validate URL
         try {
             new URL(url)
         } catch {
             return NextResponse.json({ error: 'Invalid URL' }, { status: 400 })
         }
 
-        console.log('[Extract Job] Fetching:', url)
+        const urlHost = (() => { try { return new URL(url).host } catch { return null } })()
+        logger.info(AUDIT_EVENTS.EXTRACT_JOB_REQUESTED, {
+            request_id: requestId,
+            ip_hash: ctx?.ip_hash,
+            url_host: urlHost,
+        })
 
-        // Fetch the page
         const response = await fetch(url, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -134,31 +143,47 @@ export async function POST(request: Request) {
         })
 
         if (!response.ok) {
-            console.log('[Extract Job] Fetch failed:', response.status)
+            logger.warn(AUDIT_EVENTS.EXTRACT_JOB_FAILED, {
+                request_id: requestId,
+                url_host: urlHost,
+                status: response.status,
+            })
             return NextResponse.json({ error: 'Failed to fetch URL' }, { status: 500 })
         }
 
         const html = await response.text()
-        console.log('[Extract Job] HTML length:', html.length)
-
-        // Extract job description
         const jobDescription = extractJobDescription(html)
 
         if (!jobDescription) {
-            console.log('[Extract Job] No job description found')
+            logger.warn(AUDIT_EVENTS.EXTRACT_JOB_FAILED, {
+                request_id: requestId,
+                url_host: urlHost,
+                reason: 'no_match',
+                html_length: html.length,
+            })
             return NextResponse.json({ error: 'Could not extract job description' }, { status: 404 })
         }
 
-        console.log('[Extract Job] Extracted:', jobDescription.length, 'chars')
+        logger.info(AUDIT_EVENTS.EXTRACT_JOB_COMPLETED, {
+            request_id: requestId,
+            url_host: urlHost,
+            extracted_length: jobDescription.length,
+        })
 
+        const headers = new Headers()
+        if (requestId) headers.set('x-request-id', requestId)
         return NextResponse.json({
             jobDescription,
             sourceUrl: url,
             extractedAt: new Date().toISOString()
-        })
+        }, { headers })
 
     } catch (error) {
-        console.error('[Extract Job] Error:', error)
+        logger.error(AUDIT_EVENTS.API_ERROR_UNHANDLED, {
+            request_id: requestId,
+            route: '/api/ai/extract-job',
+            error_class: error instanceof Error ? error.constructor.name : 'unknown',
+        })
         return NextResponse.json({ error: 'Failed to extract job description' }, { status: 500 })
     }
 }

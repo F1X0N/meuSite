@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { OpenAI } from 'openai'
 import { getKnowledgeBase } from '@/lib/profile'
+import { logger } from '@/lib/logger'
+import { AUDIT_EVENTS } from '@/lib/audit-events'
+import { buildRequestContext } from '@/lib/request-context'
 
 const createClient = () => {
   const apiKey = process.env.OPENAI_API_KEY

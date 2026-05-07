@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { OpenAI } from 'openai'
 import { getAllContent } from '@/lib/mdx'
 import { getKnowledgeBase } from '@/lib/profile'
+import { logger } from '@/lib/logger'
+import { AUDIT_EVENTS } from '@/lib/audit-events'
+import { buildRequestContext } from '@/lib/request-context'
 
 const createClient = () => {
   const apiKey = process.env.OPENAI_API_KEY
@@ -96,8 +99,17 @@ const simpleSearch = (query, documents) => {
 }
 
 export async function POST(request) {
+  const ctx = await buildRequestContext().catch(() => null)
+  const requestId = ctx?.request_id ?? null
+
   try {
     const { question } = await request.json()
+
+    logger.info(AUDIT_EVENTS.ASK_MY_WORK_REQUESTED, {
+      request_id: requestId,
+      ip_hash: ctx?.ip_hash,
+      question_length: typeof question === 'string' ? question.length : 0,
+    })
 
     if (!question || question.trim().length < 3) {
       return NextResponse.json(
@@ -132,7 +144,13 @@ export async function POST(request) {
 
     // 4. Gerar Resposta
     const prompt = buildPrompt(question, profileContext, relevantDocs)
+    const startedAt = Date.now()
     const answer = await generateAnswer(client, prompt)
+    logger.info(AUDIT_EVENTS.ASK_MY_WORK_COMPLETED, {
+      request_id: requestId,
+      latency_ms: Date.now() - startedAt,
+      sources_count: relevantDocs.length,
+    })
 
     const sources = relevantDocs.map((doc) => ({
       title: doc.title,
@@ -140,10 +158,17 @@ export async function POST(request) {
       type: doc.readingTime ? 'blog' : 'case-study',
     }))
 
-    return NextResponse.json({ answer, sources })
+    const headers = new Headers()
+    if (requestId) headers.set('x-request-id', requestId)
+    return NextResponse.json({ answer, sources }, { headers })
 
   } catch (error) {
-    console.error('Error in ask-my-work:', error)
+    logger.error(AUDIT_EVENTS.API_ERROR_UNHANDLED, {
+      request_id: requestId,
+      route: '/api/ai/ask-my-work',
+      error_class: error instanceof Error ? error.constructor.name : 'unknown',
+      error_message: error instanceof Error ? error.message.slice(0, 200) : 'unknown',
+    })
     return NextResponse.json(
       { error: 'Erro ao processar pergunta' },
       { status: 500 }
