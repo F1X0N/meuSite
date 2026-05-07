@@ -8,7 +8,7 @@ import { GIcon } from '@/components/icons/GIcon'
 import { Button } from '@/components/ui/Button'
 
 const buildNavItemClasses = () =>
-  'text-sm font-medium transition-colors hover:text-primary'
+  'text-sm font-medium text-foreground transition-colors hover:text-primary'
 
 const getIconForSection = (id: string): string | null => {
   const icons: Record<string, string> = {

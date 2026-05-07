@@ -1,7 +1,12 @@
 import type { HTMLAttributes, ReactNode } from 'react'
 
+type HeadingTag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+
 type CardSlotProps = HTMLAttributes<HTMLDivElement> & { children?: ReactNode }
-type CardTitleProps = HTMLAttributes<HTMLHeadingElement> & { children?: ReactNode }
+type CardTitleProps = HTMLAttributes<HTMLHeadingElement> & {
+  children?: ReactNode
+  as?: HeadingTag
+}
 type CardDescriptionProps = HTMLAttributes<HTMLParagraphElement> & { children?: ReactNode }
 
 const buildCardClasses = () =>
@@ -19,13 +24,13 @@ export const CardHeader = ({ children, className = '', ...props }: CardSlotProps
   </div>
 )
 
-export const CardTitle = ({ children, className = '', ...props }: CardTitleProps) => (
-  <h3
+export const CardTitle = ({ children, className = '', as: Tag = 'h3', ...props }: CardTitleProps) => (
+  <Tag
     className={`text-lg font-semibold leading-snug tracking-tight md:text-xl ${className}`}
     {...props}
   >
     {children}
-  </h3>
+  </Tag>
 )
 
 export const CardDescription = ({ children, className = '', ...props }: CardDescriptionProps) => (

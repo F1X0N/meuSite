@@ -25,7 +25,7 @@ const renderCaseCard = (caseStudy) => (
       <div className="text-sm text-muted-foreground">
         {caseStudy.date}
       </div>
-      <CardTitle>{caseStudy.title}</CardTitle>
+      <CardTitle as="h2">{caseStudy.title}</CardTitle>
       <CardDescription>{caseStudy.description}</CardDescription>
       <div className="mt-4 space-y-3">
         {renderTags(caseStudy.tags)}

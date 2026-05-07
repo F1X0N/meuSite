@@ -32,10 +32,10 @@ module.exports = {
         'categories:best-practices': ['warn', { minScore: 0.85 }],
         'categories:seo': ['error', { minScore: 0.9 }],
 
-        // TODO PR a11y/best-practices: investigar e corrigir; promover de off → error.
-        'color-contrast': 'off',
-        'heading-order': 'off',
-        'errors-in-console': 'off',
+        // A11y/best-practices core (corrigidos em fix/a11y-real-issues)
+        'color-contrast': 'error',
+        'heading-order': 'error',
+        'errors-in-console': 'error',
 
         // Insights aspiracionais (não bloqueadores em Next 15 atual)
         'legacy-javascript-insight': 'off',
