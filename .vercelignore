@@ -1,0 +1,8 @@
+# Local-only utilities and professional context (não devem ir para o build do Vercel)
+utilities/
+workspace/
+output/
+extract_mhtml.py
+linkedin_profile.txt
+*.mhtml
+AGENTS.md
