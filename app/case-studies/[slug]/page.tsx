@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import { Badge } from '@/components/ui/Badge'
+import { BackLink } from '@/components/ui/BackLink'
 import { getAllCaseStudies, getCaseStudyBySlug } from '@/lib/mdx'
 
 export async function generateStaticParams() {
@@ -72,6 +73,9 @@ export default async function CaseStudyPage({ params }) {
   return (
     <div className="py-16 md:py-20 lg:py-24">
       <div className="container max-w-3xl">
+        <div className="mb-6">
+          <BackLink href="/case-studies" label="Voltar para case studies" />
+        </div>
         {renderCaseHeader(caseStudy)}
         <div className="mt-12">
           {renderCaseContent(caseStudy.content)}

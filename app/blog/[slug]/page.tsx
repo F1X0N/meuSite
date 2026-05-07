@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import { Badge } from '@/components/ui/Badge'
+import { BackLink } from '@/components/ui/BackLink'
 import { getAllBlogPosts, getBlogPostBySlug } from '@/lib/mdx'
 
 export async function generateStaticParams() {
@@ -81,6 +82,9 @@ export default async function BlogPostPage({ params }) {
   return (
     <div className="py-16 md:py-20 lg:py-24">
       <div className="container max-w-3xl">
+        <div className="mb-6">
+          <BackLink href="/blog" label="Voltar para o blog" />
+        </div>
         {renderPostHeader(post)}
         <div className="mt-12">
           {renderPostContent(post.content)}
