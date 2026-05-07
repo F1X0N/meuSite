@@ -1,15 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type ChangeEvent } from 'react'
 
-const normalizeText = (text) => {
+type SearchableItem = {
+  title: string
+  description: string
+  tags: string[]
+}
+
+type SearchBarProps<T extends SearchableItem> = {
+  items: T[]
+  onFilteredResults: (filtered: T[]) => void
+}
+
+const normalizeText = (text: string) => {
   return text
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
 }
 
-const matchesSearchTerm = (item, searchTerm) => {
+const matchesSearchTerm = <T extends SearchableItem>(item: T, searchTerm: string) => {
   const normalizedTerm = normalizeText(searchTerm)
   const normalizedTitle = normalizeText(item.title)
   const normalizedDescription = normalizeText(item.description)
@@ -22,7 +33,7 @@ const matchesSearchTerm = (item, searchTerm) => {
   )
 }
 
-const filterItemsBySearch = (items, searchTerm) => {
+const filterItemsBySearch = <T extends SearchableItem>(items: T[], searchTerm: string): T[] => {
   if (!searchTerm.trim()) {
     return items
   }
@@ -33,10 +44,10 @@ const filterItemsBySearch = (items, searchTerm) => {
 const buildInputClasses = () =>
   'w-full rounded-lg border bg-background px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none'
 
-export const SearchBar = ({ items, onFilteredResults }) => {
+export const SearchBar = <T extends SearchableItem>({ items, onFilteredResults }: SearchBarProps<T>) => {
   const [searchTerm, setSearchTerm] = useState('')
 
-  const handleSearchChange = (event) => {
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     const term = event.target.value
     setSearchTerm(term)
 

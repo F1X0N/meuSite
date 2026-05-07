@@ -88,7 +88,23 @@ const renderRecommendations = (recommendations) => {
   )
 }
 
-const createInitialState = () => ({
+type JobFitAnalysis = {
+  fitScore?: number
+  summary?: string
+  skillsMatch?: { skill: string; evidence?: string; level?: string }[]
+  skillsGap?: string[]
+  highlights?: string[]
+  recommendations?: string[]
+}
+
+type JobFitState = {
+  jobDescription: string
+  analysis: JobFitAnalysis | null
+  loading: boolean
+  error: string | null
+}
+
+const createInitialState = (): JobFitState => ({
   jobDescription: '',
   analysis: null,
   loading: false,

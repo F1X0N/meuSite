@@ -42,7 +42,17 @@ const renderSources = (sources) => {
   )
 }
 
-const createInitialState = () => ({
+type AskAISource = { slug: string; type: 'blog' | 'case-study'; title: string }
+
+type AskAIState = {
+  question: string
+  answer: string
+  sources: AskAISource[]
+  loading: boolean
+  error: string | null
+}
+
+const createInitialState = (): AskAIState => ({
   question: '',
   answer: '',
   sources: [],

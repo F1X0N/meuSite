@@ -2,6 +2,35 @@ import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
 
+type FrontmatterData = Record<string, unknown> & {
+  title?: string
+  description?: string
+  date?: string
+  tags?: string[]
+  coverImage?: string | null
+  featured?: boolean
+  readingTime?: string
+}
+
+export type CaseStudyMeta = {
+  title: string
+  description: string
+  date: string
+  tags: string[]
+  coverImage: string | null
+  featured: boolean
+  slug: string
+}
+
+export type BlogPostMeta = {
+  title: string
+  description: string
+  date: string
+  tags: string[]
+  readingTime: string
+  slug: string
+}
+
 const getContentDirectory = () => {
   return path.join(process.cwd(), 'content')
 }
@@ -14,19 +43,19 @@ const getBlogDirectory = () => {
   return path.join(getContentDirectory(), 'blog')
 }
 
-const readFileContent = (filePath) => {
+const readFileContent = (filePath: string) => {
   return fs.readFileSync(filePath, 'utf-8')
 }
 
-const parseMarkdownWithFrontmatter = (content) => {
+const parseMarkdownWithFrontmatter = (content: string) => {
   return matter(content)
 }
 
-const extractSlugFromFilename = (filename) => {
+const extractSlugFromFilename = (filename: string) => {
   return filename.replace(/\.mdx?$/, '')
 }
 
-const buildCaseStudyMetadata = (data, slug) => ({
+const buildCaseStudyMetadata = (data: FrontmatterData, slug: string): CaseStudyMeta => ({
   title: data.title || '',
   description: data.description || '',
   date: data.date || '',
@@ -36,7 +65,7 @@ const buildCaseStudyMetadata = (data, slug) => ({
   slug,
 })
 
-const buildBlogPostMetadata = (data, slug) => ({
+const buildBlogPostMetadata = (data: FrontmatterData, slug: string): BlogPostMeta => ({
   title: data.title || '',
   description: data.description || '',
   date: data.date || '',
@@ -66,7 +95,7 @@ export const getAllCaseStudies = () => {
     })
 }
 
-export const getCaseStudyBySlug = (slug) => {
+export const getCaseStudyBySlug = (slug: string) => {
   const directory = getCaseStudiesDirectory()
   const filePath = path.join(directory, `${slug}.mdx`)
 
@@ -104,7 +133,7 @@ export const getAllBlogPosts = () => {
     })
 }
 
-export const getBlogPostBySlug = (slug) => {
+export const getBlogPostBySlug = (slug: string) => {
   const directory = getBlogDirectory()
   const filePath = path.join(directory, `${slug}.mdx`)
 
