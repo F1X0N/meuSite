@@ -42,8 +42,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </main>
         <Footer />
         <CommandPalette />
-        <Analytics />
-        <SpeedInsights />
+        {/* Vercel Analytics + Speed Insights só em produção (em local com
+            npm start, esses scripts dão 404 e poluem console errors no
+            Lighthouse CI). Em previews também desabilita. */}
+        {process.env.VERCEL_ENV === 'production' && (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        )}
       </body>
     </html>
   )
