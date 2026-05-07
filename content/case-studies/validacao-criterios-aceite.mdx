@@ -1,0 +1,64 @@
+---
+title: "Validação de features, critérios de aceite e impacto operacional"
+description: "Estrutura de release validation, evidência de entrega e mensuração de impacto — reduzindo retrabalho e ambiguidade no ciclo de produto."
+date: "2026-05-05"
+tags: ["Release validation", "Acceptance criteria", "Delivery"]
+coverImage: null
+featured: true
+---
+
+## Contexto
+
+Feature entra em produção e gera dúvida: "isso resolve o problema do usuário?", "como sabemos que funciona?", "e agora, podemos arquivar a demanda?". Sem critério de aceite explícito e sem validação posterior, a entrega vira aposta otimista.
+
+Pior: regressão silenciosa entra disfarçada de feature nova porque ninguém validou se o comportamento existente continuou funcionando.
+
+## Problema
+
+O ciclo típico que cria retrabalho:
+
+- Demanda chega ambígua. Engenharia interpreta. Entrega o que entendeu.
+- Produto/operação testa. Encontra que não é exatamente o que pediu. Volta para engenharia.
+- Engenharia ajusta. Retesta. Outro detalhe vira à tona.
+- Após N rodadas, todo mundo está cansado e ninguém tem certeza se a feature está realmente pronta.
+
+Custo invisível: cada rodada queima atenção do time, atrasa próximas entregas e aumenta superfície de bug.
+
+## Abordagem
+
+**Critério de aceite explícito antes do primeiro commit.** O que constitui "feature pronta"? Quais cenários funcionais? Quais métricas observáveis? Quais comportamentos preexistentes precisam continuar funcionando? Tudo escrito antes de mexer em código.
+
+**Plano de validação como parte da entrega.** Não é responsabilidade exclusiva de QA — é parte do design. O plano descreve como cada critério vai ser verificado: teste automatizado, smoke test manual, validação por log, query de verificação.
+
+**Evidência de entrega.** Quando a feature vira para validação, vem com pacote: o que mudou, como verificar, qual log esperar, qual comportamento preexistente precisa continuar funcionando, e como reverter se der errado.
+
+**Validação pós-deploy.** Critério de aceite cumprido no ambiente real, não só no ambiente de teste. Janela de observação definida — em fluxos críticos, métrica e log monitorados depois do deploy para confirmar que o efeito persistiu.
+
+**Disciplina contra "deveria estar funcionando".** Se não há evidência observável de que está funcionando, a feature não está validada. Suposição não conta como evidência.
+
+## Responsabilidade Técnica
+
+- Tradução de demanda ambígua em critério de aceite verificável, antes de tocar em código.
+- Estruturação do plano de validação como artefato — não como conversa de Slack.
+- Garantia de que regressão em comportamento preexistente é parte do critério, não pegadinha de produção.
+- Documentação do que foi entregue, como verificar, e qual evidência confirmou.
+- Disciplina de não fechar tarefa sem evidência observável de que o critério foi atendido.
+
+## Impacto
+
+**184 entregas de feature planejada** documentadas no workspace profissional sob essa disciplina. Esse volume reflete método aplicado de forma recorrente — entrega vira processo auditável.
+
+Reduz retrabalho por ambiguidade na ponta de engenharia, reduz atrito entre engenharia e produto/operação na ponta de validação, e reduz regressão silenciosa por garantir que comportamento preexistente é parte do contrato de entrega.
+
+## Trade-offs Aceitos
+
+- **Tempo investido em critério de aceite antes do código**: minutos a horas dependendo da feature. Compensa em rodadas evitadas no ciclo de validação.
+- **Disciplina de plano de validação como parte da entrega**: parece formalismo até o terceiro retrabalho evitado. Aí passa a parecer óbvio.
+- **Janela de observação pós-deploy**: time fica observando métrica/log por janela definida em features críticas. Reduz regressão silenciosa.
+
+## Stack Evidenciada
+
+- Release validation, acceptance criteria, evidence-based delivery.
+- Validação pós-mudança com observabilidade (Grafana, Loki, Sentry).
+- Documentação técnica como artefato — runbooks, planos de validação, critério de aceite.
+- Disciplina de revisão e julgamento cross-functional entre engenharia, produto e operação.

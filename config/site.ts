@@ -1,15 +1,14 @@
 const createSiteConfig = () => ({
   name: 'Josivan Amorim',
-  headline: 'Engenheiro de Software | IA aplicada em produção',
-  bio: 'Especialista em soluções de IA robustas e escaláveis, com foco em resiliência, performance e controle de custos.',
-  email: 'josivan.amorim@gmail.com',
+  headline: 'Engenheiro de Software | IA aplicada | Observabilidade | Operação técnica',
+  bio: 'Engenharia full stack com foco em IA aplicada, observabilidade e operação técnica em produção. Agentes com controle humano, diagnóstico orientado por evidências e validação por critério.',
+  email: 'amorimjosivan7@gmail.com',
   social: {
-    github: 'https://github.com/josivanamorim',
-    linkedin: 'https://linkedin.com/in/josivanamorim',
-    whatsapp: 'https://wa.me/5511999999999', // Substituir pelo número real
+    github: 'https://github.com/F1X0N',
+    linkedin: 'https://www.linkedin.com/in/josivan-amorim-44401120a/',
+    whatsapp: 'https://wa.me/5575991826325',
   },
   nav: {
-    // Seções da Home (scroll por âncora)
     sections: [
       { label: 'AI Tools', id: 'ai-tools' },
       { label: 'Trajetória', id: 'experience' },
@@ -17,12 +16,10 @@ const createSiteConfig = () => ({
       { label: 'Sobre', id: 'about' },
       { label: 'Contato', id: 'contact' },
     ],
-    // Páginas dedicadas (rota completa)
     pages: [
       { label: 'Case Studies', href: '/case-studies' },
       { label: 'Blog', href: '/blog' },
     ],
-    // Ações utilitárias
     utils: [
       { label: 'Baixar CV', href: '/cv.pdf' },
     ],
