@@ -1,0 +1,174 @@
+[
+  {
+    "name": "blog-ia-controle-humano",
+    "description": "Use quando o usuário pergunta sobre supervisão de agentes de IA, validação de saídas estruturadas, JSON repair, governança multi-provider, ou quando agente substitui vs complementa engenheiro.",
+    "triggers": [
+      "controle humano",
+      "supervisão",
+      "agente substitui",
+      "JSON repair",
+      "validação de saída",
+      "schema",
+      "alucinação",
+      "alucina",
+      "governance",
+      "governança",
+      "guardrail",
+      "guardrails"
+    ],
+    "linkedContent": "/blog/ia-controle-humano",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "case-orquestracao-ia-operacao",
+      "blog-observabilidade-antes-de-opiniao"
+    ],
+    "followups": [
+      "Como você desenha critério de escalação para agente?",
+      "O que é validação de saída na prática?",
+      "Quando vale a pena usar agente vs script tradicional?"
+    ]
+  },
+  {
+    "name": "blog-metricas-que-pagam-a-conta",
+    "description": "Use quando o usuário pergunta sobre métricas de engenharia, custo em IA, decisão técnica defensável, vocabulário de eficiência/custo/risco/produto, ou tradução de métrica técnica para liderança.",
+    "triggers": [
+      "métrica",
+      "métricas",
+      "FinOps",
+      "custo",
+      "ROI",
+      "eficiência",
+      "risco",
+      "decisão técnica",
+      "P99",
+      "vanity metric",
+      "indicador",
+      "vocabulário"
+    ],
+    "linkedContent": "/blog/metricas-que-pagam-a-conta",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "case-validacao-criterios-aceite",
+      "blog-observabilidade-antes-de-opiniao"
+    ],
+    "followups": [
+      "Como você traduz métrica técnica para liderança?",
+      "Quais métricas você prioriza em IA?",
+      "Como evitar vanity metrics em produto?"
+    ]
+  },
+  {
+    "name": "blog-observabilidade-antes-de-opiniao",
+    "description": "Use quando o usuário pergunta sobre disciplina de diagnóstico, evidência observável vs achismo, troubleshooting baseado em logs/métricas, validação pós-mudança ou disciplina de SQL safety.",
+    "triggers": [
+      "evidência",
+      "achismo",
+      "diagnóstico",
+      "diagnose",
+      "troubleshooting",
+      "SQL safety",
+      "read-only",
+      "validação pós-mudança",
+      "logs estruturados",
+      "antes de opinião",
+      "engenharia disciplinada"
+    ],
+    "linkedContent": "/blog/observabilidade-antes-de-opiniao",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "case-diagnostico-observabilidade-producao",
+      "blog-metricas-que-pagam-a-conta"
+    ],
+    "followups": [
+      "Por que read-only por padrão em diagnóstico?",
+      "Como define janela de observação pós-deploy?",
+      "O que significa 'evidência antes de opinião' no dia a dia?"
+    ]
+  },
+  {
+    "name": "case-diagnostico-observabilidade-producao",
+    "description": "Use quando o usuário pergunta sobre diagnóstico de incidentes em produção, observabilidade com Grafana/Loki/Sentry, segurança operacional, read-only diagnostics, ou validação pós-mudança.",
+    "triggers": [
+      "observabilidade",
+      "diagnóstico",
+      "incidente",
+      "incidentes",
+      "Grafana",
+      "Loki",
+      "Sentry",
+      "produção",
+      "incident",
+      "monitoring",
+      "logs",
+      "métricas"
+    ],
+    "linkedContent": "/case-studies/diagnostico-observabilidade-producao",
+    "linkedType": "case-study",
+    "relatedSkills": [
+      "blog-observabilidade-antes-de-opiniao",
+      "case-orquestracao-ia-operacao"
+    ],
+    "followups": [
+      "O que é read-only diagnostics na prática?",
+      "Como você valida que uma mudança realmente resolveu o incidente?",
+      "Que tipos de incidente você já diagnosticou?"
+    ]
+  },
+  {
+    "name": "case-orquestracao-ia-operacao",
+    "description": "Use quando o usuário pergunta sobre orquestração de agentes de IA, supervisão humana de LLMs, MCP tooling, automação de trabalho repetitivo de operação técnica, ou skills focadas vs agente genérico.",
+    "triggers": [
+      "orquestração",
+      "orquestrar",
+      "agente",
+      "agentes",
+      "MCP",
+      "skill",
+      "skills",
+      "supervisão",
+      "supervisor",
+      "automação",
+      "automatizar",
+      "LLM"
+    ],
+    "linkedContent": "/case-studies/orquestracao-ia-operacao",
+    "linkedType": "case-study",
+    "relatedSkills": [
+      "blog-ia-controle-humano",
+      "case-diagnostico-observabilidade-producao"
+    ],
+    "followups": [
+      "Como você decide o que vira skill e o que continua manual?",
+      "Quais são os critérios de aceite das skills?",
+      "Como auditar o que o agente fez?"
+    ]
+  },
+  {
+    "name": "case-validacao-criterios-aceite",
+    "description": "Use quando o usuário pergunta sobre release validation, critérios de aceite, evidência de entrega, redução de retrabalho, regressão silenciosa, ou disciplina de validação pós-deploy.",
+    "triggers": [
+      "validação",
+      "validar",
+      "critério",
+      "critérios de aceite",
+      "release validation",
+      "release",
+      "regressão",
+      "retrabalho",
+      "evidência",
+      "entrega",
+      "feature"
+    ],
+    "linkedContent": "/case-studies/validacao-criterios-aceite",
+    "linkedType": "case-study",
+    "relatedSkills": [
+      "blog-metricas-que-pagam-a-conta",
+      "case-diagnostico-observabilidade-producao"
+    ],
+    "followups": [
+      "Como você define critério de aceite para uma feature?",
+      "Como evita regressão silenciosa?",
+      "Qual seu fluxo de validação pós-deploy?"
+    ]
+  }
+]

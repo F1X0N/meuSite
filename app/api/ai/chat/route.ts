@@ -4,6 +4,13 @@ import { getKnowledgeBase } from '@/lib/profile'
 import { logger } from '@/lib/logger'
 import { AUDIT_EVENTS } from '@/lib/audit-events'
 import { buildRequestContext } from '@/lib/request-context'
+import {
+  selectRelevantSkills,
+  loadSkill,
+  suggestRelevantContent,
+  offerFollowupQuestions,
+  type ContentCard,
+} from '@/lib/agent-tools/skills'
 
 const MAX_INPUT_TOKENS = 8000
 const MODEL_NAME = 'gpt-4o'
@@ -272,10 +279,23 @@ export async function POST(request: Request) {
     // Contexto do perfil
     const profileContext = getKnowledgeBase()
 
+    // Skills por conteúdo: identifica até 3 skills relevantes para a pergunta,
+    // carrega bodies e injeta no system prompt como contexto editorial extra.
+    const relevantSkills = mode === 'ask' ? selectRelevantSkills(message, 3) : []
+    const skillBodies: string[] = []
+    for (const skill of relevantSkills) {
+      const body = await loadSkill(skill.name)
+      if (body) skillBodies.push(`### Skill: ${skill.name}\n${body}`)
+    }
+    const skillContext = skillBodies.length > 0
+      ? `\n\n=== CONTEXTO EDITORIAL (skills relevantes) ===\n${skillBodies.join('\n\n---\n\n')}\n`
+      : ''
+
     // Escolhe prompt baseado no modo
-    const systemPrompt = mode === 'job_fit'
+    const baseSystemPrompt = mode === 'job_fit'
       ? buildJobFitPrompt(profileContext || '')
       : buildAskPrompt(profileContext || '')
+    const systemPrompt = baseSystemPrompt + skillContext
 
     // Monta mensagens para API
     const apiMessages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
@@ -315,9 +335,20 @@ export async function POST(request: Request) {
       response_type: response.type ?? 'unknown',
     })
 
+    // Suggestions e followups derivados das skills consultadas (só em modo ask)
+    const suggestions: ContentCard[] = mode === 'ask' && relevantSkills.length > 0
+      ? suggestRelevantContent(message, 3)
+      : []
+    const followups: string[] = mode === 'ask' && relevantSkills.length > 0
+      ? offerFollowupQuestions(relevantSkills.map((s) => s.name), 3)
+      : []
+
     const headers = new Headers()
     if (requestId) headers.set('x-request-id', requestId)
-    return NextResponse.json({ ...response, remaining: rateLimit.remaining }, { headers })
+    return NextResponse.json(
+      { ...response, remaining: rateLimit.remaining, suggestions, followups },
+      { headers },
+    )
 
   } catch (error) {
     logger.error(AUDIT_EVENTS.API_ERROR_UNHANDLED, {

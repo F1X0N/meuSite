@@ -1,10 +1,18 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { GIcon } from '@/components/icons/GIcon'
 import { Reveal } from '@/components/motion/Motion'
 import { motion, AnimatePresence } from 'framer-motion'
+
+type Suggestion = {
+  slug: string
+  title: string
+  type: 'case-study' | 'blog'
+  href: string
+}
 
 type Message = {
   role: 'user' | 'assistant'
@@ -15,6 +23,8 @@ type Message = {
     email: string
     linkedin: string
   }
+  suggestions?: Suggestion[]
+  followups?: string[]
 }
 
 const MAX_VISIBLE_MESSAGES = 30
@@ -169,6 +179,8 @@ export const AIChat = () => {
           role: 'assistant',
           content: data.content,
           type: 'answer',
+          suggestions: Array.isArray(data.suggestions) ? data.suggestions : undefined,
+          followups: Array.isArray(data.followups) ? data.followups : undefined,
         }]))
       }
 
@@ -433,7 +445,46 @@ export const AIChat = () => {
                   ) : msg.type === 'fallback_contact' && msg.contactInfo ? (
                     renderContactCard(msg.contactInfo, true, msg.content)
                   ) : (
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                    <>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                      {msg.suggestions && msg.suggestions.length > 0 && (
+                        <div className="mt-4 pt-3 border-t border-border/50">
+                          <div className="text-xs font-medium text-muted-foreground mb-2">
+                            Posso te mostrar mais sobre isso:
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {msg.suggestions.map((s) => (
+                              <Link
+                                key={s.slug}
+                                href={s.href}
+                                className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+                              >
+                                <span>{s.type === 'case-study' ? '📂' : '📝'}</span>
+                                <span>{s.title.replace(/^Use quando[^.]+\.\s*/i, '').slice(0, 60)}</span>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {msg.followups && msg.followups.length > 0 && (
+                        <div className="mt-3">
+                          <div className="text-xs font-medium text-muted-foreground mb-2">
+                            Continue a conversa:
+                          </div>
+                          <div className="flex flex-col gap-1.5">
+                            {msg.followups.map((q, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => { setInput(q); setIsFocused(true); }}
+                                className="text-left text-xs px-3 py-2 rounded-lg bg-muted/50 hover:bg-muted text-foreground transition-colors"
+                              >
+                                {q}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
                 {msg.role === 'user' && (
