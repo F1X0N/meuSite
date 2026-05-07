@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
+import { useEffect } from 'react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { ReactNode } from 'react'
 
@@ -21,22 +22,34 @@ const exitTransition = {
   ease: 'easeIn' as const,
 }
 
+const noTransition = { duration: 0 }
+
+const scrollToHashIfPresent = (smooth: boolean) => {
+  if (typeof window === 'undefined') return
+  const hash = window.location.hash
+  if (!hash || hash.length < 2) return
+  const id = hash.slice(1)
+  const target = document.getElementById(id)
+  target?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' })
+}
+
 export const PageTransition = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname()
   const prefersReducedMotion = useReducedMotion()
 
-  if (prefersReducedMotion) {
-    return <>{children}</>
-  }
+  const initial = prefersReducedMotion ? false : enterVariants.initial
+  const exit = prefersReducedMotion ? enterVariants.animate : enterVariants.exit
+  const transition = prefersReducedMotion ? noTransition : { ...enterTransition, exit: exitTransition }
 
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={pathname}
-        initial={enterVariants.initial}
+        initial={initial}
         animate={enterVariants.animate}
-        exit={enterVariants.exit}
-        transition={{ ...enterTransition, exit: exitTransition }}
+        exit={exit}
+        transition={transition}
+        onAnimationComplete={() => scrollToHashIfPresent(!prefersReducedMotion)}
       >
         {children}
       </motion.div>

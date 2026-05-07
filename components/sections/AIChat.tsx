@@ -19,7 +19,7 @@ type Message = {
 
 const MAX_VISIBLE_MESSAGES = 30
 const MIN_INPUT_LENGTH = 3
-const MAX_INPUT_LENGTH = 1500
+const MAX_INPUT_LENGTH = 5000
 
 const capMessages = (next: Message[]): Message[] =>
   next.length > MAX_VISIBLE_MESSAGES ? next.slice(-MAX_VISIBLE_MESSAGES) : next
