@@ -617,7 +617,7 @@ export const AITools = () => {
                             <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground py-8">
                                 <GIcon name="smart_toy" size={40} className="mb-3 opacity-30" />
                                 <p className="text-sm font-medium mb-1">Como posso ajudar?</p>
-                                <p className="text-xs text-muted-foreground/80 mb-6 max-w-xs">
+                                <p className="text-xs text-muted-foreground mb-6 max-w-xs">
                                     Use o seletor abaixo para perguntar livremente ou analisar uma vaga
                                 </p>
 

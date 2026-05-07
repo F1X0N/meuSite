@@ -34,7 +34,7 @@ const renderPostCard = (post) => (
       <div className="text-sm text-muted-foreground">
         {formatDate(post.date)} · {post.readingTime}
       </div>
-      <CardTitle>{post.title}</CardTitle>
+      <CardTitle as="h2">{post.title}</CardTitle>
       <CardDescription>{post.description}</CardDescription>
       <div className="mt-4 space-y-3">
         {renderTags(post.tags)}

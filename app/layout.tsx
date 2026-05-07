@@ -24,6 +24,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..700,0..1,-25..200&display=swap"
         />
+        {/* No-flash: aplica .dark no <html> antes do body renderizar.
+            Sem isso, SSR vai sem .dark, browser cacheia computed colors do
+            light mode, e ao client adicionar .dark via useEffect alguns
+            elementos ficam stuck com cores antigas (bug de hydration + CSS
+            vars). Padrão idêntico ao next-themes. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}if(t==='dark'){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}else{document.documentElement.style.colorScheme='light';}}catch(e){}})();`,
+          }}
+        />
       </head>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
         <Header />
@@ -32,8 +42,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </main>
         <Footer />
         <CommandPalette />
-        <Analytics />
-        <SpeedInsights />
+        {/* Vercel Analytics + Speed Insights só em produção (em local com
+            npm start, esses scripts dão 404 e poluem console errors no
+            Lighthouse CI). Em previews também desabilita. */}
+        {process.env.VERCEL_ENV === 'production' && (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        )}
       </body>
     </html>
   )
