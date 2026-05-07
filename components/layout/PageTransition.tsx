@@ -1,58 +1,35 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
-import { useEffect } from 'react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { ReactNode } from 'react'
 
-const enterVariants = {
-  initial: { opacity: 0, y: 8 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0 },
-}
-
-const enterTransition = {
-  duration: 0.3,
-  ease: 'easeOut' as const,
-}
-
-const exitTransition = {
-  duration: 0.2,
-  ease: 'easeIn' as const,
-}
-
-const noTransition = { duration: 0 }
-
-const scrollToHashIfPresent = (smooth: boolean) => {
-  if (typeof window === 'undefined') return
-  const hash = window.location.hash
-  if (!hash || hash.length < 2) return
-  const id = hash.slice(1)
-  const target = document.getElementById(id)
-  target?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' })
-}
-
+/**
+ * Wrapper de transição entre rotas.
+ *
+ * NÃO usa AnimatePresence + mode="wait": esse padrão tem bug conhecido com Next
+ * App Router onde o motion.div novo monta com initial=0 e a animação para
+ * animate=1 não dispara, deixando a página invisível até hard reload (CTRL+F5).
+ *
+ * Versão simplificada: cada rota nova gera um novo motion.div via key=pathname,
+ * que entra direto com fade-in. Sem exit animation (Next limpa DOM antigo).
+ *
+ * Wrapper estável (sempre motion.div) para evitar remount após hidratação para
+ * usuários com prefers-reduced-motion. Nesse caso, só zeramos a transition.
+ */
 export const PageTransition = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname()
   const prefersReducedMotion = useReducedMotion()
 
-  const initial = prefersReducedMotion ? false : enterVariants.initial
-  const exit = prefersReducedMotion ? enterVariants.animate : enterVariants.exit
-  const transition = prefersReducedMotion ? noTransition : { ...enterTransition, exit: exitTransition }
-
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={pathname}
-        initial={initial}
-        animate={enterVariants.animate}
-        exit={exit}
-        transition={transition}
-        onAnimationComplete={() => scrollToHashIfPresent(!prefersReducedMotion)}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <motion.div
+      key={pathname}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: 'easeOut' }}
+    >
+      {children}
+    </motion.div>
   )
 }
