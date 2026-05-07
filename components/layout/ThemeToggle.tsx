@@ -80,14 +80,14 @@ export const ThemeToggle = () => {
 
   if (!mounted) {
     return (
-      <div className="rounded-lg p-2 w-10 h-10" aria-hidden="true" />
+      <div className="rounded-lg w-10 h-10 flex items-center justify-center" aria-hidden="true" />
     )
   }
 
   return (
     <button
       onClick={handleToggle}
-      className="rounded-lg p-2 hover:bg-accent transition-all duration-300 group"
+      className="rounded-lg w-10 h-10 flex items-center justify-center hover:bg-accent transition-all duration-300 group"
       aria-label={`Mudar para tema ${theme === 'dark' ? 'claro' : 'escuro'}`}
       title={`Tema ${theme === 'dark' ? 'escuro' : 'claro'} ativo`}
     >

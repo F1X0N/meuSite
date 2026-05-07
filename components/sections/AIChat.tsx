@@ -17,6 +17,13 @@ type Message = {
   }
 }
 
+const MAX_VISIBLE_MESSAGES = 30
+const MIN_INPUT_LENGTH = 3
+const MAX_INPUT_LENGTH = 1500
+
+const capMessages = (next: Message[]): Message[] =>
+  next.length > MAX_VISIBLE_MESSAGES ? next.slice(-MAX_VISIBLE_MESSAGES) : next
+
 const generateSessionId = () => {
   if (typeof window === 'undefined') return ''
   const stored = localStorage.getItem('ai-chat-session')
@@ -68,17 +75,7 @@ export const AIChat = () => {
     if (isFocused) {
       document.addEventListener('mousedown', handleClickOutside)
       document.addEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = 'hidden' // Prevent background scroll
-      
-      // Centralizar o chat na tela suavemente
-      // setTimeout para garantir que a animação de layout do framer motion já iniciou
-      setTimeout(() => {
-        containerRef.current?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center' 
-        })
-      }, 100)
-
+      document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = 'unset'
     }
@@ -92,11 +89,28 @@ export const AIChat = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim() || loading) return
+    if (loading) return
 
     const userMessage = input.trim()
+    if (userMessage.length < MIN_INPUT_LENGTH) {
+      setMessages(prev => capMessages([...prev, {
+        role: 'assistant',
+        content: `Sua mensagem precisa ter ao menos ${MIN_INPUT_LENGTH} caracteres.`,
+        type: 'answer',
+      }]))
+      return
+    }
+    if (userMessage.length > MAX_INPUT_LENGTH) {
+      setMessages(prev => capMessages([...prev, {
+        role: 'assistant',
+        content: `Mensagem muito longa (${userMessage.length} caracteres). Limite de ${MAX_INPUT_LENGTH}.`,
+        type: 'answer',
+      }]))
+      return
+    }
+
     setInput('')
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }])
+    setMessages(prev => capMessages([...prev, { role: 'user', content: userMessage }]))
     setLoading(true)
 
     try {
@@ -114,49 +128,48 @@ export const AIChat = () => {
       const data = await response.json()
 
       if (data.type === 'fallback_contact') {
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
+        setMessages(prev => capMessages([...prev, {
+          role: 'assistant',
           content: data.content,
           type: 'fallback_contact',
-          contactInfo: data.contactInfo
-        }])
+          contactInfo: data.contactInfo,
+        }]))
         return
       }
 
       if (data.type === 'rate_limit_rich') {
-         setMessages(prev => [...prev, { 
-          role: 'assistant', 
+        setMessages(prev => capMessages([...prev, {
+          role: 'assistant',
           content: data.message,
           type: 'rate_limit_rich',
-          contactInfo: data.contactInfo
-        }])
-        // Forçar remaining para 0
+          contactInfo: data.contactInfo,
+        }]))
         setRemaining(0)
         return
       }
 
       if (data.type === 'rate_limit') {
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
+        setMessages(prev => capMessages([...prev, {
+          role: 'assistant',
           content: data.message,
-          type: 'rate_limit'
-        }])
+          type: 'rate_limit',
+        }]))
         return
       }
 
       if (data.type === 'job_fit') {
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: '', 
+        setMessages(prev => capMessages([...prev, {
+          role: 'assistant',
+          content: '',
           type: 'job_fit',
-          fitData: data
-        }])
+          fitData: data,
+        }]))
       } else {
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
+        setMessages(prev => capMessages([...prev, {
+          role: 'assistant',
           content: data.content,
-          type: 'answer'
-        }])
+          type: 'answer',
+        }]))
       }
 
       if (data.remaining !== undefined) {
@@ -164,11 +177,11 @@ export const AIChat = () => {
       }
 
     } catch (error) {
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
+      setMessages(prev => capMessages([...prev, {
+        role: 'assistant',
         content: 'Desculpe, ocorreu um erro na conexão. Tente novamente mais tarde.',
-        type: 'answer'
-      }])
+        type: 'answer',
+      }]))
     } finally {
       setLoading(false)
     }
@@ -312,17 +325,21 @@ export const AIChat = () => {
         </div>
       </Reveal>
 
-      <div 
+      <div
         ref={containerRef}
-        className={`relative transition-all duration-300 ease-in-out ${isFocused ? 'z-50' : 'z-10'}`}
+        className={
+          isFocused
+            ? 'fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 pointer-events-none'
+            : 'relative z-10'
+        }
       >
         <motion.div
           layout
           className={`
-            mx-auto bg-card flex flex-col overflow-hidden transition-all duration-500 rounded-xl
-            ${isFocused 
-              ? 'max-w-4xl shadow-2xl ring-1 ring-primary/20 scale-[1.02]' 
-              : 'max-w-4xl shadow-lg border border-muted/50'
+            bg-card flex flex-col overflow-hidden transition-shadow duration-500 rounded-xl
+            ${isFocused
+              ? 'w-full max-w-4xl max-h-[85vh] shadow-2xl ring-1 ring-primary/20 pointer-events-auto'
+              : 'mx-auto max-w-4xl shadow-lg border border-muted/50'
             }
           `}
         >
@@ -355,13 +372,13 @@ export const AIChat = () => {
           </AnimatePresence>
 
             {/* Messages Area */}
-          <div 
+          <div
             ref={messagesContainerRef}
             className={`
             overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 scroll-smooth
             scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40
             transition-all duration-500
-            ${isFocused ? 'h-[50dvh] md:h-[60vh] max-h-[800px]' : 'h-[400px] md:h-[500px]'}
+            ${isFocused ? 'flex-1 min-h-0' : 'h-[400px] md:h-[500px]'}
           `}>
             {messages.length === 0 && (
               <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground px-4">
