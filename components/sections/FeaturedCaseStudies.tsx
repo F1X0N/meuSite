@@ -3,6 +3,8 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/Ca
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Reveal, StaggerContainer } from '@/components/motion/Motion'
+import { copy } from '@/config/copy'
+import { getAllCaseStudies } from '@/lib/mdx'
 
 const renderCaseTag = (tag) => (
   <Badge key={tag} variant="outline">
@@ -38,42 +40,19 @@ const renderCaseCard = (caseStudy) => (
 const renderCaseCards = (cases) => cases.map(renderCaseCard)
 
 export const FeaturedCaseStudies = () => {
-  const featuredCases = [
-    {
-      slug: 'ocr-hibrido',
-      title: 'OCR Híbrido: Custo vs Qualidade',
-      description:
-        'Pipeline multi-fase com fallback inteligente entre OCR tradicional e modelos de visão',
-      tags: ['OCR', 'Visão', 'FinOps'],
-      featured: true,
-    },
-    {
-      slug: 'llm-resiliente',
-      title: 'Sistema Multi-LLM Resiliente',
-      description:
-        'Arquitetura com retry exponencial, fallback entre providers e recovery de JSON',
-      tags: ['LLM', 'Resiliência', 'OpenAI'],
-      featured: true,
-    },
-    {
-      slug: 'observabilidade',
-      title: 'Telemetria Granular em IA',
-      description:
-        'Rastreamento de tokens, latência e custos por operação com OpenTelemetry',
-      tags: ['Telemetria', 'Custo', 'Observabilidade'],
-      featured: true,
-    },
-  ]
+  const featuredCases = getAllCaseStudies()
+    .filter((c) => c.featured)
+    .slice(0, 3)
 
   return (
     <div className="container">
       <Reveal>
         <div className="text-center max-w-3xl mx-auto mb-12">
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-            Case Studies em Destaque
+            {copy.featuredCaseStudies.title}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Casos reais de implementação de IA em produção
+            {copy.featuredCaseStudies.subtitle}
           </p>
         </div>
       </Reveal>
@@ -85,7 +64,7 @@ export const FeaturedCaseStudies = () => {
       <Reveal delay={0.3}>
         <div className="mt-8 text-center">
           <Link href="/case-studies">
-            <Button variant="outline">Ver todos os cases</Button>
+            <Button variant="outline">{copy.featuredCaseStudies.cta}</Button>
           </Link>
         </div>
       </Reveal>

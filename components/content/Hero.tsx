@@ -29,10 +29,10 @@ const renderSignalCard = (signal, index) => (
 
 const renderSignalCards = () => {
   const signals = [
-    { title: 'OCR Híbrido', subtitle: 'Custo/Qualidade' },
-    { title: 'Multi-LLM', subtitle: 'Resiliente' },
-    { title: 'Paralelismo', subtitle: 'Cloud-native' },
-    { title: 'Observabilidade', subtitle: 'FinOps' },
+    { title: 'IA com controle humano', subtitle: 'Agentes & MCP' },
+    { title: 'Observabilidade', subtitle: 'Grafana / Loki / Sentry' },
+    { title: 'Operação técnica', subtitle: 'Runbooks & validação' },
+    { title: 'Validação por evidência', subtitle: 'Critério de aceite' },
   ]
 
   return (
