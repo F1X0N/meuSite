@@ -1,35 +1,24 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { usePathname } from 'next/navigation'
-import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { ReactNode } from 'react'
 
 /**
- * Wrapper de transição entre rotas.
+ * Wrapper de transição entre rotas — DESABILITADO temporariamente.
  *
- * NÃO usa AnimatePresence + mode="wait": esse padrão tem bug conhecido com Next
- * App Router onde o motion.div novo monta com initial=0 e a animação para
- * animate=1 não dispara, deixando a página invisível até hard reload (CTRL+F5).
+ * Versões anteriores tentaram fade entre rotas com framer-motion + key=pathname,
+ * mas hit dois bugs sucessivos com Next App Router + React 19:
+ *  1. AnimatePresence + mode="wait" → motion.div novo monta com initial e nunca
+ *     anima para animate.
+ *  2. Sem AnimatePresence, motion.div ainda fica stuck em initial state em dev e
+ *     em parte das navegações em prod.
  *
- * Versão simplificada: cada rota nova gera um novo motion.div via key=pathname,
- * que entra direto com fade-in. Sem exit animation (Next limpa DOM antigo).
+ * Implementação atual: passthrough (sem fade entre rotas). As animações de scroll
+ * dentro de cada página (Reveal, StaggerContainer em components/motion) continuam
+ * funcionando normalmente — só perdemos a transição entre rotas.
  *
- * Wrapper estável (sempre motion.div) para evitar remount após hidratação para
- * usuários com prefers-reduced-motion. Nesse caso, só zeramos a transition.
+ * Reabilitar quando framer-motion publicar fix oficial ou quando migrarmos para
+ * View Transitions API nativa (Next 15.4+).
  */
 export const PageTransition = ({ children }: { children: ReactNode }) => {
-  const pathname = usePathname()
-  const prefersReducedMotion = useReducedMotion()
-
-  return (
-    <motion.div
-      key={pathname}
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, ease: 'easeOut' }}
-    >
-      {children}
-    </motion.div>
-  )
+  return <>{children}</>
 }
