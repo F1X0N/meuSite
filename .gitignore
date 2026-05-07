@@ -21,6 +21,19 @@
 # Local documentation
 docs/
 
+# Local professional context
+/workspace/professional-context/
+/workspace/linkedin/profile-source.md
+/workspace/linkedin/profile-current.json
+/workspace/linkedin/profile-proposed.json
+/workspace/linkedin/professional-sources.json
+/workspace/linkedin/posts/
+/workspace/linkedin/reviews/
+
+# Local generated artifacts and raw scraping
+/output/
+/linkedin_profile.txt
+
 # misc
 .DS_Store
 *.pem

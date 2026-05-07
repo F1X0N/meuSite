@@ -1,0 +1,17 @@
+{
+  "name": "professional-profile-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local MCP server for a sanitized professional profile context workspace.",
+  "bin": {
+    "professional-profile-mcp": "src/server.js"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "smoke": "node src/server.js --smoke"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
