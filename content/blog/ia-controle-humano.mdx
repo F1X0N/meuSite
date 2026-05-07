@@ -1,0 +1,77 @@
+---
+title: "IA com controle humano e responsabilidade técnica"
+description: "Por que agente de IA não substitui critério, e como desenhar supervisão sem matar produtividade."
+date: "2026-04-10"
+tags: ["IA", "Agentes", "Engenharia"]
+readingTime: "6 min"
+---
+
+## A pergunta errada
+
+"Esse agente substitui um engenheiro?" é a pergunta errada. Substituir é a métrica de quem vê IA como cortador de custo, não como alavanca técnica.
+
+A pergunta certa: "esse agente, com supervisão, libera engenharia para trabalho de maior valor sem perder responsabilidade técnica?"
+
+A resposta, na prática, depende de três coisas: escopo da skill, validação da saída e critério de escalação.
+
+## Escopo: skill, não agente genérico
+
+Agente genérico que tenta tudo é o caminho rápido para alucinação cara. Funciona bem na demo, falha feio em produção.
+
+Skill é diferente. Skill tem:
+
+- **Escopo definido**: o que essa skill faz e o que não faz.
+- **Contrato de entrada**: o que ela espera receber, validado.
+- **Saída esperada**: estrutura, tipo, formato. Validável por schema.
+- **Critério de aceite**: o que constitui execução bem-sucedida.
+
+Quando isso está claro, o agente vira "engenheiro júnior com cabeça boa em uma área específica". Não é genial. Mas é confiável. E confiável escala.
+
+## Validação: saída sem schema é confiança ingênua
+
+LLM gera texto. Texto vira JSON. JSON vira ação. Em algum ponto desse pipeline, alguém vai assumir que o JSON está correto sem validar — e aí a aplicação quebra.
+
+Validação de saída não é cosmético. É:
+
+- Schema validation antes de qualquer consumo.
+- JSON repair como fallback para malformação recuperável (vírgula faltando, aspa não escapada, chave não fechada).
+- Log estruturado da saída original quando há repair, para auditoria.
+- Erro tratado quando a saída é irreparável — não exceção propagada para o usuário.
+
+Sem validação, a confiança no agente é ingênua. Funciona até o dia que não funciona, e quando não funciona, ninguém sabe por quê.
+
+## Escalação: o agente sabe quando parar
+
+Agente bom não tenta resolver tudo. Sabe escalar.
+
+Critério de escalação explícito:
+
+- **Ação que muda estado** sempre passa por aprovação humana, com contexto claro: o que vai mudar, por que, qual reversibilidade.
+- **Confiança baixa na resposta** (output curto demais, schema invalida, contradição interna) escala para humano em vez de chutar.
+- **Domínio fora do escopo da skill** retorna "não documentado" em vez de inventar.
+
+Read-only por padrão. Tudo que vai além de leitura precisa de aprovação. Esse é o contrato.
+
+## O que não funciona
+
+- **Prompt monolítico de 5000 tokens**: dificulta iteração, esconde custo, mistura responsabilidade.
+- **Agente sem telemetria**: você não sabe quanto está gastando, qual provider atendeu, qual a taxa de sucesso. Otimização vira chute.
+- **Confiança em alucinação consistente**: agente que erra do mesmo jeito várias vezes parece confiável. Não é. É consistente em estar errado.
+- **"O agente vai aprender com o uso"**: na maioria dos setups, não vai. Aprendizado contínuo exige feedback loop estruturado, não esperança.
+
+## O que funciona
+
+- Skills focadas com contrato claro.
+- Validação de saída antes do consumo.
+- Read-only por padrão, com aprovação humana para qualquer mudança de estado.
+- Telemetria por execução: provider, custo, latência, taxa de sucesso.
+- Runbook de falha — o que fazer quando o agente erra ou alucina.
+- Janela de observação para identificar regressão silenciosa de qualidade.
+
+## Conclusão
+
+IA com controle humano não é IA freada. É IA confiável.
+
+A diferença entre demo e produção é exatamente essa: produção exige que o agente seja previsível, auditável e seguro. Sem isso, o ROI da automação evapora no primeiro incidente em que o agente fez algo que ninguém autorizou.
+
+Engenheiro responsável trata agente como ferramenta com manual de operação. Não como mágica.

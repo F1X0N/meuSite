@@ -1,0 +1,64 @@
+---
+title: "Diagnóstico, observabilidade e segurança em produção"
+description: "Disciplina de incident response com Grafana, Loki e Sentry — consulta read-only, configuração segura, validação pós-mudança e diagnóstico orientado por evidências."
+date: "2026-04-28"
+tags: ["Observabilidade", "Grafana", "Loki", "Sentry", "Incident"]
+coverImage: null
+featured: true
+---
+
+## Contexto
+
+Sistema em produção quebra. Usuário reporta. Time recebe o sinal. O que vem antes da hipótese?
+
+A resposta intuitiva é: "vamos olhar o erro e tentar consertar". A resposta correta é: evidência antes de opinião. Sem isso, o time fica chutando no escuro, faz mudança que não resolve, gera regressão e perde tempo.
+
+## Problema
+
+Padrões comuns que custam caro em produção:
+
+- Diagnóstico baseado em memória ("isso parece com aquele bug de mês passado") sem confirmação.
+- SQL ad-hoc com risco de side effect em ambiente compartilhado.
+- Mudança em produção sem validação posterior — assume que o fix funcionou só porque o erro sumiu da tela do usuário que reclamou.
+- Configuração sensível tratada como configuração comum, exposta em log.
+- Hipótese formada antes de olhar log, métrica ou trace.
+
+## Abordagem
+
+**Pirâmide de evidência:** logs estruturados (Loki) → métricas (Grafana) → erros agregados (Sentry) → consulta read-only no banco. Tudo nessa ordem antes de qualquer hipótese forte.
+
+**Read-only diagnostics como contrato.** Toda consulta de diagnóstico opera em modo somente leitura. Qualquer ação que muda estado é mudança planejada, com aprovação, runbook e validação pós-mudança — não diagnóstico.
+
+**Configuração segura por padrão.** Segredos fora de log, fora de erro estruturado, fora de mensagem para usuário. Toda referência a config sensível passa por handler que sanitiza antes de logar.
+
+**Validação pós-mudança contínua.** A correção não termina no deploy. Continua observando métrica e log por janela definida para confirmar que o efeito persiste. Quando o efeito não persiste, reverte.
+
+**Reprodução com dados reais sanitizados quando possível.** Em vez de assumir, reproduz o cenário com dados de produção sanitizados (ou com fixture que replique o caso). Reduz hipótese implícita.
+
+## Responsabilidade Técnica
+
+- Estruturação de log para que diagnóstico seja rápido (não precisa abrir 3 sistemas para entender uma transação).
+- Definição de quais métricas importam para cada fluxo crítico, com dashboards no Grafana.
+- Configuração de regras no Sentry para agregar erros sem inundar com ruído.
+- Disciplina de SQL safety: consulta de diagnóstico só com `SELECT`, sempre com `LIMIT`, sempre revisada antes de rodar em ambiente compartilhado.
+- Documentação do "antes/depois" de cada mudança relevante, com evidência de que o efeito persistiu.
+
+## Impacto
+
+**110 diagnósticos de incidente e recuperação** documentados no workspace profissional, com critério explícito de evidência. Esse volume reflete disciplina aplicada de forma recorrente — não exceção pontual.
+
+Diagnóstico passa de "achismo confirmado por sorte" para método auditável. Quando o time muda, o conhecimento não vai embora junto: fica documentado em runbook e em histórico de incident.
+
+## Trade-offs Aceitos
+
+- **Tempo de diagnóstico maior antes da primeira hipótese**: olhar evidência custa minutos. Compensa em mudança que efetivamente resolve o problema na primeira tentativa.
+- **Disciplina de SQL safety**: consulta read-only com `LIMIT` é mais lenta que SQL livre. Aceitável em troca de zero risco operacional.
+- **Validação pós-mudança consome janela de atenção**: o time fica observando depois do deploy. Reduz risco de regressão silenciosa.
+
+## Stack Evidenciada
+
+- Observabilidade: Grafana (métricas/dashboards), Loki (logs estruturados), Sentry (erros agregados).
+- Bancos: PostgreSQL, Redis, Firestore com disciplina de read-only diagnostics e SQL safety.
+- Configuração segura: secret handling sem exposição em log/erro/UI.
+- Validação pós-mudança como parte do ciclo de deploy.
+- Documentação por evidência: runbooks, histórico de incidente, critério de aceite.

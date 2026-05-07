@@ -1,0 +1,108 @@
+---
+title: "Métricas que pagam a conta"
+description: "Eficiência, custo, risco e produto — o vocabulário de decisão técnica que escala em conversa com liderança e operação."
+date: "2026-05-03"
+tags: ["Métricas", "Decisão técnica", "Engenharia"]
+readingTime: "6 min"
+---
+
+## O problema com "métrica técnica"
+
+Engenheiro adora métrica técnica. Latência P99, throughput, GC pause, query time. Métrica técnica é importante — mas é meio de fim, não fim.
+
+A pergunta de liderança não é "qual o P99 do endpoint X?". É "isso afeta usuário, custa dinheiro, gera risco ou ajuda o produto?".
+
+Quem só fala em métrica técnica fica preso na conversa de baixo. Quem traduz métrica técnica para vocabulário de decisão técnica circula nas duas conversas.
+
+## Eficiência
+
+Eficiência é trabalho útil por unidade de recurso. Recurso pode ser tempo de engenharia, atenção do time, custo de máquina, custo de chamada de API.
+
+Métrica técnica útil:
+- Tempo médio para resolver incidente.
+- Quantidade de retrabalho por feature entregue.
+- Volume de trabalho repetitivo absorvido por automação.
+- Tempo entre identificação de problema e mitigação.
+
+Decisão típica que melhora eficiência: estruturar runbook para reduzir tempo de diagnóstico, automatizar trabalho repetitivo de baixo valor, reduzir ambiguidade no critério de aceite para evitar rodadas de retrabalho.
+
+A pergunta certa: "estamos gastando atenção do time onde dá maior retorno?".
+
+## Custo
+
+Custo em IA é o exemplo mais óbvio: cada chamada de LLM tem custo de token. Sem visibilidade, o custo cresce em silêncio até o dia que a fatura assusta.
+
+Métrica útil:
+- Custo estimado por operação (cost attribution).
+- Custo por usuário ou por tenant.
+- Diferença entre custo previsto e custo real, mês a mês.
+- Identificação de operação que consome desproporcionalmente.
+
+Decisão típica:
+- Trocar modelo caro por modelo mais barato em operação que não exige modelo top.
+- Cachear embedding em vez de gerar do zero todo dia.
+- Identificar retry storm que está queimando budget.
+- Detectar loop infinito de usuário antes da fatura.
+
+A pergunta certa: "esse gasto está alinhado ao valor entregue?".
+
+## Risco
+
+Risco operacional é a métrica mais ignorada e a mais cara quando ignorada.
+
+Métrica útil:
+- Disponibilidade observada (não SLA contratual).
+- Tempo médio entre falha e detecção (MTTD).
+- Tempo médio entre falha e recuperação (MTTR).
+- Taxa de regressão silenciosa identificada após deploy.
+- Surface area de configuração sensível exposta indevidamente.
+
+Decisão típica:
+- Adicionar validação pós-mudança em fluxo crítico para reduzir regressão silenciosa.
+- Estruturar alerta para anomalia de custo (retry storm é ataque silencioso à conta).
+- Implementar read-only por padrão em diagnóstico para reduzir risco de incidente operacional.
+- Documentar runbook de falha para reduzir MTTR quando o agente errar.
+
+A pergunta certa: "qual a probabilidade e qual o custo se isso falhar feio?".
+
+## Produto
+
+Métrica de produto é a que prende atenção da liderança. É também a mais fácil de inventar e a mais perigosa quando inventada.
+
+Métrica útil de verdade:
+- Comportamento observável de usuário (eventos, tempo em fluxo, taxa de conclusão).
+- Correlação entre mudança técnica e métrica de produto antes/depois.
+- Custo unitário por unidade de valor entregue.
+
+Métrica que parece útil mas geralmente é teatro:
+- "Adoção" sem definição clara do que conta como adoção.
+- Vanity metric de uso (login total não importa se ninguém faz a ação central).
+- Número grande sem unidade (1500% de algo? de quê? comparado a quando?).
+
+A pergunta certa: "essa métrica reflete mudança real no comportamento do usuário?".
+
+## O vocabulário
+
+Métrica técnica vira decisão técnica quando vem traduzida em eficiência, custo, risco e produto.
+
+Em vez de:
+- "P99 do endpoint subiu para 3s."
+
+Diga:
+- "P99 do endpoint subiu para 3s. Em horário de pico, isso vai derrubar a taxa de conclusão do fluxo crítico — risco de produto. Recomendo investigar antes do release de sexta."
+
+Em vez de:
+- "O agente está alucinando JSON."
+
+Diga:
+- "O agente alucinou JSON em 3% das chamadas no último mês. Cada falha custa retry, que custa token. Custo agregado: X dólares. Risco: cresce silenciosamente até alguém olhar a fatura. Recomendo adicionar JSON repair e schema validation."
+
+A primeira versão é informação. A segunda é decisão.
+
+## Conclusão
+
+Engenheiro que pensa só em métrica técnica entrega tecnologia. Engenheiro que pensa em eficiência, custo, risco e produto entrega resultado.
+
+A diferença é vocabulário — e o vocabulário escala. Em reunião com liderança, em pós-mortem, em justificativa de prioridade, em decisão de arquitetura. Em todo lugar onde a conversa precisa ir além de "isso parece complicado".
+
+Métrica que paga a conta é a que sustenta decisão técnica defensável. O resto é dashboard bonito.

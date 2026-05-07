@@ -1,0 +1,66 @@
+---
+title: "Orquestração de IA aplicada à operação técnica"
+description: "Como agentes com supervisão humana absorvem trabalho repetitivo de diagnóstico e suporte sem perder responsabilidade técnica — workflow design, skills e critérios de aceite."
+date: "2026-04-15"
+tags: ["IA", "Agentes", "MCP", "Operação"]
+coverImage: null
+featured: true
+---
+
+## Contexto
+
+Operação técnica de SaaS LegalTech acumula trabalho repetitivo de baixo valor: triagem de incidentes, consulta de logs, montagem de query diagnóstica, redação de runbook, cruzamento de evidência entre sistemas. Esse trabalho compete com entrega de feature e diagnóstico profundo de incidente real.
+
+Engenheiro sênior fica gargalo. O time menos experiente trava em tarefas que poderiam ser automatizadas com critério.
+
+## Problema
+
+A solução intuitiva é "automatizar com IA". A solução errada é "agente faz tudo". Sem critério, o agente vira auto-pilot perigoso: cria SQL com side effects, sugere ação destrutiva sem aprovação, alucina nomes de tabela, ignora segurança operacional.
+
+O que precisava existir:
+
+- Separação clara entre tarefa autônoma e tarefa que exige aprovação humana.
+- Saída validável (estruturada, auditável).
+- Skills focadas — não um agente genérico que tenta tudo.
+- Telemetria por execução para identificar regressão e custo.
+- Runbook de falha (o que fazer quando o agente erra ou alucina).
+
+## Abordagem
+
+**Skills, não prompts genéricos.** Cada capacidade do agente vira uma skill com escopo definido: roteamento de suporte, diagnóstico de banco read-only, leitura de log estruturado, montagem de evidência. Skill tem entrada validada, saída esperada e critério de aceite explícito.
+
+**Read-only por padrão.** Diagnóstico opera só em modo somente leitura. Qualquer ação que muda estado pede aprovação humana com contexto: o que vai mudar, por que, qual reversibilidade.
+
+**Validação de saída antes de consumo.** JSON de retorno passa por schema validation, com JSON repair como fallback. Saída irreparável vira log de erro estruturado, não exceção propagada.
+
+**Governança multi-provider.** Camada de abstração sobre OpenAI/Anthropic/Azure permite trocar provider por configuração. Telemetria registra qual provider atendeu a chamada, custo estimado e latência.
+
+**Runbooks como código de operação.** Workflow com passos auditáveis, não prompt monolítico. Quando o agente quebra, o runbook descreve a recuperação manual passo a passo.
+
+## Responsabilidade Técnica
+
+- Desenho das skills: escopo, contrato de entrada, saída esperada, critério de aceite.
+- Implementação da camada de governança: rate limit, fallback de provider, validação de saída, JSON repair.
+- Definição da política de read-only por padrão para tudo que toca dado.
+- Estruturação dos runbooks de falha e dos critérios de escalação para humano.
+- Telemetria por execução: provider, custo estimado, latência, taxa de sucesso.
+
+## Impacto
+
+Workspace profissional acumulou **17 templates de workflow e runbooks**, **21 skills de agentes e procedimentos operacionais** e **74 fluxos de trabalho operacional ativo** estruturados sob essa abordagem. Esse volume de material codificado reduz dependência de conhecimento implícito e torna a operação reproduzível.
+
+Trabalho repetitivo de diagnóstico de primeiro nível passa a ser absorvido por skills supervisionadas, liberando engenharia para diagnóstico profundo e entrega de feature.
+
+## Trade-offs Aceitos
+
+- **Complexidade adicional**: skills exigem manutenção, telemetria e revisão. Vale a pena quando o trabalho repetitivo é volumoso e custoso. Não vale para automação pontual.
+- **Latência por validação**: validação de saída e JSON repair adicionam milissegundos por chamada. Aceitável em fluxos que não são tempo real.
+- **Custo de governança**: telemetria, rate limit e fallback têm custo computacional pequeno mas constante. Pago em previsibilidade operacional.
+
+## Stack Evidenciada
+
+- LLM workflows (OpenAI, governança multi-provider, JSON repair).
+- Agent supervision e MCP tooling.
+- Read-only diagnostics e SQL safety.
+- Runbooks, critérios de aceite, validação por evidência.
+- Telemetria por execução (provider, custo, latência).

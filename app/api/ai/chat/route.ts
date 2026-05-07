@@ -184,24 +184,20 @@ export async function POST(request: Request) {
       if (mode === 'job_fit') {
         return NextResponse.json({
           type: "job_fit",
-          match_score_0_100: 92,
-          summary_md: "Análise preliminar: Meu perfil tem forte alinhamento com esta vaga. A experiência com stacks modernas (Next.js/React) e entrega de valor em produção (Cases de IA e FinOps) cobre os principais requisitos listados.",
-          requirements: [
-            { requirement: "Experiência sólida com React & Ecossistema Moderno", status: "match", evidence_links: ["/case-studies/platform-v2"], notes: "Histórico comprovado em apps complexos e performáticos." },
-            { requirement: "Foco em Qualidade e Testes", status: "match", evidence_links: [], notes: "Adoção rigorosa de testes automatizados e code review." },
-            { requirement: "Fit Cultural / Autonomia", status: "match", evidence_links: [], notes: "Perfil autodidata com foco em resolver problemas de negócio." }
-          ],
-          gaps: ["Disponibilidade para início imediato (a confirmar)", "Experiência em nichos específicos da vaga (se houver)"],
-          open_questions: ["Qual o principal desafio técnico do time para os próximos 6 meses?", "Como é a estrutura de deploy e CI/CD atual?"],
-          sources: [{ label: "Trajetória Profissional", href: "/#about" }],
+          match_score_0_100: 0,
+          summary_md: "Modo de demonstração ativo (sem chave de API). Para obter análise real de fit técnico, configure OPENAI_API_KEY no servidor. Quando ativo, a análise compara a vaga ao Knowledge Base público e retorna match honesto com evidências.",
+          requirements: [],
+          gaps: ["Modo demo ativo — análise real exige OPENAI_API_KEY configurada."],
+          open_questions: [],
+          sources: [{ label: "Knowledge Base público", href: "/case-studies" }],
           remaining: rateLimit.remaining
         })
       }
 
       return NextResponse.json({
         type: "answer",
-        content: "Olá! Sou o assistente virtual do Josivan. \n\nPosso confirmar que tenho experiência prática e resultados consistentes em **Engenharia de Software** e **IA Aplicada**, focando sempre em código limpo, performance e impacto no negócio.\n\nPara detalhes específicos sobre um projeto ou stack, sinta-se à vontade para perguntar ou explorar meus Case Studies!",
-        sources: [{ label: "Ver Case Studies", href: "/case-studies" }, { label: "Sobre Mim", href: "/#about" }],
+        content: "Modo de demonstração ativo (sem chave de API). Em modo real, este assistente responde com base no Knowledge Base público de Josivan Amorim — quando não há evidência documentada, retorna \"não documentado\". Configure OPENAI_API_KEY no servidor para ativar respostas reais.",
+        sources: [{ label: "Ver Case Studies", href: "/case-studies" }, { label: "Notas de Engenharia", href: "/blog" }],
         remaining: rateLimit.remaining
       })
     }
