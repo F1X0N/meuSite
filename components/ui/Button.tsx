@@ -1,4 +1,15 @@
-const createVariantClasses = () => ({
+import type { ButtonHTMLAttributes, ReactNode } from 'react'
+
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'link'
+type ButtonSize = 'sm' | 'md' | 'lg'
+
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: ButtonVariant
+  size?: ButtonSize
+  children?: ReactNode
+}
+
+const createVariantClasses = (): Record<ButtonVariant, string> => ({
   primary:
     'bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm',
   secondary:
@@ -9,13 +20,13 @@ const createVariantClasses = () => ({
   link: 'text-primary underline-offset-4 hover:underline',
 })
 
-const createSizeClasses = () => ({
+const createSizeClasses = (): Record<ButtonSize, string> => ({
   sm: 'h-9 px-3 text-sm',
   md: 'h-10 px-4 py-2',
   lg: 'h-11 px-8 text-lg',
 })
 
-const buildButtonClasses = (variant, size) => {
+const buildButtonClasses = (variant: ButtonVariant, size: ButtonSize) => {
   const variantClasses = createVariantClasses()
   const sizeClasses = createSizeClasses()
   const baseClasses =
@@ -24,8 +35,8 @@ const buildButtonClasses = (variant, size) => {
   return `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]}`
 }
 
-export const Button = ({ variant = 'primary', size = 'md', children, ...props }) => (
-  <button className={buildButtonClasses(variant, size)} {...props}>
+export const Button = ({ variant = 'primary', size = 'md', children, className = '', ...props }: ButtonProps) => (
+  <button className={`${buildButtonClasses(variant, size)} ${className}`} {...props}>
     {children}
   </button>
 )

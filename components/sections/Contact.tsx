@@ -4,11 +4,21 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
 import { copy } from '@/config/copy'
+import { contactSchema, formatZodErrors } from '@/lib/validation'
 
 const buildInputClasses = () =>
   'w-full rounded-lg border bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:outline-none'
 
-const createInitialState = () => ({
+type ContactState = {
+  name: string
+  email: string
+  message: string
+  loading: boolean
+  success: boolean
+  error: string | null
+}
+
+const createInitialState = (): ContactState => ({
   name: '',
   email: '',
   message: '',
@@ -27,8 +37,16 @@ export const Contact = () => {
   const handleSubmit = async (event) => {
     event.preventDefault()
 
-    if (!state.name || !state.email || !state.message) {
-      setState({ ...state, error: 'Todos os campos são obrigatórios.' })
+    const parsed = contactSchema.safeParse({
+      name: state.name,
+      email: state.email,
+      message: state.message,
+    })
+
+    if (!parsed.success) {
+      const errors = formatZodErrors(parsed.error)
+      const firstError = errors.name || errors.email || errors.message || 'Verifique os campos.'
+      setState({ ...state, error: firstError })
       return
     }
 

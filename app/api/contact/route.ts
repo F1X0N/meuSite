@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import nodemailer from 'nodemailer'
+import { contactSchema, formatZodErrors } from '@/lib/validation'
 
 const MY_EMAIL = 'amorimjosivan7@gmail.com'
 
 const getSmtpTransporter = () => {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) return null
-  
+
   return nodemailer.createTransport({
-    service: 'gmail', 
+    service: 'gmail',
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
@@ -16,35 +17,35 @@ const getSmtpTransporter = () => {
   })
 }
 
-const validateRequestBody = (body: any) => {
-  if (!body.name || !body.email || !body.message) {
-    return 'Todos os campos são obrigatórios'
-  }
-  return null
-}
-
-const sanitizeInput = (text: string) => {
-  return text.trim().slice(0, 1000)
-}
+const escapeHtml = (text: string) =>
+  text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const validationError = validateRequestBody(body)
-    
-    if (validationError) {
-      return NextResponse.json({ error: validationError }, { status: 400 })
+    const body = await request.json().catch(() => ({}))
+    const parsed = contactSchema.safeParse(body)
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Validação falhou', fieldErrors: formatZodErrors(parsed.error) },
+        { status: 400 },
+      )
     }
 
-    const { name, email, message } = body
+    const { name, email, message } = parsed.data
     const emailHtml = `
       <div style="font-family: sans-serif; max-w-600px; margin: 0 auto;">
         <h2>Nova mensagem de contato! 🚀</h2>
-        <p><strong>Nome:</strong> ${sanitizeInput(name)}</p>
-        <p><strong>Email:</strong> ${sanitizeInput(email)}</p>
+        <p><strong>Nome:</strong> ${escapeHtml(name)}</p>
+        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
         <hr />
         <p><strong>Mensagem:</strong></p>
-        <p style="white-space: pre-wrap; background: #f4f4f5; p: 16px; border-radius: 8px;">${sanitizeInput(message)}</p>
+        <p style="white-space: pre-wrap; background: #f4f4f5; p: 16px; border-radius: 8px;">${escapeHtml(message)}</p>
       </div>
     `
 
