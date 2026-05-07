@@ -37,15 +37,25 @@ const checkRateLimit = (sessionId: string): { allowed: boolean; remaining: numbe
   return { allowed: true, remaining: MAX_REQUESTS_PER_SESSION - userLimit.count }
 }
 
-// ============ GUARDRAILS V4.1 ============
+// ============ GUARDRAILS V5 ============
 const GUARDRAILS = `
-⚠️ GUARDRAILS OBRIGATÓRIOS (NUNCA VIOLE):
-1. Responda APENAS com base no conteúdo fornecido abaixo (cases, blog, trajetória).
-2. PROIBIDO inventar fatos, clientes, métricas, experiências ou números não documentados.
-3. Se não houver evidência no perfil, diga "não informado" ou "unknown" — NUNCA INVENTE.
-4. Sempre inclua fontes/evidências quando disponíveis (links para cases/blog).
-5. Mantenha tom profissional, confiante e objetivo.
-6. Responda no MESMO IDIOMA da pergunta/vaga do usuário.
+DIRETRIZES DE QUALIDADE (siga rigorosamente):
+
+1. Use o conteúdo abaixo (perfil, cases, blog, FAQ) como ÚNICA fonte de fatos. Nunca invente clientes, métricas, números específicos ou experiências em tecnologias não mencionadas.
+
+2. PERMITIDO sintetizar e derivar a partir do contexto:
+   - Somar períodos profissionais para calcular anos de experiência.
+   - Conectar capacidades implícitas no perfil (ex: trabalho com observabilidade + Grafana/Loki/Sentry implica experiência em diagnóstico de incidente).
+   - Identificar fit qualitativo entre experiência documentada e a pergunta.
+   - Citar limites de honestidade quando aplicável (FAQ "Limites e Honestidade").
+
+3. Para perguntas TOTALMENTE fora do contexto (salário, vida pessoal, tecnologia nunca mencionada), responda: "Essa informação não está documentada no meu portfólio." e direcione para contato (amorimjosivan7@gmail.com).
+
+4. Sempre cite fontes/evidências disponíveis (links para cases ou nota do blog), usando o nome exato do conteúdo (ex: "Orquestração de IA aplicada à operação técnica").
+
+5. Mantenha tom profissional, em primeira pessoa, com profundidade técnica. Sem chavões corporativos.
+
+6. Responda no MESMO IDIOMA da pergunta/vaga.
 `
 
 // ============ PROMPTS POR MODO ============
@@ -139,14 +149,23 @@ const generateResponse = async (
   }
 }
 
+const sanitizeUserInput = (text: string): string => {
+  // Remove control chars (\x00-\x1F) exceto \n (\x0A), \r (\x0D), \t (\x09)
+  // e DEL (\x7F). Tab/newline são preservados para formatação de JD/perguntas longas.
+  return text
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    .trim()
+}
+
 export async function POST(request: Request) {
   try {
-    const { message, mode = 'ask', sessionId, history = [] } = await request.json()
+    const { message: rawMessage, mode = 'ask', sessionId, history = [] } = await request.json()
+    const message = typeof rawMessage === 'string' ? sanitizeUserInput(rawMessage) : ''
 
     console.log('[Request] Mode:', mode, '| Message length:', message?.length, 'chars')
 
     // Validação de entrada
-    if (!message || message.trim().length < 3) {
+    if (!message || message.length < 3) {
       return NextResponse.json({ error: 'Mensagem muito curta' }, { status: 400 })
     }
 

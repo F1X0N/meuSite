@@ -55,6 +55,17 @@ Diferencial: combina profundidade técnica com responsabilidade operacional — 
 **Foco:** Interfaces responsivas, presença digital.
 **Stack:** React, JavaScript, Bootstrap, HTML5/CSS3.
 
+### Como contar anos de experiência (regra explícita)
+
+A trajetória profissional acima tem sobreposição intencional entre o freelance e os papéis no Grupo Dass — o freelance era trabalho complementar (noites/fins de semana) durante o vínculo CLT. Para responder "quantos anos de experiência?", a contagem honesta é:
+
+- **Início profissional:** fevereiro de 2021 (Cronometrista no Grupo Dass).
+- **Tempo total:** "data atual menos fevereiro de 2021" → cerca de 4 a 5 anos de experiência profissional contínua dependendo da data de leitura.
+- **Foco em engenharia de software:** desde julho de 2021 (freelance frontend) e formalmente desde fevereiro de 2022 (dev full stack no Grupo Dass) → ≈ 3 a 4 anos focados em engenharia de software.
+- **Foco em IA aplicada:** desde julho de 2024 (SaaS LegalTech atual).
+
+Use a data atual ao calcular o período da posição atual. Não some perídos sobrepostos (ex: freelance + Grupo Dass como dev full stack do mesmo período não dobram tempo de experiência — o freelance é complemento, não trabalho adicional somável).
+
 ## 4. PORTFÓLIO TÉCNICO
 
 ### Case Studies Públicos (sanitizados)
