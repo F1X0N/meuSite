@@ -1,0 +1,167 @@
+{
+  "header": {
+    "name": "Josivan Amorim",
+    "title": "Engenheiro de Software | IA & Backend",
+    "email": "amorimjosivan7@gmail.com",
+    "phone": "+55 75 99182-6325",
+    "linkedin": "https://www.linkedin.com/in/josivan-amorim-44401120a/",
+    "github": "https://github.com/F1X0N",
+    "portfolio": "https://josivan-amorim.vercel.app/"
+  },
+  "summary": "Engenheiro de software full stack com foco em IA aplicada, backend e sistemas de produção. Experiência em SaaS LegalTech, integrando LLMs, OpenAI, RAG, automações, APIs, PostgreSQL e interfaces web para transformar fluxos operacionais complexos em soluções confiáveis, observáveis e seguras. Atua conectando produto, suporte técnico e engenharia, com disciplina em diagnóstico por evidências, documentação, revisão técnica, critérios de aceite e validação pós-mudança.",
+  "skills": {
+    "ai_llm": [
+      "OpenAI API",
+      "RAG",
+      "embeddings",
+      "busca semântica",
+      "prompt engineering",
+      "LLM workflows",
+      "agentes de IA",
+      "MCP",
+      "validação de saídas estruturadas"
+    ],
+    "backend": [
+      "Python",
+      "Node.js",
+      "TypeScript",
+      "JavaScript",
+      "REST APIs",
+      "integrações entre sistemas",
+      "automações",
+      "pipelines de processamento"
+    ],
+    "data": [
+      "PostgreSQL",
+      "SQL",
+      "Redis",
+      "Firestore",
+      "diagnóstico read-only",
+      "segurança operacional",
+      "configuração segura",
+      "bancos vetoriais"
+    ],
+    "observability": [
+      "Grafana",
+      "Loki",
+      "Sentry",
+      "monitoramento",
+      "análise de incidentes",
+      "latência",
+      "performance",
+      "validação em produção"
+    ],
+    "devops": [
+      "Docker",
+      "AWS S3",
+      "Git",
+      "GitHub",
+      "CI/CD",
+      "versionamento",
+      "runbooks",
+      "documentação técnica"
+    ],
+    "frontend": [
+      "React",
+      "Next.js",
+      "Angular",
+      "Tailwind CSS",
+      "Bootstrap",
+      "HTML5",
+      "CSS3"
+    ]
+  },
+  "experience": [
+    {
+      "company": "SaaS LegalTech",
+      "role": "Desenvolvedor Full Stack",
+      "period": "Julho 2024 — Presente",
+      "bullets": [
+        {
+          "text": "Desenvolve funcionalidades full stack em produto LegalTech SaaS, atuando em backend, frontend, automações e integrações com IA.",
+          "tags": ["full-stack", "backend", "frontend", "automation", "ai", "llm"]
+        },
+        {
+          "text": "Integra serviços de inteligência artificial em fluxos de produto, incluindo OpenAI, RAG, assistentes, prompts estruturados e geração/análise de conteúdo.",
+          "tags": ["ai", "openai", "rag", "llm", "prompts", "agent-supervision"]
+        },
+        {
+          "text": "Atua com Node.js, Python, React e PostgreSQL para construir APIs, rotinas operacionais, telas de produto e integrações entre sistemas.",
+          "tags": ["nodejs", "python", "react", "postgresql", "rest", "integration"]
+        },
+        {
+          "text": "Conduz diagnósticos técnicos orientados por evidências com observabilidade, consultas seguras, análise de comportamento em produção e validação pós-mudança.",
+          "tags": ["observability", "incident", "monitoring", "sql-safety", "validation", "grafana", "loki", "sentry"]
+        },
+        {
+          "text": "Estrutura documentação técnica, runbooks, critérios de aceite e planos de validação para reduzir ambiguidades e aumentar segurança operacional.",
+          "tags": ["runbooks", "release-validation", "acceptance-criteria", "documentation", "operational-discipline"]
+        }
+      ]
+    },
+    {
+      "company": "Grupo Dass",
+      "role": "Desenvolvedor Full Stack",
+      "period": "Fevereiro 2022 — Julho 2024",
+      "bullets": [
+        {
+          "text": "Desenvolveu sistemas internos, automações e aplicações web para digitalizar processos em uma operação com mais de 28 mil colaboradores.",
+          "tags": ["scale", "internal-tools", "process-automation", "fullstack"]
+        },
+        {
+          "text": "Atuou no ciclo completo de software: requisitos, desenvolvimento backend/frontend, entrega, apresentação e sustentação com Angular, React, JavaScript, Node.js, PHP e PostgreSQL.",
+          "tags": ["full-cycle", "angular", "react", "javascript", "nodejs", "php", "postgresql", "fullstack"]
+        },
+        {
+          "text": "Contribuiu para aumento de 30% na eficiência de processos internos e redução de 50% no tempo de processamento de documentos.",
+          "tags": ["impact", "efficiency", "process-automation", "metrics"]
+        },
+        {
+          "text": "Trabalhou em ambiente orientado a melhoria contínua, com práticas Lean, Scrum, Kanban e colaboração entre áreas.",
+          "tags": ["lean", "scrum", "kanban", "agile", "collaboration"]
+        }
+      ]
+    },
+    {
+      "company": "Freelancer",
+      "role": "Desenvolvedor Frontend",
+      "period": "Julho 2021 — Julho 2024",
+      "bullets": [
+        {
+          "text": "Desenvolveu websites responsivos e páginas institucionais com JavaScript, Bootstrap, HTML5 e CSS3, com foco em presença digital, clareza visual e responsividade.",
+          "tags": ["frontend", "responsive", "javascript", "bootstrap", "html5", "css3"]
+        }
+      ]
+    }
+  ],
+  "publicProject": {
+    "title": "Portfólio técnico com IA",
+    "url": "josivan-amorim.vercel.app",
+    "bullets": [
+      {
+        "text": "Site pessoal e portfólio técnico construído com Next.js 15, React 19, TypeScript, Tailwind CSS, MDX, Framer Motion, OpenAI API e deploy na Vercel.",
+        "tags": ["nextjs", "react", "typescript", "tailwind", "mdx", "openai", "vercel"]
+      },
+      {
+        "text": "Inclui case studies públicos sobre IA em produção, observabilidade, validação de entregas e orquestração de agentes com supervisão humana.",
+        "tags": ["case-studies", "ai", "observability", "validation", "agent-supervision"]
+      },
+      {
+        "text": "Agente conversacional com skills por conteúdo (padrão Claude Code), tools de sugestão de cases relevantes e geração de CV adaptado por vaga.",
+        "tags": ["agent", "skills", "tools", "ai", "rag"]
+      }
+    ]
+  },
+  "education": [
+    {
+      "institution": "UNIFACS",
+      "degree": "Análise e Desenvolvimento de Sistemas",
+      "period": "2021–2023"
+    }
+  ],
+  "certifications": [
+    "Curso em Vídeo — HTML5, CSS3 e JavaScript",
+    "DIO — Bootcamp Desenvolvimento Frontend com Angular"
+  ],
+  "languages": ["Inglês técnico"]
+}
