@@ -1,0 +1,95 @@
+---
+title: "RUM em integração com provider externo: medindo qualidade sem confiar no provider"
+description: "Métricas de qualidade do provider externo são suspeitas por construção. Telemetria amostrada no cliente prova degradação antes do SLA do provider reconhecer."
+date: "2026-05-08"
+tags: ["Observabilidade", "Integração", "Frontend", "Engenharia"]
+coverImage: null
+featured: false
+---
+
+## Por que confiar no provider não basta
+
+Provider externo entrega serviço crítico — comunicação, vídeo, voz, integração. Provider tem dashboard de qualidade. Mostra latência baixa, packet loss zero, tudo verde. Você acredita.
+
+Cliente reclama. Diz que a chamada está "ruim", "cortada", "atrasada". Você abre o dashboard do provider — tudo verde. Sem evidência própria, vira a palavra do cliente contra o painel do provider. Discussão sem dado.
+
+A solução é **Real User Monitoring (RUM)**: instrumentar o cliente final, capturar métricas reais de qualidade na borda, agregar no servidor. O dashboard do provider continua sendo referência, mas você passa a ter o seu próprio.
+
+## O que medir
+
+Para integração de comunicação em tempo real (voz, vídeo, dados), métricas-chave:
+
+- **RTT (round-trip time)** — quanto tempo o ack leva. Detecta latência real, não estimada.
+- **Jitter** — variação do RTT entre amostras. Voz/vídeo degrada antes da latência absoluta ficar ruim.
+- **Packet loss** — percentual de pacotes não entregues. Síntoma mais impactante de qualidade ruim.
+- **Bitrate efetivo** — banda real entregue, não a contratada. Mais útil em vídeo.
+
+Para integração de API (REST, webhook), métricas adaptam:
+
+- **End-to-end latency** — do clique do usuário até a resposta final. Inclui rede + provider + sua aplicação.
+- **Error rate por tipo** — distinguir erro do provider (5xx) de erro de rede (timeout, fetch failed).
+- **Payload size** — para integração que retorna conteúdo dinâmico, tamanho varia e indica qualidade.
+
+## Sampling: você não vai logar tudo
+
+Coletar todas as métricas a cada 100ms vira flood. Cliente lento, dados se acumulam, batch atrasa, métrica chega tarde.
+
+Sampling resolve. Duas estratégias:
+
+**Sampling fixo** — uma amostra a cada N segundos. Simples. Bom para métrica que muda devagar (qualidade de chamada estável). Limite: 40 amostras por sessão é pratical, qualquer pico fica capturado em janela móvel.
+
+**Sampling adaptativo** — amostra mais quando detecta anomalia. Bom para sistema complexo onde queremos resolução fina em momentos críticos. Mais difícil de calibrar.
+
+Para a maioria dos casos, sampling fixo já entrega valor. Adaptativo é otimização tardia.
+
+## Onde a coleta acontece
+
+No **cliente** (browser, app móvel, SDK do provider rodando localmente). É o único lugar onde você vê a qualidade real entregue ao usuário. Métricas no servidor só veem a parte do servidor — não a perda no last-mile.
+
+A SDK do provider geralmente expõe APIs para extrair métricas em tempo real. Se não expõe, você ainda tem heurísticas (timing de eventos, RTT estimado por tempo de resposta).
+
+## Onde a agregação acontece
+
+No **servidor**. Cliente envia batches periódicos (a cada 30s, ou ao final da sessão). Servidor:
+
+1. Persiste o lote em tabela achatada (uma linha por amostra).
+2. Calcula percentis (P50, P95, P99) por dimensão (provider, sessão, região, hora).
+3. Expõe em dashboards e alertas.
+
+Esse é o ponto onde a evidência fica mensurável. Sem agregação, é só log por sessão isolada — útil para investigar uma sessão específica, ruim para detectar tendência.
+
+## Anti-padrões
+
+- **Coletar mas não agregar** — dado existe mas insight é zero.
+- **Métrica única para julgamento** — RTT médio engana; precisa percentil + distribuição.
+- **Confiar 100% no SDK do provider** — se o SDK reporta "tudo bem" e o usuário reclama, prefira evidência do usuário.
+- **Sampling alto demais que vira flood** — se a coleta degrada a sessão, ela está atrapalhando o que pretende medir.
+
+## O que isso permite operacionalmente
+
+- **Conversa com provider baseada em dado** — "região X teve P95 de RTT 4x acima do habitual entre 14h e 16h". Provider responde com dado real, não com "vamos investigar".
+- **Comparativo entre providers** — quando usar provider A vs B. Decidir baseado em distribuição, não em pitch.
+- **Detecção precoce de degradação** — alerta quando P95 sobe 50% acima do baseline. Provider só vai detectar quando virar incidente para múltiplos clientes.
+- **Roadmap de produto justificado** — "qualidade ruim no horário X é responsável por Y% de dropoff". Decisão de investir em mitigação fica defensável.
+
+## Trade-offs honestos
+
+- **Custo de storage** — cada sessão gera até 40 amostras. Para volume alto, vira gigabytes por dia. TTL é obrigatório, agregação para long-term retention é decisão.
+- **Privacidade** — métricas técnicas em geral não são PII, mas IP de origem e geolocalização sim. Anonimizar antes de agregar.
+- **Cliente lento** — instrumentação adiciona JS no browser/app. Em dispositivos lentos, ruído de medição mistura com sinal de qualidade. Calibre.
+
+## A disciplina que sustenta
+
+RUM só vale se alguém olha o dashboard. Configure:
+
+- Alerta automático para regressão (P95 acima do baseline por X minutos).
+- Review periódico (semanal) das métricas-chave.
+- Comparativo provider × período × região como dashboard primário.
+
+Sem isso, dado fica acumulando sem virar decisão.
+
+---
+
+RUM não é luxo. É a única forma de ter evidência sobre o serviço entregue ao usuário final. Sem ele, você está delegando observabilidade ao provider, e provider não tem incentivo para reportar problema próprio.
+
+Relacionado: [Diagnóstico em produção](/case-studies/diagnostico-observabilidade-producao), [Log payload truncation](/blog/log-payload-truncation), [Observabilidade antes de opinião](/blog/observabilidade-antes-de-opiniao).

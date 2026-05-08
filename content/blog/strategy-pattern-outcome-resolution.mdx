@@ -1,0 +1,116 @@
+---
+title: "Strategy aplicado: outcome resolution sem if-else infinito"
+description: "Cascata de if/else para classificar resultado é dívida que cresce com cada caso novo. Strategy com array de matchers transforma isso em configuração."
+date: "2026-05-08"
+tags: ["Engenharia", "Padrões de Código", "Refactor"]
+readingTime: "4 min"
+---
+
+## A função que cresceu errado
+
+Você precisa classificar resultado de operação. Status de chamada, tipo de erro, categoria de evento — qualquer dado que precisa virar uma label de alto nível. Versão inicial:
+
+```
+function deriveOutcome(result) {
+  if (result.code === 'OK') return 'success'
+  if (result.code === 'TIMEOUT') return 'timeout'
+  if (result.code === 'INVALID_INPUT') return 'validation_failure'
+  return 'unknown'
+}
+```
+
+Limpa. Funciona. Cresce.
+
+Seis meses depois:
+
+```
+function deriveOutcome(result) {
+  if (result.code === 'OK' && result.duration < 100) return 'success_fast'
+  if (result.code === 'OK' && result.duration >= 100) return 'success_slow'
+  if (result.code === 'TIMEOUT' && result.partial) return 'timeout_partial'
+  if (result.code === 'TIMEOUT' && !result.partial) return 'timeout_full'
+  if (result.code === 'ERROR' && result.errorClass === 'network') return 'network_error'
+  if (result.code === 'ERROR' && result.errorClass === 'auth') return 'auth_error'
+  if (result.code === 'ERROR') return 'unknown_error'
+  if (result.code === 'INVALID_INPUT') return 'validation_failure'
+  // ... mais 15 linhas
+  return 'unknown'
+}
+```
+
+Difícil de ler. Difícil de testar. Adicionar um caso novo pede tocar a função. Code review fica focado em "será que quebrei algo existente?" mais do que em validar a regra nova.
+
+## Strategy resolve
+
+A inversão: cada caso vira uma **estratégia** com matcher (predicado) e outcome (resultado). Lista de estratégias é dado, não código.
+
+```
+const strategies = [
+  { match: r => r.code === 'OK' && r.duration < 100, outcome: 'success_fast' },
+  { match: r => r.code === 'OK' && r.duration >= 100, outcome: 'success_slow' },
+  { match: r => r.code === 'TIMEOUT' && r.partial, outcome: 'timeout_partial' },
+  { match: r => r.code === 'TIMEOUT' && !r.partial, outcome: 'timeout_full' },
+  { match: r => r.code === 'ERROR' && r.errorClass === 'network', outcome: 'network_error' },
+  { match: r => r.code === 'ERROR' && r.errorClass === 'auth', outcome: 'auth_error' },
+  { match: r => r.code === 'ERROR', outcome: 'unknown_error' },
+  { match: r => r.code === 'INVALID_INPUT', outcome: 'validation_failure' },
+]
+
+function deriveOutcome(result) {
+  const strategy = strategies.find(s => s.match(result))
+  return strategy ? strategy.outcome : 'unknown'
+}
+```
+
+Adicionar caso novo é uma entrada no array. Função `deriveOutcome` não muda mais.
+
+## Ordem importa
+
+`Array.find` retorna o primeiro match. Em qualquer caso onde matchers se sobrepõem (ex: `code === 'ERROR' && errorClass === 'network'` e `code === 'ERROR'`), o mais específico precisa vir antes do mais genérico.
+
+Convenção que funciona: ordene matchers do **mais específico para o mais genérico**, com fallback `unknown` no fim. Comentário curto na lista lembra a regra.
+
+Em casos com lógica de prioridade não-óbvia (matcher A só vale se outro contexto X também match), considere campo `priority: number` e `Array.sort` antes do find. Mas é overhead — preserve para quando realmente precisar.
+
+## Onde guarda o mapa
+
+Para sistema simples, em arquivo de config junto do código. Não precisa virar JSON externo.
+
+Para sistema com **regras que mudam com frequência** (políticas de classificação que produto ajusta), faz sentido externalizar (JSON em banco, feature flag service, sheet). Loader carrega na inicialização ou sob demanda. Adicione cache para evitar I/O repetido.
+
+Não comece com externalização. Adicione quando ficar claro que regras mudam mais que código.
+
+## Trade-offs honestos
+
+- **Closure captura escopo** — predicado lambda pode capturar variável da escopo externo, dificulta serialização. Para mapa em código está OK; para externalização, predicados precisam virar dados (DSL pequeno tipo `{ field: 'code', op: 'eq', value: 'OK' }`).
+- **Performance** — `find` é O(n) sobre estratégias. Para n pequeno (até centenas), irrelevante. Para n grande, indexar pelo primeiro campo (`Map<code, strategies[]>`).
+- **Erro de matcher silencioso** — predicado lança exceção e `find` propaga. Wrappar com try/catch ou validar predicados em test boot.
+
+## Anti-padrões
+
+- **Strategy para 3 casos** — overengineering. Cascata é mais clara.
+- **Matchers com side effect** — predicado deve ser puro (ler input, retornar bool). Side effect quebra testabilidade.
+- **Sem fallback** — se nenhum matcher casar, `find` retorna undefined. Função retorna undefined. Lugar fácil para bug propagar. Sempre tenha fallback explícito.
+- **Reordenar matchers em refactor sem testar** — primeiro match ganha; mover ordem muda comportamento silenciosamente.
+
+## Quando vale a pena
+
+- **5+ casos de classificação** com chance de crescer.
+- **Cada caso pode envolver múltiplas condições** — predicado com `&&` aninhado.
+- **Time precisa adicionar casos sem auditar a função inteira** — Strategy isola adição.
+- **Regras candidatas a virar configuração** no futuro — Strategy facilita externalização.
+
+Abaixo disso, cascata `if/else` é mais legível e mais barata.
+
+## O ganho operacional
+
+- Função core (`deriveOutcome`) fica congelada — bugs raríssimos.
+- Adicionar caso novo é PR de uma linha — code review trivial.
+- Test de cada caso é teste de matcher + outcome em isolamento — milissegundos, em paralelo.
+- Quando regra precisa virar config, refactor é loader + serializer dos predicados; lógica core não muda.
+
+---
+
+Strategy é Design Pattern velho com aplicação prática óbvia: substituir cascata de if/else por dado iterável. A diferença não é teórica — é manutenibilidade que se acumula em cada caso novo adicionado.
+
+Relacionado: [Hexagonal architecture](/case-studies/hexagonal-domain-saas), [Domain events](/blog/event-driven-domain-events).

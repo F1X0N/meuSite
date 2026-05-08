@@ -1,0 +1,95 @@
+---
+title: "ACL na fronteira do LLM: validar não é opcional"
+description: "Saída de LLM é dado externo não-confiável. Anti-corruption layer entre o output do modelo e o seu domínio é o que separa produção confiável de demo bonita."
+date: "2026-05-08"
+tags: ["IA", "Arquitetura", "Validação", "DDD"]
+readingTime: "6 min"
+---
+
+## A premissa que muita gente pula
+
+LLM gera texto. Texto vem com a forma que ele decidiu — geralmente próxima do schema pedido, às vezes não. Confiar nessa saída sem validação é o atalho para incidente caro.
+
+A boa notícia é que o padrão para isso já existe em DDD há décadas e tem nome: **Anti-Corruption Layer (ACL)**. Originalmente para isolar domínio de sistema legado integrado, hoje aplicável palavra por palavra a integração com LLM.
+
+ACL é uma fronteira explícita. Tudo que entra no seu domínio passa por ela. Tudo que sai vai por ela. Por dentro do domínio, o tipo é seu, a invariante é sua, a linguagem é sua. Por fora, é o caos do provider.
+
+## O que ACL faz na prática
+
+Três responsabilidades, em ordem:
+
+1. **Schema validation** — saída do LLM passa por validação estrutural. Schema declarado (zod, JSON Schema, equivalente). Falha aqui é falha de protocolo, não de regra.
+
+2. **Sanitization** — campos de texto que vão para o domínio passam por normalização: trim, encoding consistente, limites de tamanho. Strings vindas de LLM podem trazer caracteres invisíveis, espaço duplo, encoding misto.
+
+3. **Translation** — formato do LLM (otimizado para serializar em JSON) traduzido para o vocabulário do domínio. Campos renomeados, enums mapeados, valores normalizados (datas em ISO, IDs estáveis).
+
+Só depois disso o objeto entra no domínio. Antes, é dado externo desconhecido.
+
+## Por que isso é diferente de "só validar com zod"
+
+Zod valida estrutura. ACL é mais larga: é o lugar arquitetural onde **toda essa preparação acontece, fora do domínio**. Domínio recebe o objeto já validado, traduzido, limpo. Não tem `if-validate-else-throw` espalhado.
+
+A diferença prática: quando o LLM evolui (provider muda formato, schema do prompt muda), você ajusta a ACL. Domínio não fica sabendo. Quando o domínio evolui (campo renomeado, invariante nova), você ajusta o domínio. ACL não fica sabendo.
+
+Sem ACL, qualquer mudança no LLM ou no domínio se propaga para a outra ponta. Acoplamento escondido.
+
+## Onde colocar a ACL
+
+Para output de tool call ou geração estruturada:
+
+```
+provider client → response_format JSON → ACL → domain object
+                                          ↑
+                                          schema valida
+                                          sanitiza
+                                          traduz
+```
+
+ACL fica em arquivo próprio, próximo do domínio mas isolado. Cada `tool` ou `output type` tem sua ACL — não tente um conversor genérico, vira espaguete em duas semanas.
+
+## Repair vs reject
+
+LLM falha em formatar JSON com mais frequência do que documentação sugere. Quando isso acontece, ACL tem duas opções:
+
+**Repair** — JSON malformado por motivo recuperável (vírgula faltando, aspa não escapada). Bibliotecas de JSON repair conseguem consertar a maioria. Aceitável se o conteúdo está completo, só sintaticamente quebrado.
+
+**Reject** — JSON estrutural ou semanticamente errado (campo obrigatório ausente, tipo trocado). Não tente adivinhar. Devolve erro estruturado para o caller decidir: retry, fallback, escalar para humano.
+
+Regra: **repair é técnico, reject é semântico**. Confundir os dois faz seu sistema confiar em alucinação.
+
+## O que vai junto
+
+ACL boa exige amigos:
+
+- **Telemetria de validação** — taxa de falha por schema, por modelo, por contexto. Falha subindo é sinal de prompt regredindo ou modelo mudando comportamento. Detectar cedo.
+
+- **Log estruturado da entrada bruta** quando há repair — auditoria depois consegue reconstruir o que veio do LLM antes da limpeza. Essencial para debugar regressão sutil.
+
+- **Versionamento do schema** — quando o schema muda, dados antigos validados pelo schema antigo continuam válidos. Mudança não é retroativa.
+
+- **Cost ledger** — chamada que falhou em validar ainda gastou tokens. Contabilizar separadamente ([cost ledger](/case-studies/cost-ledger-llm-multi-modelo)) mostra "quanto está sendo desperdiçado em saída inválida".
+
+## Anti-padrões
+
+- **Confiar em "o LLM vai melhorar"** — modelo evolui, mas regressão acontece sem aviso. ACL é a apólice de seguro.
+
+- **Schema em produção sem versão** — dia que muda, qualquer dado em trânsito quebra. Versionar é trabalho a mais que se paga no primeiro incidente evitado.
+
+- **ACL no controller HTTP** — atrai a tentação de retornar a saída do LLM direto pro usuário sem passar pelo domínio. Ruim. Domínio tem que mediar mesmo se a feature é "só repassar".
+
+- **Sem fallback determinístico** — quando ACL rejeita, qual o plano? "Tentar de novo" não é plano. Definir antecipadamente: retry com prompt diferente? Resposta default? Escalar para humano?
+
+## Por que isso é capability-based security aplicada
+
+Cada tool/output que o LLM produz é uma capability — algo que pode afetar o sistema. ACL define o **contrato dessa capability**: o que pode ser dito, em que formato, com quais limites. Saída fora do contrato é negada.
+
+Esse é o mesmo princípio de **least privilege**: domínio não precisa saber que existe LLM, e LLM não precisa saber que existe domínio. ACL é o ponto de troca controlada.
+
+Sem ACL, qualquer evolução do LLM ou do domínio é risco. Com ACL, evolução de cada lado é trabalho previsível.
+
+---
+
+ACL não é overengineering em integração com LLM — é o mínimo defensável. A demo funciona sem. A produção, em algum momento, não.
+
+Relacionado: [Cost ledger de LLM](/case-studies/cost-ledger-llm-multi-modelo), [IA com controle humano](/blog/ia-controle-humano), [Hexagonal architecture](/case-studies/hexagonal-domain-saas), [Orquestração de IA](/case-studies/orquestracao-ia-operacao).

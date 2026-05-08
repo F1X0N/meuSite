@@ -1,0 +1,108 @@
+---
+title: "Logs que cabem no Loki: padrões de truncação safe"
+description: "Payload grande em log estoura budget de ingestão e custa caro. Truncação recursiva com limites por tipo preserva legibilidade e protege observabilidade."
+date: "2026-05-08"
+tags: ["Observabilidade", "Backend", "Logging", "Engenharia"]
+readingTime: "4 min"
+---
+
+## O custo invisível
+
+Você loga payload de request. Algum endpoint recebe upload de PDF em base64. O log dessa request, sozinho, tem 8MB. Provider de log ingere. No fim do mês, você descobre que 80% do custo de logging vem de 0,1% das requests.
+
+Pior cenário: provider rejeita logs acima do limite. A request com problema (que você queria investigar) é a que não foi logada — porque o payload era exatamente o que estava grande demais.
+
+Truncação não é cosmética. É mecanismo de defesa do orçamento e da observabilidade.
+
+## A regra simples não basta
+
+`if (log.length > N) log = log.substring(0, N) + '...[truncated]'`
+
+Funciona se log é string plana. Em estruturado, cobre só o caso fácil. O log de verdade é objeto com aninhamento — request body é objeto, com array de items, cada item com um campo `description`. Truncar a string final mantém só a primeira parte do objeto serializado: começo do request, fim sumiu inteiro.
+
+Pior: campos importantes (`error`, `request_id`) podem estar no fim, ser truncados, e o log perde valor.
+
+## Truncação recursiva por tipo
+
+A solução é truncar **por tipo, com limite específico para cada um**, antes de serializar:
+
+- **String**: corta acima de N caracteres. Exemplo: 4KB.
+- **Array**: limita a N itens, marca quantos foram omitidos. Exemplo: 20 itens.
+- **Objeto**: limita profundidade. Acima de N níveis, vira `[Object]` ou `[depth_limit]`. Exemplo: 4 níveis.
+- **Buffer/Blob**: nunca loga conteúdo. Loga `[Buffer size=...]`.
+
+Recursão aplica os limites em cada nível. Tamanho do log fica previsível mesmo para payload extremo.
+
+## Limites práticos
+
+Calibre observando produção real:
+
+- `MAX_STRING_SIZE: 4096` — texto livre fica legível, body de email cabe.
+- `MAX_ARRAY_ITEMS: 20` — primeiros 20 itens dão contexto suficiente.
+- `MAX_DEPTH: 4` — payloads ficam navegáveis sem virar bola de neve.
+- `MAX_LOG_SIZE_BYTES: 200_000` — payload total. Acima disso, força truncação adicional.
+
+Esses são pontos de partida. Ajuste conforme distribuição de tamanho dos seus payloads reais.
+
+## Mensagem de truncamento explícita
+
+Sempre marque que houve truncação. Sem marca, o investigador depois vai pensar que o log está completo e basear hipótese em dado parcial.
+
+Convenção:
+
+```
+{ message: "...primeira parte do conteúdo...", _truncated: true, _original_length: 12384 }
+```
+
+Inclua `_original_length` quando viável — útil para detectar payloads anormalmente grandes.
+
+## Campos sensíveis: redact, não trunca
+
+PII (e-mail, telefone, CPF), secret (token, chave) e dado sensível **não devem ser truncados**. Devem ser **redacted** — substituídos por marcador.
+
+```
+{ email: "[REDACTED]", token: "[REDACTED]" }
+```
+
+Truncação parcial é perigoso: 5 caracteres de um token é informação suficiente para correlacionar com vazamento.
+
+Lista de campos a redact é decisão de domínio (`password`, `token`, `cpf`, `card_number`, etc). Codifique em utility central, aplica antes da truncação.
+
+## Truncar antes ou depois de serializar?
+
+**Antes**. Sempre.
+
+Serializar primeiro e cortar depois corta no meio do JSON, gera string inválida, e o investigador depois precisa adivinhar onde estava o `}` final.
+
+Truncar antes (no objeto) preserva estrutura. JSON serializado fica válido, mesmo que com `[truncated]` em vez de conteúdo.
+
+## Como instrumentar sem virar burocracia
+
+Toda chamada `logger.info(...)` passa pelo mesmo serializer central. Serializer aplica truncação + redaction antes de enviar. Endpoint não precisa lembrar — virou propriedade do logger.
+
+```
+logger.info('Request received', { body, headers })
+// internally:
+//   truncate(redact({ body, headers })) → enviado para sink
+```
+
+Quem escreve endpoint loga o que importa. Política de tamanho e segurança fica em uma camada só.
+
+## Anti-padrões
+
+- **Truncar string serializada** — corta JSON em meio de objeto, gera string inválida.
+- **Não marcar truncação** — investigação depois confunde dado parcial com dado completo.
+- **Logar buffer/blob** — explode o log sem entregar valor; sempre `[Buffer size=...]`.
+- **Truncar campo sensível em vez de redact** — preserva 5 caracteres é leak parcial.
+
+## O ROI
+
+Sem truncação safe, primeira request com payload grande causa três coisas: estoura budget, atrasa ingestão de outros logs, talvez seja rejeitada inteira. Custa muito mais do que o trabalho de adicionar uma camada de truncação.
+
+Implementar custa algumas horas. Salva semanas de incidente acumulado.
+
+---
+
+Truncação não é optimization, é higiene. Sem ela, observabilidade vira despesa que cresce com sucesso. Com ela, logs continuam úteis e o orçamento previsível.
+
+Relacionado: [Request_id correlation](/blog/request-id-trace-correlation), [Diagnóstico em produção](/case-studies/diagnostico-observabilidade-producao).

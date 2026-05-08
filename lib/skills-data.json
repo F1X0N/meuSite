@@ -1,5 +1,113 @@
 [
   {
+    "name": "blog-anti-corruption-layer-llm",
+    "description": "Use quando o usuário pergunta sobre validação de saída de LLM, ACL, anti-corruption layer, schema validation com zod, JSON repair vs reject, ou como isolar domínio de provider externo de IA.",
+    "triggers": [
+      "ACL",
+      "anti-corruption",
+      "validação",
+      "schema",
+      "zod",
+      "JSON",
+      "LLM safety",
+      "JSON repair",
+      "fronteira de domínio",
+      "validação de saída"
+    ],
+    "linkedContent": "/blog/anti-corruption-layer-llm",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "case-orquestracao-ia-operacao",
+      "blog-ia-controle-humano",
+      "case-cost-ledger-llm-multi-modelo",
+      "case-hexagonal-domain-saas"
+    ],
+    "followups": [
+      "Como decide se rejeita ou tenta reparar a saída do LLM?",
+      "Onde guarda o schema de cada tool/output?",
+      "ACL é só pra LLM ou para todo provider externo?"
+    ]
+  },
+  {
+    "name": "blog-api-key-isolation-por-contexto",
+    "description": "Use quando o usuário pergunta sobre segregação de API keys por contexto, least privilege, secret management, multi-tenant key routing, ou cost attribution via key segregada.",
+    "triggers": [
+      "API key",
+      "secret management",
+      "least privilege",
+      "isolation",
+      "multi-tenant",
+      "segurança",
+      "cost attribution",
+      "chave segregada"
+    ],
+    "linkedContent": "/blog/api-key-isolation-por-contexto",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "blog-webhook-signature-verification",
+      "case-cost-ledger-llm-multi-modelo",
+      "blog-anti-corruption-layer-llm"
+    ],
+    "followups": [
+      "Onde guarda o mapa contexto → env var?",
+      "Como age quando uma key específica vaza?",
+      "Vale para qualquer provider ou só LLM?"
+    ]
+  },
+  {
+    "name": "blog-connection-context-serverless",
+    "description": "Use quando o usuário pergunta sobre pool de conexão, leak de conexão em serverless, transações ACID, wrapper de request, ou como garantir cleanup de recursos com finally.",
+    "triggers": [
+      "connection pool",
+      "serverless",
+      "ACID",
+      "transaction",
+      "leak de conexão",
+      "FaaS",
+      "banco",
+      "wrapper",
+      "finally"
+    ],
+    "linkedContent": "/blog/connection-context-serverless",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "case-diagnostico-observabilidade-producao",
+      "blog-event-driven-domain-events",
+      "blog-request-id-trace-correlation"
+    ],
+    "followups": [
+      "Como detectou leak de conexão antes de virar incidente?",
+      "Wrapper genérico ou por endpoint?",
+      "Como roda integration test sem leakar?"
+    ]
+  },
+  {
+    "name": "blog-event-driven-domain-events",
+    "description": "Use quando o usuário pergunta sobre domain events, event-driven architecture, observer pattern, desacoplamento de efeitos colaterais, ou quando trocar workflow procedural por reação a evento.",
+    "triggers": [
+      "event-driven",
+      "domain events",
+      "observer",
+      "eventos de domínio",
+      "desacoplamento",
+      "listener",
+      "effect handler",
+      "acoplamento"
+    ],
+    "linkedContent": "/blog/event-driven-domain-events",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "case-hexagonal-domain-saas",
+      "blog-retry-backoff-dead-letter",
+      "blog-idempotencia-webhook-state-machine"
+    ],
+    "followups": [
+      "Quando trocar workflow procedural por evento de domínio?",
+      "Onde guarda o catálogo de eventos? Markdown ou ferramenta?",
+      "Como evita listener fantasma com silent failure?"
+    ]
+  },
+  {
     "name": "blog-ia-controle-humano",
     "description": "Use quando o usuário pergunta sobre supervisão de agentes de IA, validação de saídas estruturadas, JSON repair, governança multi-provider, ou quando agente substitui vs complementa engenheiro.",
     "triggers": [
@@ -26,6 +134,61 @@
       "Como você desenha critério de escalação para agente?",
       "O que é validação de saída na prática?",
       "Quando vale a pena usar agente vs script tradicional?"
+    ]
+  },
+  {
+    "name": "blog-idempotencia-webhook-state-machine",
+    "description": "Use quando o usuário pergunta sobre idempotência, deduplicação de webhooks, state machine para eventos retransmitidos, ou como evitar dupla cobrança/notificação em integrações com providers externos.",
+    "triggers": [
+      "idempotência",
+      "idempotency",
+      "webhook",
+      "dedupe",
+      "deduplicação",
+      "state machine",
+      "retry",
+      "evento duplicado",
+      "retransmissão",
+      "dupla cobrança"
+    ],
+    "linkedContent": "/blog/idempotencia-webhook-state-machine",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "blog-webhook-signature-verification",
+      "blog-retry-backoff-dead-letter",
+      "blog-value-object-identificador-composto"
+    ],
+    "followups": [
+      "Como você define o que torna dois webhooks 'o mesmo evento'?",
+      "Onde guarda o estado: no banco principal ou tabela à parte?",
+      "Como evita race condition entre dois workers processando o mesmo webhook?"
+    ]
+  },
+  {
+    "name": "blog-log-payload-truncation",
+    "description": "Use quando o usuário pergunta sobre log truncation, log safety, payload grande em log, redaction de PII, ou como controlar custo de ingestão em Loki/Datadog/Sentry.",
+    "triggers": [
+      "log truncation",
+      "log safety",
+      "Loki",
+      "Datadog",
+      "payload size",
+      "observability",
+      "structured log",
+      "redact",
+      "PII em log"
+    ],
+    "linkedContent": "/blog/log-payload-truncation",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "blog-request-id-trace-correlation",
+      "case-diagnostico-observabilidade-producao",
+      "blog-observabilidade-antes-de-opiniao"
+    ],
+    "followups": [
+      "Quais limites usa em produção (string, array, depth)?",
+      "Como tratar campos sensíveis (PII, token) na truncação?",
+      "Truncar antes ou depois de serializar?"
     ]
   },
   {
@@ -86,6 +249,192 @@
     ]
   },
   {
+    "name": "blog-request-id-trace-correlation",
+    "description": "Use quando o usuário pergunta sobre request_id, trace_id, correlation ID, distributed tracing, OpenTelemetry, ou como instrumentar logs para investigar incidentes em sistemas com múltiplas instâncias.",
+    "triggers": [
+      "request id",
+      "trace id",
+      "correlation",
+      "log structured",
+      "observability",
+      "distributed tracing",
+      "OpenTelemetry",
+      "X-Request-Id",
+      "troubleshooting"
+    ],
+    "linkedContent": "/blog/request-id-trace-correlation",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "case-diagnostico-observabilidade-producao",
+      "blog-observabilidade-antes-de-opiniao",
+      "blog-log-payload-truncation"
+    ],
+    "followups": [
+      "Onde gera o ID? Middleware ou framework?",
+      "Como propaga o request_id em chamadas async?",
+      "Quando migrar de UUID para OpenTelemetry?"
+    ]
+  },
+  {
+    "name": "blog-retry-backoff-dead-letter",
+    "description": "Use quando o usuário pergunta sobre retry, backoff (linear, exponencial, jitter), dead letter queue, falha transiente vs permanente, ou como deduzir limite de tentativas e deadline.",
+    "triggers": [
+      "retry",
+      "backoff",
+      "dead letter",
+      "DLQ",
+      "resiliência",
+      "falha transiente",
+      "tentativa",
+      "reprocessamento",
+      "jitter"
+    ],
+    "linkedContent": "/blog/retry-backoff-dead-letter",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "blog-idempotencia-webhook-state-machine",
+      "blog-timeout-promise-race",
+      "blog-event-driven-domain-events"
+    ],
+    "followups": [
+      "Backoff linear ou exponencial? Quando cada um?",
+      "Como decide N de tentativas?",
+      "DLQ no banco principal ou em fila dedicada?"
+    ]
+  },
+  {
+    "name": "blog-strategy-pattern-outcome-resolution",
+    "description": "Use quando o usuário pergunta sobre Strategy pattern, classificar resultado em categorias, refatorar cascata de if/else, derivar outcome a partir de múltiplos campos, ou pattern matching em código.",
+    "triggers": [
+      "strategy",
+      "design pattern",
+      "if-else",
+      "cascata",
+      "outcome",
+      "refactor",
+      "pattern matching",
+      "classificação",
+      "matcher"
+    ],
+    "linkedContent": "/blog/strategy-pattern-outcome-resolution",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "case-hexagonal-domain-saas",
+      "blog-event-driven-domain-events"
+    ],
+    "followups": [
+      "Como ordena prioridade entre estratégias quando há sobreposição?",
+      "Como testa matcher quando ele tem múltiplas condições?",
+      "Quando Strategy vira overkill?"
+    ]
+  },
+  {
+    "name": "blog-timeout-promise-race",
+    "description": "Use quando o usuário pergunta sobre timeout em chamadas externas (LLM, APIs), Promise.race, AbortController, hang de request, deadline ou diferença entre timeout e circuit breaker.",
+    "triggers": [
+      "timeout",
+      "circuit breaker",
+      "hang",
+      "Promise.race",
+      "deadline",
+      "resiliência",
+      "LLM lento",
+      "AbortController",
+      "latência"
+    ],
+    "linkedContent": "/blog/timeout-promise-race",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "blog-retry-backoff-dead-letter",
+      "blog-anti-corruption-layer-llm",
+      "case-cost-ledger-llm-multi-modelo"
+    ],
+    "followups": [
+      "Quanto tempo é razoável de timeout para LLM?",
+      "Diferença prática entre timeout e circuit breaker?",
+      "Como reportar timeout no log sem confundir com erro genérico?"
+    ]
+  },
+  {
+    "name": "blog-value-object-identificador-composto",
+    "description": "Use quando o usuário pergunta sobre value object, identidade composta, hash de campos múltiplos, normalização para deduplicação, SHA-1 vs SHA-256, ou DDD aplicado a identidade.",
+    "triggers": [
+      "value object",
+      "identidade",
+      "hash composto",
+      "immutable",
+      "deduplicação",
+      "DDD",
+      "SHA-1",
+      "SHA-256",
+      "normalização"
+    ],
+    "linkedContent": "/blog/value-object-identificador-composto",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "blog-idempotencia-webhook-state-machine",
+      "blog-event-driven-domain-events"
+    ],
+    "followups": [
+      "SHA-1 ou SHA-256? Importa em quê?",
+      "Como evita colisão acidental entre tipos de evento diferentes?",
+      "Quando vira classe vs continua função pura retornando string?"
+    ]
+  },
+  {
+    "name": "blog-webhook-signature-verification",
+    "description": "Use quando o usuário pergunta sobre validação de assinatura de webhook, HMAC, anti-spoofing, replay attack, rotação de secret, ou como proteger endpoint público de webhook.",
+    "triggers": [
+      "webhook",
+      "signature",
+      "HMAC",
+      "verificação",
+      "segurança",
+      "anti-spoofing",
+      "replay attack",
+      "timing attack",
+      "rotação de secret"
+    ],
+    "linkedContent": "/blog/webhook-signature-verification",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "blog-idempotencia-webhook-state-machine",
+      "blog-api-key-isolation-por-contexto"
+    ],
+    "followups": [
+      "Onde guarda o secret? Env var ou cofre dedicado?",
+      "Como rotaciona o secret sem downtime?",
+      "Falha de assinatura: log warn ou error?"
+    ]
+  },
+  {
+    "name": "case-cost-ledger-llm-multi-modelo",
+    "description": "Use quando o usuário pergunta sobre custo de IA em produção, cost attribution por feature, escolha de modelo por tarefa, contabilidade de tokens, ou como justificar gasto de LLM tecnicamente.",
+    "triggers": [
+      "custo IA",
+      "cost attribution",
+      "ledger",
+      "contabilidade IA",
+      "custo de LLM",
+      "modelo certo",
+      "otimização de custo",
+      "tokens",
+      "cached tokens"
+    ],
+    "linkedContent": "/case-studies/cost-ledger-llm-multi-modelo",
+    "linkedType": "case-study",
+    "relatedSkills": [
+      "case-orquestracao-ia-operacao",
+      "blog-anti-corruption-layer-llm",
+      "blog-metricas-que-pagam-a-conta"
+    ],
+    "followups": [
+      "Como decide qual modelo usar para cada tarefa?",
+      "Como atribui custo de IA a uma feature/produto interno?",
+      "Cache de prompt vale a pena? Quando?"
+    ]
+  },
+  {
     "name": "case-diagnostico-observabilidade-producao",
     "description": "Use quando o usuário pergunta sobre diagnóstico de incidentes em produção, observabilidade com Grafana/Loki/Sentry, segurança operacional, read-only diagnostics, ou validação pós-mudança.",
     "triggers": [
@@ -115,6 +464,33 @@
     ]
   },
   {
+    "name": "case-hexagonal-domain-saas",
+    "description": "Use quando o usuário pergunta sobre arquitetura hexagonal, ports and adapters, separação domínio/infraestrutura, clean architecture aplicada a SaaS, ou quando vale a pena adotar essa separação.",
+    "triggers": [
+      "hexagonal",
+      "ports and adapters",
+      "arquitetura",
+      "clean architecture",
+      "separação de camadas",
+      "domain",
+      "DDD",
+      "infrastructure",
+      "adapter"
+    ],
+    "linkedContent": "/case-studies/hexagonal-domain-saas",
+    "linkedType": "case-study",
+    "relatedSkills": [
+      "blog-anti-corruption-layer-llm",
+      "blog-event-driven-domain-events",
+      "case-validacao-criterios-aceite"
+    ],
+    "followups": [
+      "Como evita o domínio depender de framework HTTP?",
+      "Onde guarda a interface do adapter (port)?",
+      "Quando adotar Hexagonal e quando é overengineering?"
+    ]
+  },
+  {
     "name": "case-orquestracao-ia-operacao",
     "description": "Use quando o usuário pergunta sobre orquestração de agentes de IA, supervisão humana de LLMs, MCP tooling, automação de trabalho repetitivo de operação técnica, ou skills focadas vs agente genérico.",
     "triggers": [
@@ -141,6 +517,33 @@
       "Como você decide o que vira skill e o que continua manual?",
       "Quais são os critérios de aceite das skills?",
       "Como auditar o que o agente fez?"
+    ]
+  },
+  {
+    "name": "case-rum-integracao-provider-externo",
+    "description": "Use quando o usuário pergunta sobre Real User Monitoring (RUM), telemetria de qualidade em integrações com providers externos, sampling, jitter, packet loss, ou como ter evidência própria de qualidade.",
+    "triggers": [
+      "RUM",
+      "real user monitoring",
+      "telemetria",
+      "qualidade",
+      "provider",
+      "sampling",
+      "jitter",
+      "packet loss",
+      "latência cliente"
+    ],
+    "linkedContent": "/case-studies/rum-integracao-provider-externo",
+    "linkedType": "case-study",
+    "relatedSkills": [
+      "case-diagnostico-observabilidade-producao",
+      "blog-log-payload-truncation",
+      "blog-observabilidade-antes-de-opiniao"
+    ],
+    "followups": [
+      "Como decide o que amostrar e o que ignorar?",
+      "Como evita inflar payload no batch enviado?",
+      "Como age quando provider está degradando?"
     ]
   },
   {

@@ -1,0 +1,88 @@
+---
+title: "Correlação de logs por request_id: o básico que muita gente erra"
+description: "Investigar incidente sem trace_id é arqueologia. Um UUID propagado em toda log da request transforma horas de greppar em minutos de leitura."
+date: "2026-05-08"
+tags: ["Observabilidade", "Backend", "Engenharia", "Logging"]
+readingTime: "4 min"
+---
+
+## A diferença que esse padrão faz
+
+Cliente reporta erro às 14h22. Você precisa entender o que aconteceu. Sem `request_id` correlacional, você tem:
+
+- 200 requests por minuto naquele intervalo
+- Logs de 10 serviços diferentes
+- Timestamps com clock skew entre instâncias
+- Mensagens de erro genéricas
+
+Investigação vira arqueologia. Você cruza heuristicamente: "qual usuário?", "qual endpoint?", "qual cor de instância?". Encontra o trace certo se tiver sorte. Demora 30 minutos para entender uma request.
+
+Com `request_id` correlacional, é diferente:
+
+- Cliente passa o header `X-Request-Id` (ou você gera no edge).
+- Toda log dessa request inclui o ID.
+- Investigação é `grep request_id=abc-123` no Loki/Datadog/Sentry.
+- 30 segundos para reconstruir o fluxo completo.
+
+## Onde gera o ID
+
+Duas escolhas:
+
+**No edge da sua aplicação** (middleware HTTP). Funciona se você é o ponto de entrada, e nenhum upstream propaga ID. Gera UUIDv4 no início do request lifecycle, anexa em todo log e na response.
+
+**Propagado de upstream**. Se sua aplicação está atrás de gateway/CDN/proxy que já gera ID (Cloudflare `cf-ray`, AWS `x-amzn-trace-id`, gateway interno custom), respeite o que veio. Se não veio, gera. Convenção: header `X-Request-Id`.
+
+Padrão híbrido: middleware lê header existente; se não existe, gera.
+
+## Onde aparece
+
+Em **toda** linha de log da request. Sem exceção.
+
+Solução é instrumentação central, não disciplina manual:
+
+- Logger global recebe contexto da request via async context (Node: `AsyncLocalStorage`; outras linguagens: equivalente).
+- Cada log do logger inclui `request_id` automaticamente.
+- Endpoint não precisa lembrar de passar — está no contexto.
+
+Sem async context, request_id vira parâmetro espalhado por todas as funções. Funciona, mas polui assinatura de função e é fácil esquecer.
+
+## E na resposta?
+
+Sempre devolva o `request_id` no header da response. Não é opcional. Cliente que reportar erro pode passar o ID. Investigação fica trivial.
+
+Header convencional: `X-Request-Id`. Quando o cliente abre ticket de suporte, você pede esse ID. Sem ele, você está procurando agulha em palheiro.
+
+## Em chamadas async / fila
+
+Request_id da operação síncrona acaba quando a request termina. Mas a operação pode disparar trabalho assíncrono (fila, scheduler, worker).
+
+Padrão: **propagar o request_id para o trabalho async**. Listener de evento, mensagem em fila, registro em outbox — todos carregam o request_id original.
+
+Quando o worker processa, ele continua usando aquele request_id em seus logs. Investigação cruza barreira sync/async sem perder o fio.
+
+Para ações novas geradas pelo worker (ex: webhook outbound), o `request_id` continua mas é prudente adicionar `caused_by: <request_id_original>` para preservar a cadeia causal.
+
+## Diferença entre request_id e trace_id
+
+Em sistemas distribuídos, `trace_id` (OpenTelemetry, X-Ray) é mais amplo que request_id. Trace_id atravessa múltiplos serviços e fica no formato W3C Trace Context.
+
+Para sistema monolítico ou poucos serviços, request_id (UUID) é suficiente. Para sistema com mais de 3-4 serviços compondo cada request, OpenTelemetry oferece padronização melhor (trace_id + span_id, propagação automática).
+
+Regra prática: **comece com request_id UUID. Migre para OpenTelemetry quando o trace cruzar 3+ serviços e o ROI justificar a complexidade.**
+
+## Anti-padrões
+
+- **Logar request_id só no início e no fim** — meio da request fica sem correlação.
+- **Não retornar no header da response** — cliente não consegue dizer qual request bugou.
+- **Gerar ID novo em chamada async** — quebra cadeia causal.
+- **`request_id` como número sequencial** — colisão entre instâncias, vazamento de informação sobre volume.
+
+## Bônus: log truncation safe
+
+Quando log inclui payload grande, request_id continua leve. Útil para correlacionar mesmo quando o resto do log foi truncado por segurança ([log truncation](/blog/log-payload-truncation)).
+
+---
+
+Request_id é trabalho de uma tarde. Paga conta em todo incidente futuro. Sem dúvida o melhor ROI em observabilidade básica.
+
+Relacionado: [Observabilidade antes de opinião](/blog/observabilidade-antes-de-opiniao), [Log payload truncation](/blog/log-payload-truncation), [Diagnóstico em produção](/case-studies/diagnostico-observabilidade-producao).

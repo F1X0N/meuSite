@@ -1,0 +1,109 @@
+---
+title: "Connection context em serverless: ACID sem leak no pool"
+description: "Pool de conexão esgotado é um dos jeitos mais sutis de tirar produção do ar. Wrapper centralizado + finally garantido resolve em definitivo."
+date: "2026-05-08"
+tags: ["Backend", "Serverless", "Banco de Dados", "Resiliência"]
+readingTime: "5 min"
+---
+
+## O incidente que ensina
+
+Sistema funciona bem por semanas. De repente, requests começam a engasgar. Cinco minutos depois, todas falham com erro de conexão. Restart resolve. Volta a funcionar. Algumas horas depois, repete.
+
+A causa? **Pool de conexão esgotado**. Algum endpoint está pegando conexão e nunca devolvendo. Operação concluiu, mas a conexão ficou pendurada.
+
+Em serverless, isso é especialmente cruel: cada instância tem pool pequeno, e instâncias morrem e nascem com frequência. Um único endpoint mal-comportado escala o problema.
+
+## A regra que evita o problema inteiro
+
+**Toda conexão pega tem que ser devolvida em `finally`. Sem exceção.**
+
+Isso não pode ser disciplina manual em cada endpoint. Cada vez que alguém esquece, é um vazamento. Em poucos meses, com dezenas de endpoints, garantir manualmente é impossível.
+
+A solução é **wrapper centralizado**:
+
+```
+async wrapperRequest(handler) {
+  const conn = await db.getConnection()
+  try {
+    await db.beginTransaction(conn)
+    const result = await handler(conn)
+    await db.commit(conn)
+    return result
+  } catch (error) {
+    await db.rollback(conn)
+    throw error
+  } finally {
+    db.releaseConnection(conn)
+  }
+}
+```
+
+Endpoints chamam o wrapper. Não tocam diretamente em `getConnection` ou `release`. Garantia operacional virou propriedade do framework — quem escreve endpoint não pode esquecer.
+
+## Por que `finally` e não cleanup explícito
+
+Cleanup explícito (`if (conn) db.release(conn)` no fim do try) tem dois problemas:
+
+1. **Não roda quando `throw` interrompe o fluxo** — exceção pula a cleanup, conexão vaza.
+2. **Espalha responsabilidade** — cada endpoint precisa lembrar.
+
+`finally` roda sempre — sucesso, exceção tratada, exceção propagada. Garantia da linguagem.
+
+## A camada de transação junto
+
+Conexão sem transação é metade do problema. A outra metade: garantir que operações múltiplas (UPDATE + INSERT + DELETE) sejam atômicas.
+
+`BEGIN` no início, `COMMIT` no fim, `ROLLBACK` em qualquer erro. Mais uma vez, no `finally` do wrapper, com captura de exceção:
+
+- Sucesso → COMMIT
+- Erro tratável → ROLLBACK + relança
+- Erro não-tratável → ROLLBACK + alert
+
+Endpoint nunca toca em transação manualmente. Nunca esquece de COMMIT. Nunca relança sem ROLLBACK.
+
+## O detalhe do read-only
+
+Toda operação dentro do wrapper assume escrita. Mas nem toda request escreve. Endpoints de leitura pura não precisam de transação — abrir BEGIN/COMMIT custa overhead pequeno mas inútil.
+
+Solução: wrapper aceita flag `mode: 'read' | 'write'`. Em read, pula BEGIN/COMMIT. Pega conexão (do pool de leitura, se houver), executa, devolve.
+
+Bonus: forçar conexão de read-only replica quando disponível ([CQRS aplicado](/case-studies/diagnostico-observabilidade-producao)). Reduz pressão no master, melhora latência.
+
+## Logging que sustenta o padrão
+
+Cada wrapper invoca uma trace de request:
+
+- `request_id` correlacional ([trace correlation](/blog/request-id-trace-correlation))
+- duração total
+- status final (success / error)
+- número de queries executadas (instrumentação opcional)
+
+Quando vaza conexão, dashboard mostra: requests com duration anormal e ausência de log de release. Investigação imediata, não espera o pool esgotar.
+
+## Anti-padrões em uso
+
+- **Endpoint que pega conexão fora do wrapper** — quebra a garantia. Code review precisa marcar.
+- **Wrapper sem finally** — depende de happy path. Primeira exceção é leak.
+- **Transação aninhada** — BEGIN dentro de BEGIN. Comportamento varia entre bancos. Evitar; usar savepoint quando precisa de rollback parcial.
+- **Conexão pega no meio do handler** — dificulta saber quando devolver. Sempre pegue no início, devolva no fim.
+
+## Quando isso é overengineering
+
+- **Frontend / SSR sem banco direto** — não tem conexão pra gerenciar.
+- **Sistema com banco serverless gerenciado** (que abstrai pool) — provider já cuida disso.
+- **Operação síncrona única, sem composição** — pode passar com try/finally inline.
+
+Em qualquer aplicação com handler de request mais complexo do que CRUD trivial, wrapper paga conta no primeiro vazamento evitado.
+
+## O que isso permite além do óbvio
+
+- **Migration de banco com janela curta** — wrapper centraliza onde a conexão é pega. Trocar driver, adicionar replica, mudar pool size é one-place change.
+- **Tracing distribuído gratuito** — request_id já está no wrapper. Adicionar OpenTelemetry vira instrumentação de uma função.
+- **Métrica RED automática** — Request count, Error count, Duration — todos visíveis no wrapper sem instrumentar cada endpoint.
+
+---
+
+Connection context não é optimization. É a infraestrutura mínima que sustenta operação confiável. Sem ele, sistema serverless é uma bomba relógio escondida em endpoint qualquer. Com ele, leak vira evento mensurável e prevenível.
+
+Relacionado: [Diagnóstico em produção](/case-studies/diagnostico-observabilidade-producao), [Trace correlation por request_id](/blog/request-id-trace-correlation), [Domain events](/blog/event-driven-domain-events).
