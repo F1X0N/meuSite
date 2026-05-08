@@ -104,6 +104,13 @@ type JobFitState = {
   error: string | null
 }
 
+type ResumeModalState = {
+  open: boolean
+  loading: boolean
+  markdown: string | null
+  error: string | null
+}
+
 const createInitialState = (): JobFitState => ({
   jobDescription: '',
   analysis: null,
@@ -111,8 +118,38 @@ const createInitialState = (): JobFitState => ({
   error: null,
 })
 
+const initialResumeModal: ResumeModalState = { open: false, loading: false, markdown: null, error: null }
+
 export const JobFit = () => {
   const [state, setState] = useState(createInitialState())
+  const [resumeModal, setResumeModal] = useState<ResumeModalState>(initialResumeModal)
+
+  const handleGenerateResume = async () => {
+    if (!state.jobDescription) return
+    setResumeModal({ open: true, loading: true, markdown: null, error: null })
+    try {
+      const response = await fetch('/api/ai/targeted-resume', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobDescription: state.jobDescription }),
+      })
+      const data = await response.json()
+      if (!response.ok) {
+        setResumeModal({ open: true, loading: false, markdown: null, error: data.error ?? 'Erro ao gerar CV' })
+        return
+      }
+      setResumeModal({ open: true, loading: false, markdown: data.markdown, error: null })
+    } catch {
+      setResumeModal({ open: true, loading: false, markdown: null, error: 'Erro de conexão' })
+    }
+  }
+
+  const handleCopyMarkdown = async () => {
+    if (!resumeModal.markdown) return
+    try { await navigator.clipboard.writeText(resumeModal.markdown) } catch {}
+  }
+
+  const handleCloseResumeModal = () => setResumeModal(initialResumeModal)
 
   const handleJobDescriptionChange = (event) => {
     setState({ ...state, jobDescription: event.target.value, error: null })
@@ -236,6 +273,62 @@ export const JobFit = () => {
               {renderRecommendations(state.analysis.recommendations)}
             </CardContent>
           </Card>
+
+          {(state.analysis.fitScore ?? 0) >= 75 && (
+            <Card>
+              <CardContent className="pt-6">
+                <h3 className="font-semibold mb-2">🎯 CV adaptado para esta vaga</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Gere uma versão do meu currículo com os bullets reordenados para destacar as skills mais alinhadas a esta vaga (sem inventar nada — só prioriza o que já está documentado).
+                </p>
+                <Button type="button" variant="primary" onClick={handleGenerateResume}>
+                  Gerar CV adaptado
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {resumeModal.open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md"
+          onClick={handleCloseResumeModal}
+        >
+          <div
+            className="bg-card w-full max-w-3xl max-h-[85vh] rounded-xl shadow-2xl border border-border flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="font-semibold">CV adaptado</h3>
+              <Button type="button" variant="ghost" size="sm" onClick={handleCloseResumeModal}>
+                Fechar
+              </Button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              {resumeModal.loading && (
+                <p className="text-sm text-muted-foreground">Gerando CV adaptado...</p>
+              )}
+              {resumeModal.error && (
+                <p className="text-sm text-destructive">{resumeModal.error}</p>
+              )}
+              {resumeModal.markdown && (
+                <pre className="text-xs whitespace-pre-wrap font-mono bg-muted/50 p-4 rounded-lg">
+                  {resumeModal.markdown}
+                </pre>
+              )}
+            </div>
+            {resumeModal.markdown && (
+              <div className="border-t p-4 flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={handleCopyMarkdown}>
+                  Copiar markdown
+                </Button>
+                <Button type="button" variant="primary" onClick={handleCloseResumeModal}>
+                  OK
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

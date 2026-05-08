@@ -43,6 +43,12 @@ export const AUDIT_EVENTS = {
   // Frontend (rota /api/log/client-error)
   CLIENT_ERROR_CAPTURED: 'client.error.captured',
 
+  // Targeted resume (rota /api/ai/targeted-resume)
+  TARGETED_RESUME_REQUESTED: 'targeted_resume.requested',
+  TARGETED_RESUME_GENERATED: 'targeted_resume.generated',
+  TARGETED_RESUME_VALIDATION_FAILED: 'targeted_resume.validation_failed',
+  TARGETED_RESUME_RATE_LIMIT_HIT: 'targeted_resume.rate_limit.hit',
+
   // Catch-all
   API_ERROR_UNHANDLED: 'api.error.unhandled',
 } as const
