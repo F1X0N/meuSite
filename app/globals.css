@@ -75,13 +75,60 @@ html {
   html {
     scroll-behavior: auto;
   }
-  
+
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* MDX code rendering — rehype-pretty-code + Shiki dual theme */
+@layer components {
+  /* Inline code (não dentro de <pre>) */
+  .prose :not(pre) > code {
+    @apply rounded bg-muted px-1.5 py-0.5 text-[0.875em] font-mono
+           border border-border/40 text-foreground/90;
+    font-weight: 500;
+  }
+  .prose :not(pre) > code::before,
+  .prose :not(pre) > code::after { content: none; }
+
+  /* Code block container */
+  .prose pre {
+    @apply rounded-lg border border-border bg-muted/40 overflow-x-auto
+           text-sm leading-relaxed py-4 px-5 my-6;
+  }
+  .prose pre > code {
+    @apply bg-transparent border-0 p-0;
+    font-weight: 400;
+    counter-reset: line;
+  }
+  .prose pre > code::before,
+  .prose pre > code::after { content: none; }
+
+  /* rehype-pretty-code: cada linha vira <span data-line> */
+  .prose pre > code [data-line] {
+    @apply block;
+  }
+
+  /* Shiki dual-theme via CSS vars (theme as object emits --shiki-light + --shiki-dark per token).
+     Light mode = default (light), dark mode swaps to dark vars. */
+  .prose pre > code span {
+    color: var(--shiki-light);
+    background-color: var(--shiki-light-bg);
+    font-style: var(--shiki-light-font-style);
+    font-weight: var(--shiki-light-font-weight);
+    text-decoration: var(--shiki-light-text-decoration);
+  }
+  html.dark .prose pre > code span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+    font-style: var(--shiki-dark-font-style);
+    font-weight: var(--shiki-dark-font-weight);
+    text-decoration: var(--shiki-dark-text-decoration);
   }
 }
 
