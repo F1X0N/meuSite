@@ -38,21 +38,28 @@ const checkRate = (key: string): { allowed: boolean; reason?: string } => {
   return { allowed: true }
 }
 
+const SELF_DOMAIN = 'josivan-amorim.vercel.app'
+const SELF_ALLOWED_PATH = '/cv.pdf'
+const BLOB_HOST_SUFFIX = 'blob.vercel-storage.com'
+
+const isAllowedPdfUrl = (u: string): boolean => {
+  try {
+    const url = new URL(u)
+    if (url.protocol !== 'https:') return false
+    if (url.hostname === SELF_DOMAIN) {
+      return url.pathname === SELF_ALLOWED_PATH
+    }
+    return url.hostname === BLOB_HOST_SUFFIX || url.hostname.endsWith('.' + BLOB_HOST_SUFFIX)
+  } catch {
+    return false
+  }
+}
+
 const requestSchema = z.object({
   pdfUrl: z
     .string()
     .url()
-    .refine(
-      (u) => {
-        try {
-          const host = new URL(u).hostname
-          return host.endsWith('public.blob.vercel-storage.com') || host.endsWith('blob.vercel-storage.com')
-        } catch {
-          return false
-        }
-      },
-      { message: 'pdfUrl inválido (apenas Vercel Blob é aceito)' },
-    ),
+    .refine(isAllowedPdfUrl, { message: 'pdfUrl inválido (apenas Vercel Blob ou /cv.pdf do site)' }),
   recipientEmail: z.string().email().max(254),
   jobTitle: z.string().min(2).max(160).optional(),
   sessionId: z.string().min(8).max(100),

@@ -23,7 +23,7 @@ beforeEach(() => {
 })
 
 describe('POST /api/ai/targeted-resume/email', () => {
-  it('rejeita pdfUrl fora do domínio Vercel Blob (anti-SSRF)', async () => {
+  it('rejeita pdfUrl fora do allowlist (anti-SSRF)', async () => {
     const { POST } = await import('@/app/api/ai/targeted-resume/email/route')
     const req = new Request('http://localhost/api/ai/targeted-resume/email', {
       method: 'POST',
@@ -32,6 +32,22 @@ describe('POST /api/ai/targeted-resume/email', () => {
         pdfUrl: 'https://evil.example.com/cv.pdf',
         recipientEmail: 'foo@bar.com',
         sessionId: 'sess-anti-ssrf',
+        consent: true,
+      }),
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+  })
+
+  it('rejeita pdfUrl same-domain fora de /cv.pdf (anti fetch-and-mail)', async () => {
+    const { POST } = await import('@/app/api/ai/targeted-resume/email/route')
+    const req = new Request('http://localhost/api/ai/targeted-resume/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pdfUrl: 'https://josivan-amorim.vercel.app/api/ai/chat',
+        recipientEmail: 'foo@bar.com',
+        sessionId: 'sess-self-non-pdf',
         consent: true,
       }),
     })

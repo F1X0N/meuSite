@@ -466,8 +466,12 @@ export const AITools = () => {
     }
 
     // ============ Targeted Resume — abre PDF em nova aba imediato ============
+    // Estratégia: tenta gerar PDF adaptado (Blob); se indisponível, cai para
+    // o /cv.pdf default (gerado no build a partir do mesmo template). Recrutador
+    // sempre tem um PDF para abrir; o adaptado é melhoria silenciosa quando há Blob.
     const handleGenerateTargetedResume = async () => {
         if (!lastJobDescription) return
+        const defaultPdf = typeof window !== 'undefined' ? `${window.location.origin}/cv.pdf` : '/cv.pdf'
         setResumeModal({
             ...initialResumeModal,
             open: true,
@@ -482,21 +486,32 @@ export const AITools = () => {
             })
             const data = await r.json()
             if (!r.ok) {
-                setResumeModal((prev) => ({ ...prev, loading: false, error: data.error || 'Erro ao abrir o currículo' }))
+                // Mesmo em erro, oferecer o CV default
+                window.open(defaultPdf, '_blank', 'noopener,noreferrer')
+                setResumeModal((prev) => ({
+                    ...prev,
+                    loading: false,
+                    pdfUrl: defaultPdf,
+                    markdown: null,
+                }))
                 return
             }
-            const pdfUrl = data.pdfUrl ?? null
-            if (pdfUrl) {
-                window.open(pdfUrl, '_blank', 'noopener,noreferrer')
-            }
+            const pdfUrl = data.pdfUrl ?? defaultPdf
+            window.open(pdfUrl, '_blank', 'noopener,noreferrer')
             setResumeModal((prev) => ({
                 ...prev,
                 loading: false,
-                markdown: data.markdown,
+                markdown: data.markdown ?? null,
                 pdfUrl,
             }))
         } catch {
-            setResumeModal((prev) => ({ ...prev, loading: false, error: 'Erro de conexão' }))
+            window.open(defaultPdf, '_blank', 'noopener,noreferrer')
+            setResumeModal((prev) => ({
+                ...prev,
+                loading: false,
+                pdfUrl: defaultPdf,
+                markdown: null,
+            }))
         }
     }
 
@@ -948,9 +963,11 @@ export const AITools = () => {
                                         >
                                             <GIcon name="open_in_new" size={14} /> Abrir currículo
                                         </a>
-                                        <Button type="button" variant="outline" size="sm" onClick={handleCopyResume}>
-                                            Copiar texto
-                                        </Button>
+                                        {resumeModal.markdown && (
+                                            <Button type="button" variant="outline" size="sm" onClick={handleCopyResume}>
+                                                Copiar texto
+                                            </Button>
+                                        )}
                                     </div>
                                     <div className="rounded-lg border border-border p-3 space-y-2">
                                         <label className="flex items-start gap-2 text-xs cursor-pointer">
@@ -996,9 +1013,6 @@ export const AITools = () => {
                                         )}
                                     </div>
                                 </>
-                            )}
-                            {!resumeModal.loading && !resumeModal.error && !resumeModal.pdfUrl && resumeModal.markdown && (
-                                <p className="text-sm text-muted-foreground">Currículo gerado. Use o botão Copiar texto para visualizar.</p>
                             )}
                         </div>
                         {(resumeModal.pdfUrl || resumeModal.markdown) && (
