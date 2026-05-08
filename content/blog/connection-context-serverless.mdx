@@ -1,7 +1,7 @@
 ---
 title: "Connection context em serverless: ACID sem leak no pool"
 description: "Pool de conexão esgotado é um dos jeitos mais sutis de tirar produção do ar. Wrapper centralizado + finally garantido resolve em definitivo."
-date: "2026-05-08"
+date: "2025-10-13"
 coverComponent: "ConnectionContextCover"
 tags: ["Backend", "Serverless", "Banco de Dados", "Resiliência"]
 readingTime: "5 min"
@@ -23,7 +23,7 @@ Isso não pode ser disciplina manual em cada endpoint. Cada vez que alguém esqu
 
 A solução é **wrapper centralizado**:
 
-```
+```ts
 async wrapperRequest(handler) {
   const conn = await db.getConnection()
   try {
@@ -40,16 +40,16 @@ async wrapperRequest(handler) {
 }
 ```
 
-Endpoints chamam o wrapper. Não tocam diretamente em `getConnection` ou `release`. Garantia operacional virou propriedade do framework — quem escreve endpoint não pode esquecer.
+Endpoints chamam o wrapper. Não tocam diretamente em `getConnection` ou `release`. Garantia operacional virou propriedade do framework: quem escreve endpoint não pode esquecer.
 
 ## Por que `finally` e não cleanup explícito
 
 Cleanup explícito (`if (conn) db.release(conn)` no fim do try) tem dois problemas:
 
-1. **Não roda quando `throw` interrompe o fluxo** — exceção pula a cleanup, conexão vaza.
-2. **Espalha responsabilidade** — cada endpoint precisa lembrar.
+1. **Não roda quando `throw` interrompe o fluxo**: exceção pula a cleanup, conexão vaza.
+2. **Espalha responsabilidade**: cada endpoint precisa lembrar.
 
-`finally` roda sempre — sucesso, exceção tratada, exceção propagada. Garantia da linguagem.
+`finally` roda sempre: sucesso, exceção tratada, exceção propagada. Garantia da linguagem.
 
 ## A camada de transação junto
 
@@ -57,15 +57,15 @@ Conexão sem transação é metade do problema. A outra metade: garantir que ope
 
 `BEGIN` no início, `COMMIT` no fim, `ROLLBACK` em qualquer erro. Mais uma vez, no `finally` do wrapper, com captura de exceção:
 
-- Sucesso → COMMIT
-- Erro tratável → ROLLBACK + relança
-- Erro não-tratável → ROLLBACK + alert
+- Sucesso: COMMIT
+- Erro tratável: ROLLBACK + relança
+- Erro não-tratável: ROLLBACK + alert
 
 Endpoint nunca toca em transação manualmente. Nunca esquece de COMMIT. Nunca relança sem ROLLBACK.
 
 ## O detalhe do read-only
 
-Toda operação dentro do wrapper assume escrita. Mas nem toda request escreve. Endpoints de leitura pura não precisam de transação — abrir BEGIN/COMMIT custa overhead pequeno mas inútil.
+Toda operação dentro do wrapper assume escrita. Mas nem toda request escreve. Endpoints de leitura pura não precisam de transação. Abrir BEGIN/COMMIT custa overhead pequeno mas inútil.
 
 Solução: wrapper aceita flag `mode: 'read' | 'write'`. Em read, pula BEGIN/COMMIT. Pega conexão (do pool de leitura, se houver), executa, devolve.
 
@@ -84,24 +84,24 @@ Quando vaza conexão, dashboard mostra: requests com duration anormal e ausênci
 
 ## Anti-padrões em uso
 
-- **Endpoint que pega conexão fora do wrapper** — quebra a garantia. Code review precisa marcar.
-- **Wrapper sem finally** — depende de happy path. Primeira exceção é leak.
-- **Transação aninhada** — BEGIN dentro de BEGIN. Comportamento varia entre bancos. Evitar; usar savepoint quando precisa de rollback parcial.
-- **Conexão pega no meio do handler** — dificulta saber quando devolver. Sempre pegue no início, devolva no fim.
+- **Endpoint que pega conexão fora do wrapper**: quebra a garantia. Code review precisa marcar.
+- **Wrapper sem finally**: depende de happy path. Primeira exceção é leak.
+- **Transação aninhada**: BEGIN dentro de BEGIN. Comportamento varia entre bancos. Evitar; usar savepoint quando precisa de rollback parcial.
+- **Conexão pega no meio do handler**: dificulta saber quando devolver. Sempre pegue no início, devolva no fim.
 
 ## Quando isso é overengineering
 
-- **Frontend / SSR sem banco direto** — não tem conexão pra gerenciar.
-- **Sistema com banco serverless gerenciado** (que abstrai pool) — provider já cuida disso.
-- **Operação síncrona única, sem composição** — pode passar com try/finally inline.
+- **Frontend / SSR sem banco direto**: não tem conexão pra gerenciar.
+- **Sistema com banco serverless gerenciado** (que abstrai pool): provider já cuida disso.
+- **Operação síncrona única, sem composição**: pode passar com try/finally inline.
 
 Em qualquer aplicação com handler de request mais complexo do que CRUD trivial, wrapper paga conta no primeiro vazamento evitado.
 
 ## O que isso permite além do óbvio
 
-- **Migration de banco com janela curta** — wrapper centraliza onde a conexão é pega. Trocar driver, adicionar replica, mudar pool size é one-place change.
-- **Tracing distribuído gratuito** — request_id já está no wrapper. Adicionar OpenTelemetry vira instrumentação de uma função.
-- **Métrica RED automática** — Request count, Error count, Duration — todos visíveis no wrapper sem instrumentar cada endpoint.
+- **Migration de banco com janela curta**: wrapper centraliza onde a conexão é pega. Trocar driver, adicionar replica, mudar pool size é one-place change.
+- **Tracing distribuído gratuito**: request_id já está no wrapper. Adicionar OpenTelemetry vira instrumentação de uma função.
+- **Métrica RED automática**: Request count, Error count, Duration, todos visíveis no wrapper sem instrumentar cada endpoint.
 
 ---
 

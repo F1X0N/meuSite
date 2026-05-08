@@ -1,6 +1,6 @@
 ---
 title: "Observabilidade antes de opinião"
-description: "Por que diagnóstico orientado por evidências é contrato de engenharia — e como evitar o teatro de troubleshooting baseado em achismo."
+description: "Por que diagnóstico orientado por evidências é contrato de engenharia, e como evitar o teatro de troubleshooting baseado em achismo."
 date: "2026-04-22"
 tags: ["Observabilidade", "Diagnóstico", "Incident Response"]
 readingTime: "5 min"
@@ -18,10 +18,10 @@ Resultado típico: mudança que não resolve, regressão em outro lugar, e o pro
 
 Evidência antes de opinião não é metodologia rigorosa de PhD em ciência da computação. É disciplina mínima de produção:
 
-1. **Logs estruturados** — Loki ou equivalente. Não procurar agulha em palheiro de stdout.
-2. **Métricas** — Grafana ou equivalente. Tendência ao longo do tempo, não foto pontual.
-3. **Erros agregados** — Sentry ou equivalente. Taxa de erro, não erro individual.
-4. **Consulta read-only no banco** — sem side effect, sempre com `LIMIT`. SQL safety como padrão, não exceção.
+1. **Logs estruturados**: Loki ou equivalente. Não procurar agulha em palheiro de stdout.
+2. **Métricas**: Grafana ou equivalente. Tendência ao longo do tempo, não foto pontual.
+3. **Erros agregados**: Sentry ou equivalente. Taxa de erro, não erro individual.
+4. **Consulta read-only no banco**: sem side effect, sempre com `LIMIT`. SQL safety como padrão, não exceção.
 
 Olhar essa pirâmide na ordem custa minutos. Hipótese baseada em evidência custa muito menos do que hipótese errada baseada em palpite.
 
@@ -33,7 +33,7 @@ A regra é simples: diagnóstico não muda estado.
 - Toda consulta tem `LIMIT` para evitar acidente em tabela grande.
 - Toda consulta passa por revisão antes de rodar em ambiente compartilhado.
 
-Mudança de estado é mudança planejada — com aprovação, runbook e validação pós-mudança. Não diagnóstico apressado em janela de incidente.
+Mudança de estado é mudança planejada, com aprovação, runbook e validação pós-mudança. Não diagnóstico apressado em janela de incidente.
 
 Essa disciplina parece exagero. Até o dia que um `UPDATE` sem `WHERE` em produção te ensina por que ela existe.
 
@@ -60,14 +60,15 @@ Janela de observação:
 
 - Critério de aceite explícito antes do deploy: o que precisa estar verdadeiro depois?
 - Métrica e log monitorados na janela definida.
-- Se o efeito não persistir, reverte. Reversão não é fracasso — é parte do método.
+- Se o efeito não persistir, reverte. Reversão não é fracasso, é parte do método.
 
 ## O que isso evita
 
 - **Troubleshooting baseado em vibração**: "parece que melhorou" não é métrica.
-- **Mudança que mascara o problema**: o erro sumiu mas a causa não foi atacada — volta em outro lugar.
+- **Mudança que mascara o problema**: o erro sumiu mas a causa não foi atacada, volta em outro lugar.
 - **Regressão silenciosa**: feature nova quebra comportamento preexistente porque ninguém validou.
 - **Conhecimento implícito**: o engenheiro que diagnosticou foi embora e ninguém sabe como o problema foi resolvido. Sem documentação por evidência, o conhecimento vai junto.
+
 
 ## O que isso permite
 
@@ -80,6 +81,6 @@ Janela de observação:
 
 Observabilidade não é dashboard bonito. É contrato de engenharia.
 
-Sem evidência observável, todo argumento é opinião. E opinião não escala em sistema com usuário real. Escala em reunião — não em produção.
+Sem evidência observável, todo argumento é opinião. E opinião não escala em sistema com usuário real. Escala em reunião, não em produção.
 
 Engenheiro responsável trata diagnóstico como método auditável. Não como intuição.

@@ -1,7 +1,7 @@
 ---
 title: "Cost ledger de LLM: contabilidade fina para IA em produção"
 description: "Cada chamada de LLM é uma transação contábil. Atribuir custo por modelo, por feature e por request_id transforma 'IA cara' em decisão técnica defensável."
-date: "2026-05-08"
+date: "2026-03-30"
 coverComponent: "CostLedgerLlmCover"
 tags: ["IA", "Custo", "Observabilidade", "Arquitetura"]
 coverImage: null
@@ -10,7 +10,7 @@ featured: false
 
 ## O problema invisível
 
-IA em produção custa dinheiro real. Cada chamada a um modelo gasta tokens, e tokens custam diferente entre modelos, entre input/output e entre cached/fresh. Sem instrumentação, no fim do mês você recebe uma fatura que não consegue defender — qual feature gastou? Qual cliente puxou esse custo? Faz sentido continuar usando esse modelo nessa tarefa?
+IA em produção custa dinheiro real. Cada chamada a um modelo gasta tokens, e tokens custam diferente entre modelos, entre input/output e entre cached/fresh. Sem instrumentação, no fim do mês você recebe uma fatura que não consegue defender. Qual feature gastou? Qual cliente puxou esse custo? Faz sentido continuar usando esse modelo nessa tarefa?
 
 A resposta não está no provider. Está no seu sistema, se você modelar isso como **ledger contábil**.
 
@@ -20,14 +20,14 @@ Log de chamada LLM é commodity: provider, modelo, latency, sucesso. Útil pra d
 
 Ledger é diferente. Ledger registra **transação contábil**:
 
-- Quem comprou? (request_id correlacional → trace completo)
+- Quem comprou? (request_id correlacional, trace completo)
 - Em nome de qual produto/feature interno?
 - Com qual modelo?
 - Quantos tokens de cada tipo (input fresh, input cached, output)?
 - Custo unitário do modelo no momento da transação?
 - Custo derivado total?
 
-Cada chamada gera **uma linha**. Agregação vira analytics — "feature X gastou Y reais este mês", "modelo mini é 40x mais barato que o full nessa tarefa específica", "produto novo está usando custos por requisição 3x acima do orçado".
+Cada chamada gera **uma linha**. Agregação vira analytics: "feature X gastou Y reais este mês", "modelo mini é 40x mais barato que o full nessa tarefa específica", "produto novo está usando custos por requisição 3x acima do orçado".
 
 ## O modelo que sustentou a decisão
 
@@ -38,7 +38,7 @@ A tabela de modelos é dado, não código. Para cada modelo suportado:
 - preço de output por 1M tokens
 - limites operacionais (rate limit, context window)
 
-Quando precificação muda, atualiza a tabela. As chamadas históricas mantêm o preço da época — auditoria não muda retroativamente.
+Quando precificação muda, atualiza a tabela. As chamadas históricas mantêm o preço da época. Auditoria não muda retroativamente.
 
 ## A arquitetura simples que escala
 
@@ -50,18 +50,18 @@ Counter pattern. Cada chamada incrementa um contador escopado a `(request_id, mo
 
 A persistência tem duas camadas:
 
-- **Operacional**: junto da entidade que motivou a chamada (auditoria — "quanto custou processar esta requisição?").
+- **Operacional**: junto da entidade que motivou a chamada (auditoria, "quanto custou processar esta requisição?").
 - **Analítica**: tabela achatada para queries de BI, com TTL longo.
 
 ## O que isso permite decidir
 
-Decisão 1 — **Modelo certo para a tarefa**. Classificação binária não precisa do modelo top-de-linha. Com ledger, você prova: "mini classifica com mesma acurácia, custa 40x menos. Trocando."
+Decisão 1: **Modelo certo para a tarefa**. Classificação binária não precisa do modelo top-de-linha. Com ledger, você prova: "mini classifica com mesma acurácia, custa 40x menos. Trocando."
 
-Decisão 2 — **Cache vale a pena**. Ver percentual de input cached por feature mostra onde investir em prompt engineering. Sem dados, é fé.
+Decisão 2: **Cache vale a pena**. Ver percentual de input cached por feature mostra onde investir em prompt engineering. Sem dados, é fé.
 
-Decisão 3 — **Pricing de produto novo**. Antes de ofertar feature de IA com preço fixo, simular custo médio com dados reais de adoção esperada. Sem ledger, é chute.
+Decisão 3: **Pricing de produto novo**. Antes de ofertar feature de IA com preço fixo, simular custo médio com dados reais de adoção esperada. Sem ledger, é chute.
 
-Decisão 4 — **Alerta de anomalia**. Custo médio por requisição salta 3x — feature regrediu (output explodiu, retry agressivo). Sem instrumentação, descobre na fatura.
+Decisão 4: **Alerta de anomalia**. Custo médio por requisição salta 3x; feature regrediu (output explodiu, retry agressivo). Sem instrumentação, descobre na fatura.
 
 ## Trade-offs honestos
 
@@ -75,13 +75,13 @@ Antes desse ponto, log estruturado com modelo + tokens é suficiente.
 
 ## O que não vale a pena fazer
 
-- **Ledger inline na resposta** — incluir custo no payload da API expõe métrica interna. Nunca foi pedido pelo cliente.
-- **Cobrar usuário pelo custo bruto** — quase sempre o modelo de pricing precisa de margem e variabilidade. Ledger é input, não output.
-- **Repassar precificação do provider direto** — provider muda preço sem aviso. Tabela versionada local protege.
+- **Ledger inline na resposta**: incluir custo no payload da API expõe métrica interna. Nunca foi pedido pelo cliente.
+- **Cobrar usuário pelo custo bruto**: quase sempre o modelo de pricing precisa de margem e variabilidade. Ledger é input, não output.
+- **Repassar precificação do provider direto**: provider muda preço sem aviso. Tabela versionada local protege.
 
 ## Princípio operacional
 
-A regra que tornou isso defensável aqui: **toda chamada de LLM deve responder à pergunta "quanto custou e para quem?"**. Antes da chamada é instrumentação. Depois da chamada é prova. Sem prova, IA é caixa preta cara — e caixa preta cara perde para alternativa mensurável.
+A regra que tornou isso defensável aqui: **toda chamada de LLM deve responder à pergunta "quanto custou e para quem?"**. Antes da chamada é instrumentação. Depois da chamada é prova. Sem prova, IA é caixa preta cara, e caixa preta cara perde para alternativa mensurável.
 
 [Anti-corruption layer entre LLM e domínio](/blog/anti-corruption-layer-llm) é o complemento natural: validação na fronteira impede output bugado de inflar custo. Junto com ledger, você tem visibilidade e proteção.
 

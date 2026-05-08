@@ -1,7 +1,7 @@
 ---
 title: "Assinatura de webhook: como não confiar em payload externo"
 description: "Webhook é endpoint público. Validar HMAC do payload contra secret compartilhado é a primeira linha de defesa contra spoofing."
-date: "2026-05-08"
+date: "2025-08-02"
 coverComponent: "WebhookSignatureCover"
 tags: ["Segurança", "Webhook", "Backend", "Integração"]
 readingTime: "4 min"
@@ -11,7 +11,7 @@ readingTime: "4 min"
 
 Você expõe endpoint público para receber webhook do provider. URL pública. Qualquer um pode mandar request. Por padrão, sua aplicação processa qualquer payload que chegar bem-formado.
 
-Atacante descobre a URL (não é difícil — DNS, header `Referer`, error logs). Manda payload forjado. Sua aplicação aplica efeito: lança cobrança, atualiza status, dispara processo. Sem validação, é trivial.
+Atacante descobre a URL (não é difícil: DNS, header `Referer`, error logs). Manda payload forjado. Sua aplicação aplica efeito: lança cobrança, atualiza status, dispara processo. Sem validação, é trivial.
 
 A defesa é **assinatura de webhook**: provider legítimo assina o payload com secret compartilhado, sua aplicação verifica antes de processar.
 
@@ -24,19 +24,19 @@ Provider e sua aplicação compartilham um secret. Quando o provider envia webho
 
 Quando sua aplicação recebe:
 
-1. Lê o payload bruto (não parseado — assinatura é sobre bytes exatos).
+1. Lê o payload bruto (não parseado, assinatura é sobre bytes exatos).
 2. Calcula HMAC com o mesmo secret.
-3. Compara com o header. Igual = legítimo. Diferente = spoofing ou corrupção.
+3. Compara com o header. Igual significa legítimo. Diferente significa spoofing ou corrupção.
 
-Comparação tem que ser **constant-time**. `==` de string é vulnerável a timing attack — atacante mede o tempo de comparação para descobrir bytes do hash. Use função específica (`crypto.timingSafeEqual` em Node).
+Comparação tem que ser **constant-time**. `==` de string é vulnerável a timing attack: atacante mede o tempo de comparação para descobrir bytes do hash. Use função específica (`crypto.timingSafeEqual` em Node).
 
 ## Onde guarda o secret
 
 Nunca em código. Nunca em arquivo versionado. Sempre em **variável de ambiente** ou **cofre de secrets** (Doppler, Vault, Secret Manager).
 
-Diferente para cada ambiente (dev/staging/prod) — vazamento em dev não compromete prod.
+Diferente para cada ambiente (dev/staging/prod): vazamento em dev não compromete prod.
 
-Diferente para cada provider — webhook do gateway de pagamento e webhook do CRM têm secrets distintos.
+Diferente para cada provider: webhook do gateway de pagamento e webhook do CRM têm secrets distintos.
 
 ## Rotação sem downtime
 
@@ -56,39 +56,39 @@ Convenção de logging:
 
 - **Sucesso de validação**: `info` ou nem loga (volume alto, ruído).
 - **Falha de validação**: `warn` (não `info` nem `error`). É evento de segurança.
-- **Métrica separada**: `webhook_signature_failures_total`, com label de provider e endpoint. Subindo = ataque ou config quebrada.
+- **Métrica separada**: `webhook_signature_failures_total`, com label de provider e endpoint. Subindo significa ataque ou config quebrada.
 
-`error` é reservado para falha do nosso lado. Falha de assinatura é externa — não somos a vítima do bug, somos o detector da tentativa.
+`error` é reservado para falha do nosso lado. Falha de assinatura é externa, não somos a vítima do bug, somos o detector da tentativa.
 
-Alerta deve disparar acima de threshold (não em cada falha — falsos positivos por config errada acontecem). Threshold típico: 10+ falhas em 5 minutos do mesmo IP.
+Alerta deve disparar acima de threshold (não em cada falha, falsos positivos por config errada acontecem). Threshold típico: 10+ falhas em 5 minutos do mesmo IP.
 
 ## Replay attack: assinatura sozinha não basta
 
 Atacante captura webhook legítimo. Reenvia depois. HMAC continua válido (mesmo payload, mesmo secret).
 
-Defesa: timestamp dentro do payload assinado. Sua aplicação rejeita webhook com timestamp mais antigo que N minutos (5 minutos é típico). Atacante teria que forjar HMAC para timestamp atual — sem o secret, não consegue.
+Defesa: timestamp dentro do payload assinado. Sua aplicação rejeita webhook com timestamp mais antigo que N minutos (5 minutos é típico). Atacante teria que forjar HMAC para timestamp atual; sem o secret, não consegue.
 
 Timestamp + identidade composta ([state machine de webhook](/blog/idempotencia-webhook-state-machine)) cobrem replay e dedupe.
 
 ## Anti-padrões
 
-- **Comparação de string com `==`** — vulnerável a timing attack.
-- **Secret em código ou arquivo versionado** — leak inevitável.
-- **Mesmo secret para dev e prod** — leak em dev compromete prod.
-- **Sem rotação planejada** — quando precisar rotacionar, downtime certo.
-- **Aceitar webhook sem timestamp** — vulnerável a replay.
-- **Logar payload bruto na falha de assinatura** — pode ser tentativa de injection no log.
+- **Comparação de string com `==`**: vulnerável a timing attack.
+- **Secret em código ou arquivo versionado**: leak inevitável.
+- **Mesmo secret para dev e prod**: leak em dev compromete prod.
+- **Sem rotação planejada**: quando precisar rotacionar, downtime certo.
+- **Aceitar webhook sem timestamp**: vulnerável a replay.
+- **Logar payload bruto na falha de assinatura**: pode ser tentativa de injection no log.
 
 ## Quando isso é overengineering
 
-- **Webhook em rede privada** (VPC interno, sem exposição pública) — risco menor, validação leve pode bastar.
-- **Provider que não suporta assinatura** — algumas integrações antigas. Compense com IP whitelist + autenticação por token na URL.
+- **Webhook em rede privada** (VPC interno, sem exposição pública): risco menor, validação leve pode bastar.
+- **Provider que não suporta assinatura**: algumas integrações antigas. Compense com IP whitelist + autenticação por token na URL.
 
 Em qualquer endpoint público, assinatura HMAC é o mínimo. Custo de implementar é uma tarde. Custo de não ter é um incidente.
 
 ## O que isso te dá
 
-- Endpoint público continua funcionando — você não precisou movê-lo para rede privada.
+- Endpoint público continua funcionando, você não precisou movê-lo para rede privada.
 - Tentativa de spoofing vira sinal mensurável, não invisível.
 - Auditoria fica clara: qualquer ação derivada de webhook tem origem rastreável.
 - Compliance fica simples: assinatura HMAC é checkbox padrão em PCI/SOC2.

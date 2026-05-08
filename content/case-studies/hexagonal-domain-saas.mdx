@@ -1,7 +1,7 @@
 ---
 title: "Camadas de domínio em SaaS: ports & adapters na prática"
 description: "Hexagonal architecture deixa de ser teoria quando trocar de provider externo, banco ou framework HTTP não quebra a regra de negócio."
-date: "2026-05-08"
+date: "2026-03-06"
 coverComponent: "HexagonalCover"
 tags: ["Arquitetura", "Hexagonal", "Domain-Driven Design", "Engenharia"]
 coverImage: null
@@ -12,17 +12,17 @@ featured: false
 
 SaaS LegalTech operacional tem realidades duras: provider de comunicação muda, gateway de pagamento muda, modelo de LLM evolui, framework HTTP precisa de upgrade major. Se cada uma dessas mudanças exige reescrever regra de negócio, o sistema vira refém da infraestrutura.
 
-Hexagonal architecture (também chamada **Ports and Adapters**) é a resposta que aguenta esse tipo de mudança. Tem reputação de overengineering — merecida quando aplicada cedo demais. Mas em sistema com integração com 3+ providers externos e regra de negócio não-trivial, é o que separa código que dura do código que precisa ser reescrito a cada troca.
+Hexagonal architecture (também chamada **Ports and Adapters**) é a resposta que aguenta esse tipo de mudança. Tem reputação de overengineering, merecida quando aplicada cedo demais. Mas em sistema com integração com 3+ providers externos e regra de negócio não-trivial, é o que separa código que dura do código que precisa ser reescrito a cada troca.
 
 ## A separação que importa
 
 Três camadas, cada uma com responsabilidade estrita:
 
-**Domínio** — entidades, regras, invariantes. Nunca importa framework HTTP, nunca conhece banco específico, nunca chama provider externo direto. Linguagem aqui é a do negócio: "lançar cobrança", "validar peça", "encerrar processo".
+**Domínio**: entidades, regras, invariantes. Nunca importa framework HTTP, nunca conhece banco específico, nunca chama provider externo direto. Linguagem aqui é a do negócio: "lançar cobrança", "validar peça", "encerrar processo".
 
-**Aplicação** — orquestração. Recebe a request HTTP, traduz para chamada do domínio, devolve resposta. Aqui mora o middleware, o controller, o handler.
+**Aplicação**: orquestração. Recebe a request HTTP, traduz para chamada do domínio, devolve resposta. Aqui mora o middleware, o controller, o handler.
 
-**Infraestrutura** — adapters concretos. Implementação que fala com banco, com provider externo, com fila. Cada adapter implementa uma **port** (interface) definida pelo domínio.
+**Infraestrutura**: adapters concretos. Implementação que fala com banco, com provider externo, com fila. Cada adapter implementa uma **port** (interface) definida pelo domínio.
 
 A regra é simples: **dependência aponta para dentro**. Infraestrutura conhece domínio. Domínio não conhece infraestrutura.
 
@@ -34,7 +34,7 @@ Domínio declara o que precisa, em sua própria linguagem:
 - "Preciso buscar o último diagnóstico de uma entidade"
 - "Preciso cobrar X reais do cliente Y"
 
-Cada uma dessas declarações é uma **port** — interface tipada, com contrato claro. O domínio chama a port. Não sabe nem se importa qual adapter está plugado.
+Cada uma dessas declarações é uma **port**: interface tipada, com contrato claro. O domínio chama a port. Não sabe nem se importa qual adapter está plugado.
 
 Adapter é a implementação:
 
@@ -56,13 +56,13 @@ Com o domínio separado por port `CommunicationPort`, foi: implementar segundo a
 - **Equipe pequena sem cultura de testes**: ports só dão valor real se você testa o domínio em isolamento.
 - **Rotina sem intenção de mudar provider**: se a infraestrutura é estável e o sistema é descartável, ports são burocracia.
 
-A regra prática: **adote Hexagonal quando você antecipa pelo menos uma troca de adapter no horizonte de 12-18 meses**. Antes disso, separe pastas (`domain/`, `infrastructure/`) sem ports formais — você ganha clareza sem o custo de manutenção das interfaces.
+A regra prática: **adote Hexagonal quando você antecipa pelo menos uma troca de adapter no horizonte de 12-18 meses**. Antes disso, separe pastas (`domain/`, `infrastructure/`) sem ports formais. Você ganha clareza sem o custo de manutenção das interfaces.
 
 ## O que não funciona
 
-- **Ports vazias** — interface com um único implementador é só burocracia. Vale formalizar quando há (ou virá) segunda implementação.
-- **Domínio chamando direto a infra "só dessa vez"** — cada exceção mina a separação. Se o caso é genuíno, vira port nova. Se não é, refatora para passar pelo domínio corretamente.
-- **DTO espelhando entidade do domínio** — DTO existe pra desacoplar API contract de modelo interno. Se DTO = entidade, há acoplamento escondido.
+- **Ports vazias**: interface com um único implementador é só burocracia. Vale formalizar quando há (ou virá) segunda implementação.
+- **Domínio chamando direto a infra "só dessa vez"**: cada exceção mina a separação. Se o caso é genuíno, vira port nova. Se não é, refatora para passar pelo domínio corretamente.
+- **DTO espelhando entidade do domínio**: DTO existe pra desacoplar API contract de modelo interno. Se DTO = entidade, há acoplamento escondido.
 
 ## O que torna o investimento defensável
 
