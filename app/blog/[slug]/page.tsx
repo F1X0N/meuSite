@@ -89,8 +89,8 @@ export default async function BlogPostPage({ params }) {
           <BackLink href="/blog" label="Voltar para o blog" />
         </div>
         {Cover && (
-          <div className="mb-10 rounded-xl overflow-hidden border border-border bg-muted/30 aspect-[1200/630]">
-            <Cover className="w-full h-full" />
+          <div className="mb-10">
+            <Cover className="w-full h-auto" />
           </div>
         )}
         {renderPostHeader(post)}

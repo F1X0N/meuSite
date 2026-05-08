@@ -80,8 +80,8 @@ export default async function CaseStudyPage({ params }) {
           <BackLink href="/case-studies" label="Voltar para case studies" />
         </div>
         {Cover && (
-          <div className="mb-10 rounded-xl overflow-hidden border border-border bg-muted/30 aspect-[1200/630]">
-            <Cover className="w-full h-full" />
+          <div className="mb-10">
+            <Cover className="w-full h-auto" />
           </div>
         )}
         {renderCaseHeader(caseStudy)}
