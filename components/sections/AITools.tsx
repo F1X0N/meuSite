@@ -738,16 +738,14 @@ export const AITools = () => {
                 ref={containerRef}
                 className={`relative transition-all duration-300 ease-out ${isFocused ? 'z-50' : 'z-10'}`}
             >
-                <motion.div
-                    layout
+                <div
                     className={`
-                        mx-auto bg-card flex flex-col overflow-hidden rounded-xl transition-shadow duration-300
+                        mx-auto max-w-3xl bg-card flex flex-col overflow-hidden rounded-xl transition-[height,box-shadow] duration-300
                         ${isFocused
-                            ? 'max-w-3xl shadow-2xl ring-1 ring-primary/20'
-                            : 'max-w-3xl shadow-lg border border-border/50'
+                            ? 'h-[80vh] shadow-2xl ring-1 ring-primary/20'
+                            : 'h-[500px] shadow-lg border border-border/50'
                         }
                     `}
-                    style={{ maxHeight: isFocused ? '80vh' : '500px' }}
                 >
                     {/* Focus Mode Header */}
                     <AnimatePresence>
@@ -777,14 +775,10 @@ export const AITools = () => {
                         )}
                     </AnimatePresence>
 
-                    {/* Messages Area */}
+                    {/* Messages Area — flex-1 sem min/max para evitar relayout/scroll bug */}
                     <div
                         ref={messagesContainerRef}
-                        className={`
-                            flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth
-                            scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/20
-                            ${isFocused ? 'min-h-[200px]' : 'min-h-[280px] max-h-[320px]'}
-                        `}
+                        className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 scroll-smooth scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/20"
                     >
                         {messages.length === 0 && (
                             <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground py-8">
@@ -838,7 +832,7 @@ export const AITools = () => {
                     </div>
 
                     {/* Input Area with Mode Toggle */}
-                    <div className="border-t p-3 bg-background/80 backdrop-blur-sm">
+                    <div className="flex-shrink-0 border-t p-3 bg-background/80 backdrop-blur-sm">
                         {remaining !== null && remaining < 5 && (
                             <p className="text-[10px] text-muted-foreground mb-2 text-center">
                                 ⚠️ {remaining} pergunta{remaining !== 1 ? 's' : ''} restante{remaining !== 1 ? 's' : ''}
@@ -912,7 +906,7 @@ export const AITools = () => {
                             )}
                         </form>
                     </div>
-                </motion.div>
+                </div>
             </div>
 
             {/* Transparency note */}
