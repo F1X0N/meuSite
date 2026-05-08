@@ -48,6 +48,12 @@ export const AUDIT_EVENTS = {
   TARGETED_RESUME_GENERATED: 'targeted_resume.generated',
   TARGETED_RESUME_VALIDATION_FAILED: 'targeted_resume.validation_failed',
   TARGETED_RESUME_RATE_LIMIT_HIT: 'targeted_resume.rate_limit.hit',
+  TARGETED_RESUME_PDF_UPLOADED: 'targeted_resume.pdf.uploaded',
+  TARGETED_RESUME_PDF_FAILED: 'targeted_resume.pdf.failed',
+  TARGETED_RESUME_EMAIL_REQUESTED: 'targeted_resume.email.requested',
+  TARGETED_RESUME_EMAIL_SENT: 'targeted_resume.email.sent',
+  TARGETED_RESUME_EMAIL_FAILED: 'targeted_resume.email.failed',
+  TARGETED_RESUME_EMAIL_RATE_LIMIT_HIT: 'targeted_resume.email.rate_limit.hit',
 
   // Catch-all
   API_ERROR_UNHANDLED: 'api.error.unhandled',

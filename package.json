@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build:skills-index": "tsx scripts/build-skills-index.ts",
-    "prebuild": "npm run build:skills-index",
+    "build:default-cv": "tsx scripts/generate-default-cv.ts",
+    "prebuild": "npm run build:skills-index && npm run build:default-cv",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -19,8 +20,10 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.5.1",
     "@types/nodemailer": "^7.0.5",
     "@vercel/analytics": "^1.6.1",
+    "@vercel/blob": "^2.3.3",
     "@vercel/speed-insights": "^1.3.1",
     "ai": "^6.0.49",
     "cmdk": "^1.1.1",
