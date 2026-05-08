@@ -1,0 +1,115 @@
+---
+title: "Chaves API segregadas por contexto: least privilege na prática"
+description: "Uma key compartilhada para todo o sistema é o caminho rápido para vazamento ampliado. Chave por feature/produto isola dano e permite contabilidade granular."
+date: "2026-05-08"
+tags: ["Segurança", "Backend", "Engenharia", "IA"]
+readingTime: "4 min"
+---
+
+## O atalho que custa caro depois
+
+Você inicia integração com provider externo. Documentação: "gere uma API key, configure no .env, pronto". Você gera. Configura uma única variável de ambiente. Funciona. Avança.
+
+Meses depois, sistema cresceu. A mesma key está em uso em:
+
+- Classificador automático de tickets
+- Validador de receitas
+- Gerador de respostas para chat
+- Worker que faz processamento batch noturno
+- Dashboard de testes interno
+
+Eventualmente:
+
+- Key vaza em log debug que ficou em produção. Atacante descobre. Tem acesso a todos os contextos.
+- Você precisa rotacionar a key. Tem que coordenar com 5 features simultaneamente. Risco alto.
+- Custo da fatura subiu. Quem gastou? Sem etiqueta, é detetive.
+- Quer migrar uma feature para outro provider. Precisa adicionar nova key — agora você tem duas keys e dois mecanismos.
+
+A solução é simples e estrutural: **chave por contexto de uso**, desde o início.
+
+## A arquitetura de roteamento
+
+Em vez de:
+
+```
+const apiKey = process.env.PROVIDER_API_KEY
+const client = new ProviderClient({ apiKey })
+```
+
+Você tem:
+
+```
+function getProviderKey(usage: 'classifier' | 'validator' | 'chat' | 'batch'): string {
+  const envVar = `PROVIDER_API_KEY_${usage.toUpperCase()}`
+  const key = process.env[envVar]
+  if (key) return key
+  // fallback para key genérica em ambientes onde rota não foi configurada (dev, staging)
+  return process.env.PROVIDER_API_KEY
+}
+
+const client = new ProviderClient({ apiKey: getProviderKey('classifier') })
+```
+
+Cada feature passa seu identificador. Roteador escolhe a key. Fallback para key genérica preserva compatibilidade em dev/staging onde múltiplas keys são overhead.
+
+## O ganho operacional
+
+**Vazamento isolado**. Key da feature A vaza, atacante não acessa a feature B. Containment de dano vira propriedade arquitetural.
+
+**Cost attribution gratuita**. Provider geralmente expõe gasto por API key no dashboard. Com key por contexto, você sabe direto: "feature A consumiu X esta semana". Sem rastreamento adicional. Combina com [cost ledger interno](/case-studies/cost-ledger-llm-multi-modelo) para visão completa.
+
+**Rotação independente**. Suspeita que key da feature A vazou. Rotaciona só ela. Outras features continuam funcionando sem coordenação.
+
+**Limites por contexto**. Provider permite rate limit por key. Feature batch pode ter limite mais alto. Feature de chat (mais sensível a latência) pode ter limite separado para garantir capacidade.
+
+## Onde mora o mapa
+
+Mapa `usage → env_var` fica em código central:
+
+```
+const ENV_VAR_BY_USAGE: Record<string, string> = {
+  classifier: 'PROVIDER_API_KEY_CLASSIFIER',
+  validator: 'PROVIDER_API_KEY_VALIDATOR',
+  chat: 'PROVIDER_API_KEY_CHAT',
+  batch: 'PROVIDER_API_KEY_BATCH',
+}
+```
+
+Adicionar novo contexto vira mudança em uma linha + provisionamento de nova key no provider + nova env var.
+
+## Granularidade certa
+
+A pergunta natural: "quantas keys?". Resposta depende.
+
+- **Por feature de IA** — bom default. Classificador é diferente de validador é diferente de chat.
+- **Por produto/cliente** — quando o sistema é multi-tenant e você quer rastreio por cliente.
+- **Por ambiente** — sempre. Dev, staging, prod nunca compartilham.
+
+Granularidade fina demais (key por endpoint, por usuário) vira burocracia. Granularidade grossa demais (key única) é o problema que estamos resolvendo.
+
+Sweet spot: **uma key por contexto operacional distinto**. Se duas features são interchangeable do ponto de vista de risco e auditoria, podem dividir.
+
+## Anti-padrões
+
+- **Key única para tudo** — risco e auditoria zero.
+- **Key versionada com prefixo** (`PROVIDER_KEY_V1`, `V2`) — não é segregação, é versionamento. Ambas têm o mesmo escopo.
+- **Mapa de keys com nome de cliente** — vaza informação sobre clientes via env vars.
+- **Fallback para key genérica em produção** — em dev é OK, em prod é violação do princípio.
+
+## Quando isso é overengineering
+
+- **Sistema com uma única integração de IA, uma feature** — não há contexto para segregar. Adicionar quando crescer.
+- **MVP** — adia. Custo é trocar env var depois, é trabalho linear, não exponencial.
+- **Provider que não suporta múltiplas keys gratuitas** — alguns têm custo por key. Trade-off financeiro.
+
+## A disciplina que sustenta
+
+Code review com olho nesse ponto. Pull request que adiciona uso de IA tem que declarar contexto. Sem `getProviderKey('xyz')` explícito, está usando default — sinal vermelho.
+
+Configurar provisionamento de nova key como passo do "definition of done" para feature nova de IA. Sem nova key, não é done.
+
+---
+
+Segregar keys é trabalho de uma tarde de configuração inicial. Ganho em containment, auditoria e operação se acumula com o tempo. É o tipo de decisão que custa pouco cedo e muito tarde.
+
+Relacionado: [Cost ledger de LLM](/case-studies/cost-ledger-llm-multi-modelo), [Webhook signature verification](/blog/webhook-signature-verification), [Anti-corruption layer](/blog/anti-corruption-layer-llm).

@@ -1,0 +1,83 @@
+---
+title: "Camadas de domínio em SaaS: ports & adapters na prática"
+description: "Hexagonal architecture deixa de ser teoria quando trocar de provider externo, banco ou framework HTTP não quebra a regra de negócio."
+date: "2026-05-08"
+tags: ["Arquitetura", "Hexagonal", "Domain-Driven Design", "Engenharia"]
+coverImage: null
+featured: false
+---
+
+## A pressão que torna isso útil
+
+SaaS LegalTech operacional tem realidades duras: provider de comunicação muda, gateway de pagamento muda, modelo de LLM evolui, framework HTTP precisa de upgrade major. Se cada uma dessas mudanças exige reescrever regra de negócio, o sistema vira refém da infraestrutura.
+
+Hexagonal architecture (também chamada **Ports and Adapters**) é a resposta que aguenta esse tipo de mudança. Tem reputação de overengineering — merecida quando aplicada cedo demais. Mas em sistema com integração com 3+ providers externos e regra de negócio não-trivial, é o que separa código que dura do código que precisa ser reescrito a cada troca.
+
+## A separação que importa
+
+Três camadas, cada uma com responsabilidade estrita:
+
+**Domínio** — entidades, regras, invariantes. Nunca importa framework HTTP, nunca conhece banco específico, nunca chama provider externo direto. Linguagem aqui é a do negócio: "lançar cobrança", "validar peça", "encerrar processo".
+
+**Aplicação** — orquestração. Recebe a request HTTP, traduz para chamada do domínio, devolve resposta. Aqui mora o middleware, o controller, o handler.
+
+**Infraestrutura** — adapters concretos. Implementação que fala com banco, com provider externo, com fila. Cada adapter implementa uma **port** (interface) definida pelo domínio.
+
+A regra é simples: **dependência aponta para dentro**. Infraestrutura conhece domínio. Domínio não conhece infraestrutura.
+
+## Como port e adapter conversam
+
+Domínio declara o que precisa, em sua própria linguagem:
+
+- "Preciso publicar um evento de cobrança gerada"
+- "Preciso buscar o último diagnóstico de uma entidade"
+- "Preciso cobrar X reais do cliente Y"
+
+Cada uma dessas declarações é uma **port** — interface tipada, com contrato claro. O domínio chama a port. Não sabe nem se importa qual adapter está plugado.
+
+Adapter é a implementação:
+
+- "Para publicar evento, gravo na tabela X e disparo webhook"
+- "Para buscar diagnóstico, consulto o banco com query Y"
+- "Para cobrar, chamo o gateway externo Z e trato o retorno"
+
+Trocar adapter (mudar gateway de pagamento, trocar banco, migrar para event bus) não toca em uma linha de domínio. Esse é o ganho.
+
+## O caso onde provou valor
+
+A primeira vez que isso pagou conta foi quando precisamos suportar um segundo provider de comunicação. Sistema antigo tinha o provider espalhado em controllers, services e até templates. Migração estimada em semanas.
+
+Com o domínio separado por port `CommunicationPort`, foi: implementar segundo adapter, ajustar a fábrica de adapter conforme contexto (cliente A usa um, cliente B usa outro), testar. Dois dias de trabalho. Zero alteração na regra de negócio. Zero regressão em features que não usavam o segundo provider.
+
+## Quando Hexagonal vira overengineering
+
+- **CRUD simples** com uma única integração externa: a abstração custa mais do que dá.
+- **Equipe pequena sem cultura de testes**: ports só dão valor real se você testa o domínio em isolamento.
+- **Rotina sem intenção de mudar provider**: se a infraestrutura é estável e o sistema é descartável, ports são burocracia.
+
+A regra prática: **adote Hexagonal quando você antecipa pelo menos uma troca de adapter no horizonte de 12-18 meses**. Antes disso, separe pastas (`domain/`, `infrastructure/`) sem ports formais — você ganha clareza sem o custo de manutenção das interfaces.
+
+## O que não funciona
+
+- **Ports vazias** — interface com um único implementador é só burocracia. Vale formalizar quando há (ou virá) segunda implementação.
+- **Domínio chamando direto a infra "só dessa vez"** — cada exceção mina a separação. Se o caso é genuíno, vira port nova. Se não é, refatora para passar pelo domínio corretamente.
+- **DTO espelhando entidade do domínio** — DTO existe pra desacoplar API contract de modelo interno. Se DTO = entidade, há acoplamento escondido.
+
+## O que torna o investimento defensável
+
+- **Teste de domínio sem subir banco**: roda em milissegundos, em paralelo, sem fixture pesada.
+- **Substituição de provider em janela de manutenção curta**: dias, não semanas.
+- **Onboarding de engenheiro novo é mais rápido**: ele lê só o domínio para entender o sistema. Infra ele encontra quando precisar.
+- **Auditoria mais clara**: regulatório/compliance olha o domínio, não a infra. Domínio limpo é argumento técnico defensável.
+
+## A disciplina que sustenta
+
+Hexagonal não se mantém sozinha. Linter ou regra de import (`domain/` não pode importar `infrastructure/`) força a separação. Code review com olho nesse ponto. PR que viola a regra é rejeitado, ou vira refactor antes do merge.
+
+Sem essa disciplina, em poucos meses o domínio começa a "saber" do banco, e em um ano você tem uma estrutura hexagonal de fachada com acoplamento real escondido.
+
+---
+
+Hexagonal não é dogma. É ferramenta para um problema específico: sistema de longa vida com integrações que mudam. Quando se aplica, paga muitas vezes o custo de aprender o padrão. Quando não se aplica, é peso morto que envelhece pior que um monolito honesto.
+
+Relacionado: [Anti-corruption layer entre LLM e domínio](/blog/anti-corruption-layer-llm), [Validação de features](/case-studies/validacao-criterios-aceite), [Event-driven com domain events](/blog/event-driven-domain-events).

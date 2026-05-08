@@ -29,6 +29,10 @@ docs/
 /workspace/linkedin/professional-sources.json
 /workspace/linkedin/posts/
 /workspace/linkedin/reviews/
+/workspace/cv/
+
+# Local Claude Code session state
+/.claude/
 
 # Local generated artifacts and raw scraping
 /output/

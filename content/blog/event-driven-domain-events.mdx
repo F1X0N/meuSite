@@ -1,0 +1,103 @@
+---
+title: "Domain events: quando trocar workflow procedural por evento"
+description: "Mudança crítica em entidade emite evento. Listeners reagem. Quem altera não conhece os efeitos. Acoplamento cai, observabilidade sobe."
+date: "2026-05-08"
+tags: ["Arquitetura", "Domain-Driven Design", "Event-Driven", "Engenharia"]
+readingTime: "5 min"
+---
+
+## A pista de que workflow procedural está cobrando preço
+
+Você altera o saldo de uma conta. Em seguida precisa: notificar o usuário, recalcular limite de crédito, disparar webhook outbound, atualizar painel operacional, registrar auditoria. Cada feature nova adiciona mais uma chamada ao final da função `atualizarSaldo()`.
+
+Em pouco tempo, `atualizarSaldo` é o lugar onde tudo acontece. Testar fica difícil porque cada teste mocka cinco dependências. Onboarding de engenheiro novo passa por ler essa função inteira para entender o sistema. Mudar a regra de cálculo do saldo exige tocar em código que não é sobre saldo.
+
+Domain event é a saída desse poço.
+
+## A inversão proposta
+
+Em vez de:
+
+```
+atualizarSaldo()
+  → calcula novo saldo
+  → grava no banco
+  → notifica usuário
+  → recalcula limite
+  → dispara webhook
+  → atualiza painel
+  → registra auditoria
+```
+
+Você tem:
+
+```
+atualizarSaldo()
+  → calcula novo saldo
+  → grava no banco
+  → emite SaldoAtualizado(entidade, antes, depois, motivo)
+```
+
+E listeners separados:
+
+- `NotificarUsuarioAoSaldoMudar` reage a `SaldoAtualizado`
+- `RecalcularLimiteAoSaldoMudar` reage a `SaldoAtualizado`
+- `DispararWebhookAoSaldoMudar` reage a `SaldoAtualizado`
+- `RegistrarAuditoriaAoSaldoMudar` reage a `SaldoAtualizado`
+
+Cada listener é uma unidade pequena, testável em isolamento. `atualizarSaldo` ficou focado no que importa: alterar saldo.
+
+## Sync ou async?
+
+Decisão importante: o listener roda na mesma transação do emitente, ou depois?
+
+**Síncrono** — listener executa antes de `atualizarSaldo` retornar. Vantagem: tudo ou nada (transaction encompassing). Desvantagem: tempo de resposta sobe com cada listener novo, e falha em listener qualquer abor­ta a operação principal.
+
+**Assíncrono** — listener executa depois (fila, scheduler, worker). Vantagem: response time da operação principal não muda; falha em listener não trava o fluxo. Desvantagem: consistência eventual; precisa de garantia de entrega (outbox, retry, DLQ).
+
+Regra prática: **mude estado interno crítico em sync, efeitos colaterais externos em async**. Recalcular limite (interno) é candidato a sync. Disparar webhook (externo) é candidato a async.
+
+## Onde guarda o catálogo
+
+Catálogo de eventos não é overhead, é documentação obrigatória. Lista:
+
+- Nome do evento
+- Quem emite
+- Forma do payload (campos garantidos)
+- Quem reage (listeners conhecidos)
+- Política (sync/async, retry, deadline)
+
+Sem catálogo, em poucos meses ninguém sabe quais eventos existem nem quem reage. Listener fantasma vira incidente: alguém adicionou efeito colateral em um evento e ninguém percebeu.
+
+Catálogo simples (markdown ou tabela em código) já resolve. Não precisa de ferramenta.
+
+## Listener fantasma e silent failure
+
+O risco real do padrão é justamente o desacoplamento: listener falha silenciosamente e o sistema continua andando. `atualizarSaldo` retornou 200, mas a notificação nunca saiu.
+
+Mitigação:
+
+- **Telemetria por listener** — cada listener loga início, fim e resultado. Dashboards de listener com falha alta sinalizam regressão.
+- **Idempotência** — listener pode ser invocado mais de uma vez (retry, replay). Idempotente por design ([state machine de webhook](/blog/idempotencia-webhook-state-machine) é uma referência boa).
+- **Outbox para efeitos externos** — em vez de listener disparar webhook diretamente, ele grava em tabela `outbox` e um worker drena. Garante entrega mesmo se o serviço cair entre evento e webhook.
+
+## Quando NÃO é a resposta
+
+- **Transação simples sem efeito colateral** — emitir evento adiciona complexidade sem ganho.
+- **Sistema pequeno com um único consumidor por estado** — chamada direta é mais legível, mais rápido para debugar.
+- **Equipe sem cultura de testes** — listeners não-testados viram terra de ninguém.
+
+A regra prática inversa: **considere domain event quando uma única mudança de estado tem 3+ consequências, ou quando você antecipa adicionar consequência nova nos próximos meses**.
+
+## O que muda na prática quando funciona
+
+- Code review fica mais focado: "está mudando saldo? Olha só a função de saldo." Os efeitos colaterais cada um vê o seu listener.
+- Adicionar feature nova é nova listener, não modificação da função core.
+- Auditoria é trivial: lista de eventos é a história do sistema.
+- Teste de listener não precisa do banco — recebe o evento, retorna efeito.
+
+---
+
+Domain event é mecânica. O que muda é a gramática do sistema. Em vez de "função X faz Y, Z e W", você tem "X aconteceu — quem se importa?". Mais perto do como o negócio funciona de verdade.
+
+Relacionado: [Hexagonal architecture](/case-studies/hexagonal-domain-saas), [Idempotência via state machine](/blog/idempotencia-webhook-state-machine), [Retry seguro](/blog/retry-backoff-dead-letter).

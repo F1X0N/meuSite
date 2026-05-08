@@ -1,0 +1,119 @@
+---
+title: "Hash composto como identidade: deduplicação sem colisão"
+description: "Identidade de evento ou registro frequentemente vem de combinação de campos. Encapsular em função pura preserva consistência entre escrita e leitura."
+date: "2026-05-08"
+tags: ["Engenharia", "Domain-Driven Design", "Padrões de Código"]
+readingTime: "4 min"
+---
+
+## O problema sutil
+
+Você precisa deduplicar eventos. ID interno do provider externo não é confiável (alguns provedores reusam, outros mandam `null` em retry). Solução natural: identidade composta de campos do payload.
+
+Primeira tentativa, espalhada pelo código:
+
+```
+// no insert
+const key = `${event.id}:${event.type}:${event.payload.amount}`
+db.insert({ key, ...event })
+
+// no read
+const key = `${ev.id}-${ev.type}-${ev.payload.amount}`
+const existing = db.find({ key })
+```
+
+Os formatos não batem (`:` vs `-`). Read não encontra o que insert gravou. Bug invisível: dedupe falha, eventos duplicam, ninguém detecta até virar incidente.
+
+A causa: identidade ficou sendo construída em **múltiplos lugares**, cada um com decisão própria sobre formato.
+
+## Value Object resolve
+
+Value Object é conceito de DDD: objeto cuja identidade é seu valor. Dois value objects com mesmos campos são iguais; não têm identity stable independente.
+
+Para identificador composto, value object é uma **função pura**:
+
+```
+function buildEventKey(event) {
+  return `${event.id}|${event.type}|${event.payload.amount}`
+}
+```
+
+Apenas um lugar decide o formato. Insert e read usam a mesma função. Mudança de formato (separator, normalização) afeta os dois lados juntos.
+
+Em linguagem com tipos fortes, vira uma classe ou type-alias (`type EventKey = string & { __brand: 'EventKey' }`) para evitar confundir com string qualquer. Em JavaScript/TypeScript dinâmico, função pura já entrega 80% do valor.
+
+## Por que hash, não concat
+
+Concatenar campos é simples e legível, até virar problema:
+
+- **Caracteres no campo causam colisão**. Se um valor contém o separator (`|`, `:`, `-`), parsing reverso quebra.
+- **Tamanho varia muito**. Payload com 50 campos vira chave de 500 bytes. Index do banco fica gordo.
+- **PII visível**. Concatenação preserva valores literais — leak parcial em log, em URL, em métrica.
+
+Hash criptográfico (SHA-1, SHA-256) resolve os três:
+
+```
+function buildEventKey(event) {
+  const canonical = `${event.id}|${event.type}|${event.payload.amount}`
+  return crypto.createHash('sha1').update(canonical).digest('hex')
+}
+```
+
+Sempre 40 caracteres (SHA-1) ou 64 (SHA-256). Caracteres especiais não importam. Não revelam dado de origem.
+
+SHA-1 é OK para identidade (não é uso criptográfico contra ataque — é dedupe). SHA-256 se quiser margem para o futuro. MD5 evite — colisão demonstrada na prática.
+
+## Normalização antes de hash
+
+Hash é sensível a qualquer byte. Diferenças cosméticas geram chaves diferentes:
+
+- `email = "FOO@bar.com"` ≠ `email = "foo@bar.com"`
+- JSON com espaços ≠ JSON sem espaços
+- Número `100` ≠ string `"100"`
+
+Antes de concatenar para hash, **normalizar**:
+
+- Strings: trim + lowercase quando faz sentido (email, ID externo).
+- Números: forçar tipo (parseFloat ou string padronizada).
+- Datas: ISO 8601.
+- Objects: serializar com chaves ordenadas.
+
+Sem normalização, dedupe falha de forma sutil.
+
+## Onde mora a função
+
+Junto do conceito que ela identifica. Para chave de evento, ao lado do tipo de evento ou do handler. Não numa pasta `utils/` genérica — perde a ligação com o domínio.
+
+Em sistemas com múltiplos tipos de identidade composta (evento, registro, transação), cada um tem sua função. Não tente um construtor genérico — vira espaguete.
+
+## Quando isso é overengineering
+
+- **Identidade já existe e é confiável** — campo `id` único do banco, tudo bem.
+- **Volume pequeno e dedupe não é crítico** — string concatenada bem-comentada serve.
+- **Uso único em uma função pequena** — função inline com comentário é honesto.
+
+Vale criar value object explícito quando: a identidade é usada em **2+ lugares** e tem **2+ campos** e/ou normalização não-trivial.
+
+## Anti-padrões
+
+- **Construir chave em múltiplos lugares** — recipe para bug invisível.
+- **Hash sem normalização** — dedupe falha em mudança cosmética.
+- **MD5 ou hash truncado curto demais** — colisão prática.
+- **Hash de payload completo** — chave depende de campos irrelevantes; mudança pequena gera identidade falsa.
+
+## Bônus: testabilidade
+
+Value object como função pura é trivial de testar. Casos de borda óbvios: maiúscula vs minúscula, espaço extra, ordem de campos no JSON. Cada teste é assertivamente sobre a função, não sobre integração com banco.
+
+```
+expect(buildEventKey({id: 'X', type: 'A', amount: 100}))
+  .toEqual(buildEventKey({id: ' X ', type: 'A', amount: 100}))
+```
+
+Esse tipo de teste pega regressão de normalização cedo.
+
+---
+
+Value object para identidade composta é peça pequena com retorno alto. Encapsula uma decisão (qual a chave deste registro?) que de outra forma fica espalhada e divergente. O bug que ele evita é o tipo silencioso — dedupe falhando sem ninguém perceber.
+
+Relacionado: [Idempotência via state machine](/blog/idempotencia-webhook-state-machine), [Domain events](/blog/event-driven-domain-events).

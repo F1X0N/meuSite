@@ -1,0 +1,102 @@
+---
+title: "Retry seguro: backoff, deadline e dead-letter sem reinventar fila"
+description: "Falha transiente é normal. Retry mal feito é o que vira incidente. Backoff, limite de tentativas e DLQ explícita resolvem sem precisar de fila."
+date: "2026-05-08"
+tags: ["Resiliência", "Backend", "Webhook", "Engenharia"]
+readingTime: "5 min"
+---
+
+## A pergunta que vale fazer antes de retry
+
+Antes de escrever `for (let i=0; i<3; i++) try {...}`, vale pausar:
+
+- Esse erro é **transiente** (rede, timeout, lock momentâneo) ou **permanente** (validação falhou, recurso não existe)?
+- A operação é **idempotente** (pode tentar de novo sem efeito duplicado)?
+- Existe **deadline** real do caller, ou retry pode demorar minutos?
+- Quando desistir, o evento **se perde** ou vai para análise humana?
+
+Errar em qualquer uma dessas perguntas é o que torna retry pior que não-retry. Sistema que retenta erro permanente em loop fica preso. Sistema que retenta operação não-idempotente duplica. Sistema sem deadline trava o caller. Sistema sem DLQ perde dado.
+
+## Backoff: linear ou exponencial?
+
+A diferença prática:
+
+**Linear** (`intervalo * tentativa`): primeira tentativa em 1s, segunda em 2s, terceira em 3s. Total ~6s para 3 tentativas. Bom para falha curta de rede onde o sistema upstream provavelmente já voltou.
+
+**Exponencial** (`intervalo * 2^tentativa`): primeira em 1s, segunda em 2s, terceira em 4s, quarta em 8s. Total ~15s para 4 tentativas. Bom para sistema upstream em sobrecarga — dá tempo de recuperar sem aumentar a pressão.
+
+**Exponencial com jitter** — varia o intervalo aleatoriamente em ±25%. Bom quando muitos clientes falharam ao mesmo tempo (queda momentânea). Sem jitter, todos retentam ao mesmo tempo e quebram o upstream que estava se recuperando.
+
+Regra prática: **linear para webhook recebido (você é o servidor), exponencial com jitter para chamada externa (você é o cliente em fila com outros)**.
+
+## Limite de tentativas: número, não infinito
+
+Retry sem limite é loop. Sempre defina N. Como escolher:
+
+- **N=1** — retry único, simples, evita transiente óbvio. Usar quando o erro é raríssimo e sem ele a operação seria perdida.
+- **N=3** — sweet spot para a maioria dos casos. Cobre 99% das falhas transientes sem custar muito tempo.
+- **N=5+** — cabe quando a operação é cara de reexecutar (custo computacional, custo de IA) e dá pra esperar mais.
+
+Acima de 5 raramente vale. Se 5 tentativas falharam, o problema não é transiente.
+
+## Deadline: o limite que o N de tentativas não dá
+
+Retry com N=10 e backoff exponencial pode levar minutos. Se o caller está esperando síncrono, ele já desistiu (timeout HTTP), e seu retry está trabalhando para ninguém.
+
+Solução: **deadline absoluto** combinado com N. "Tente até 5 vezes, mas pare se passou de 30 segundos do início". O que vier primeiro vence.
+
+Para retry async (worker drenando fila), o deadline pode ser maior — minutos ou horas, dependendo do SLA. Para retry sync (handler de webhook), deadline curto é mandatório.
+
+## Dead-letter queue manual: você não precisa de fila
+
+Há uma confusão comum: "DLQ" sugere fila dedicada (SQS, RabbitMQ). Não precisa.
+
+DLQ manual é simples: depois de N tentativas, marca o registro com `status: dead_letter` no banco. Adiciona em uma view de monitoramento. Dispara alerta. Pronto.
+
+Vantagens:
+
+- Auditoria compartilha schema com a operação principal — investigar é trivial.
+- Sem dependência operacional adicional.
+- Reprocessar é UPDATE no status, não migrar de fila.
+
+Quando vale fila dedicada: volume alto (centenas de DLQ por minuto) ou SLA crítico em tempo de processamento. Antes disso, simplicidade ganha.
+
+## A regra de ouro: idempotência junto
+
+Retry sem idempotência é perigoso. A primeira tentativa pode ter aplicado efeito mas falhado em ack — a segunda vai aplicar de novo. Cobrança duplicada, notificação duplicada.
+
+Solução: cada operação retentável tem **identidade estável** ([state machine + chave composta](/blog/idempotencia-webhook-state-machine)). Listener verifica se essa identidade já foi processada antes de aplicar. Retry vira "tenta de novo se falhou", não "aplica de novo se já passou".
+
+## Anti-padrões em retry
+
+- **Try/catch com retry sem distinguir tipo de erro** — retry em validação 400 nunca vai funcionar e atrasa a falha legítima.
+- **Backoff fixo em milissegundos** sem variação — todos os clientes batem ao mesmo tempo no upstream estressado.
+- **DLQ silenciosa** — eventos vão para dead-letter, ninguém recebe alerta, descobre o problema dias depois.
+- **Retry em operação síncrona ao usuário** — usuário espera enquanto seu sistema retenta. UX morre.
+
+## O loop minimum-viable
+
+Para a maioria dos sistemas, isso resolve:
+
+```
+attempt = 1
+while attempt <= MAX_ATTEMPTS:
+  try:
+    aplicar()
+    return
+  except RetryableError:
+    if attempt == MAX_ATTEMPTS:
+      mark_dead_letter()
+      alert()
+      return
+    sleep(linear_backoff(attempt))
+    attempt += 1
+```
+
+Com idempotência na operação, isso é robusto o suficiente para integrações de complexidade média.
+
+---
+
+Retry é técnica simples mal aplicada com frequência. Os ingredientes são poucos: distinguir transiente de permanente, backoff calibrado, deadline, DLQ explícita, idempotência. Cada um isoladamente é trivial. A composição é o que vira sistema confiável.
+
+Relacionado: [Idempotência via state machine](/blog/idempotencia-webhook-state-machine), [Timeout em chamadas LLM](/blog/timeout-promise-race), [Domain events](/blog/event-driven-domain-events).
