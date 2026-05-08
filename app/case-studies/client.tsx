@@ -6,7 +6,6 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/Ca
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { SearchBar } from '@/components/ui/SearchBar'
-import { getCoverComponent } from '@/components/blog-covers'
 
 const renderTag = (tag) => (
   <Badge key={tag} variant="outline">
@@ -20,35 +19,25 @@ const renderTags = (tags) => (
   </div>
 )
 
-const renderCaseCard = (caseStudy) => {
-  const Cover = getCoverComponent(caseStudy.coverComponent)
-  return (
-    <Card key={caseStudy.slug} className="overflow-hidden flex flex-col">
-      {Cover && (
-        <Link href={`/case-studies/${caseStudy.slug}`} className="block bg-muted/30 border-b border-border">
-          <div className="aspect-[1200/630]">
-            <Cover className="w-full h-full" />
-          </div>
+const renderCaseCard = (caseStudy) => (
+  <Card key={caseStudy.slug}>
+    <CardHeader>
+      <div className="text-sm text-muted-foreground">
+        {caseStudy.date}
+      </div>
+      <CardTitle as="h2">{caseStudy.title}</CardTitle>
+      <CardDescription>{caseStudy.description}</CardDescription>
+      <div className="mt-4 space-y-3">
+        {renderTags(caseStudy.tags)}
+        <Link href={`/case-studies/${caseStudy.slug}`}>
+          <Button variant="ghost" size="sm">
+            Ler caso →
+          </Button>
         </Link>
-      )}
-      <CardHeader className="flex-1">
-        <div className="text-sm text-muted-foreground">
-          {caseStudy.date}
-        </div>
-        <CardTitle as="h2">{caseStudy.title}</CardTitle>
-        <CardDescription>{caseStudy.description}</CardDescription>
-        <div className="mt-4 space-y-3">
-          {renderTags(caseStudy.tags)}
-          <Link href={`/case-studies/${caseStudy.slug}`}>
-            <Button variant="ghost" size="sm">
-              Ler caso →
-            </Button>
-          </Link>
-        </div>
-      </CardHeader>
-    </Card>
-  )
-}
+      </div>
+    </CardHeader>
+  </Card>
+)
 
 const sortCases = (cases) => {
   return [...cases].sort((a, b) => {
