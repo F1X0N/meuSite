@@ -16,9 +16,10 @@ const styles = StyleSheet.create({
     color: COLOR_TEXT,
     lineHeight: 1.3,
   },
-  name: { fontSize: 18, fontFamily: 'Helvetica-Bold', color: COLOR_TEXT, marginBottom: 2 },
-  title: { fontSize: 10.2, color: COLOR_MUTED, marginBottom: 5 },
+  name: { fontSize: 18, fontFamily: 'Helvetica-Bold', color: COLOR_TEXT, marginBottom: 4 },
+  title: { fontSize: 10.2, color: COLOR_MUTED, marginBottom: 6 },
   contactLine: { fontSize: 8.4, color: COLOR_MUTED, marginBottom: 1.5 },
+  headerBlock: { marginBottom: 8 },
   sectionHeading: {
     fontSize: 10.6,
     fontFamily: 'Helvetica-Bold',
@@ -73,7 +74,7 @@ const renderHeader = (model: ResumeRenderModel) => {
   const linksLine = [header.linkedin, header.github, header.portfolio].filter(Boolean).join(' | ')
 
   return (
-    <View>
+    <View style={styles.headerBlock}>
       <Text style={styles.name}>{header.name}</Text>
       <Text style={styles.title}>{header.title}</Text>
       <Text style={styles.contactLine}>{contactLine}</Text>
@@ -140,19 +141,19 @@ export const ResumeDocument = ({ prioritySkills = [] }: { prioritySkills?: strin
       <Page size="A4" style={styles.page}>
         {renderHeader(model)}
 
-        <Section title="Summary">{renderSummary(model)}</Section>
+        <Section title="Resumo">{renderSummary(model)}</Section>
 
-        <Section title="Skills">{renderSkills(model)}</Section>
+        <Section title="Competências">{renderSkills(model)}</Section>
 
-        <Section title="Experience">
+        <Section title="Experiência">
           {model.experience.map(renderExperience)}
         </Section>
 
-        <Section title="Projects">
+        <Section title="Projetos">
           {model.publicProjects.map(renderProject)}
         </Section>
 
-        <Section title="Education">
+        <Section title="Formação">
           {model.education.map((education) => (
             <Text key={`${education.institution}-${education.period}`} style={styles.compactItem}>
               {education.institution} - {education.degree} ({education.period})
@@ -160,7 +161,7 @@ export const ResumeDocument = ({ prioritySkills = [] }: { prioritySkills?: strin
           ))}
         </Section>
 
-        <Section title="Certifications">
+        <Section title="Certificações">
           {model.certifications.map((certification) => (
             <Text key={certification.text} style={styles.compactItem}>
               - {certification.text}
@@ -168,7 +169,7 @@ export const ResumeDocument = ({ prioritySkills = [] }: { prioritySkills?: strin
           ))}
         </Section>
 
-        <Section title="Languages">
+        <Section title="Idiomas">
           {model.languages.map((language) => (
             <Text key={language.text} style={styles.compactItem}>
               - {language.text}
