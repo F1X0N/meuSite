@@ -16,9 +16,9 @@ const styles = StyleSheet.create({
     color: COLOR_TEXT,
     lineHeight: 1.3,
   },
-  name: { fontSize: 18, fontFamily: 'Helvetica-Bold', color: COLOR_TEXT, marginBottom: 4 },
+  name: { fontSize: 18, fontFamily: 'Helvetica-Bold', color: COLOR_TEXT, marginBottom: 8 },
   title: { fontSize: 10.2, color: COLOR_MUTED, marginBottom: 6 },
-  contactLine: { fontSize: 8.4, color: COLOR_MUTED, marginBottom: 1.5 },
+  contactLine: { fontSize: 8.4, color: COLOR_MUTED, marginBottom: 3 },
   headerBlock: { marginBottom: 8 },
   sectionHeading: {
     fontSize: 10.6,
