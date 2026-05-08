@@ -1,6 +1,6 @@
 ---
 title: "Validação de features, critérios de aceite e impacto operacional"
-description: "Estrutura de release validation, evidência de entrega e mensuração de impacto — reduzindo retrabalho e ambiguidade no ciclo de produto."
+description: "Estrutura de release validation, evidência de entrega e mensuração de impacto: reduzindo retrabalho e ambiguidade no ciclo de produto."
 date: "2026-05-05"
 tags: ["Release validation", "Acceptance criteria", "Delivery"]
 coverImage: null
@@ -28,25 +28,25 @@ Custo invisível: cada rodada queima atenção do time, atrasa próximas entrega
 
 **Critério de aceite explícito antes do primeiro commit.** O que constitui "feature pronta"? Quais cenários funcionais? Quais métricas observáveis? Quais comportamentos preexistentes precisam continuar funcionando? Tudo escrito antes de mexer em código.
 
-**Plano de validação como parte da entrega.** Não é responsabilidade exclusiva de QA — é parte do design. O plano descreve como cada critério vai ser verificado: teste automatizado, smoke test manual, validação por log, query de verificação.
+**Plano de validação como parte da entrega.** Não é responsabilidade exclusiva de QA, é parte do design. O plano descreve como cada critério vai ser verificado: teste automatizado, smoke test manual, validação por log, query de verificação.
 
 **Evidência de entrega.** Quando a feature vira para validação, vem com pacote: o que mudou, como verificar, qual log esperar, qual comportamento preexistente precisa continuar funcionando, e como reverter se der errado.
 
-**Validação pós-deploy.** Critério de aceite cumprido no ambiente real, não só no ambiente de teste. Janela de observação definida — em fluxos críticos, métrica e log monitorados depois do deploy para confirmar que o efeito persistiu.
+**Validação pós-deploy.** Critério de aceite cumprido no ambiente real, não só no ambiente de teste. Janela de observação definida: em fluxos críticos, métrica e log monitorados depois do deploy para confirmar que o efeito persistiu.
 
 **Disciplina contra "deveria estar funcionando".** Se não há evidência observável de que está funcionando, a feature não está validada. Suposição não conta como evidência.
 
 ## Responsabilidade Técnica
 
 - Tradução de demanda ambígua em critério de aceite verificável, antes de tocar em código.
-- Estruturação do plano de validação como artefato — não como conversa de Slack.
+- Estruturação do plano de validação como artefato, não como conversa de Slack.
 - Garantia de que regressão em comportamento preexistente é parte do critério, não pegadinha de produção.
 - Documentação do que foi entregue, como verificar, e qual evidência confirmou.
 - Disciplina de não fechar tarefa sem evidência observável de que o critério foi atendido.
 
 ## Impacto
 
-**184 entregas de feature planejada** documentadas no workspace profissional sob essa disciplina. Esse volume reflete método aplicado de forma recorrente — entrega vira processo auditável.
+**184 entregas de feature planejada** documentadas no workspace profissional sob essa disciplina. Esse volume reflete método aplicado de forma recorrente: entrega vira processo auditável.
 
 Reduz retrabalho por ambiguidade na ponta de engenharia, reduz atrito entre engenharia e produto/operação na ponta de validação, e reduz regressão silenciosa por garantir que comportamento preexistente é parte do contrato de entrega.
 
@@ -60,5 +60,5 @@ Reduz retrabalho por ambiguidade na ponta de engenharia, reduz atrito entre enge
 
 - Release validation, acceptance criteria, evidence-based delivery.
 - Validação pós-mudança com observabilidade (Grafana, Loki, Sentry).
-- Documentação técnica como artefato — runbooks, planos de validação, critério de aceite.
+- Documentação técnica como artefato: runbooks, planos de validação, critério de aceite.
 - Disciplina de revisão e julgamento cross-functional entre engenharia, produto e operação.

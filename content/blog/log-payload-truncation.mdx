@@ -1,7 +1,7 @@
 ---
 title: "Logs que cabem no Loki: padrões de truncação safe"
 description: "Payload grande em log estoura budget de ingestão e custa caro. Truncação recursiva com limites por tipo preserva legibilidade e protege observabilidade."
-date: "2026-05-08"
+date: "2025-08-26"
 coverComponent: "LogPayloadTruncationCover"
 tags: ["Observabilidade", "Backend", "Logging", "Engenharia"]
 readingTime: "4 min"
@@ -11,7 +11,7 @@ readingTime: "4 min"
 
 Você loga payload de request. Algum endpoint recebe upload de PDF em base64. O log dessa request, sozinho, tem 8MB. Provider de log ingere. No fim do mês, você descobre que 80% do custo de logging vem de 0,1% das requests.
 
-Pior cenário: provider rejeita logs acima do limite. A request com problema (que você queria investigar) é a que não foi logada — porque o payload era exatamente o que estava grande demais.
+Pior cenário: provider rejeita logs acima do limite. A request com problema (que você queria investigar) é a que não foi logada, porque o payload era exatamente o que estava grande demais.
 
 Truncação não é cosmética. É mecanismo de defesa do orçamento e da observabilidade.
 
@@ -19,7 +19,7 @@ Truncação não é cosmética. É mecanismo de defesa do orçamento e da observ
 
 `if (log.length > N) log = log.substring(0, N) + '...[truncated]'`
 
-Funciona se log é string plana. Em estruturado, cobre só o caso fácil. O log de verdade é objeto com aninhamento — request body é objeto, com array de items, cada item com um campo `description`. Truncar a string final mantém só a primeira parte do objeto serializado: começo do request, fim sumiu inteiro.
+Funciona se log é string plana. Em estruturado, cobre só o caso fácil. O log de verdade é objeto com aninhamento. Request body é objeto, com array de items, cada item com um campo `description`. Truncar a string final mantém só a primeira parte do objeto serializado: começo do request, fim sumiu inteiro.
 
 Pior: campos importantes (`error`, `request_id`) podem estar no fim, ser truncados, e o log perde valor.
 
@@ -38,10 +38,10 @@ Recursão aplica os limites em cada nível. Tamanho do log fica previsível mesm
 
 Calibre observando produção real:
 
-- `MAX_STRING_SIZE: 4096` — texto livre fica legível, body de email cabe.
-- `MAX_ARRAY_ITEMS: 20` — primeiros 20 itens dão contexto suficiente.
-- `MAX_DEPTH: 4` — payloads ficam navegáveis sem virar bola de neve.
-- `MAX_LOG_SIZE_BYTES: 200_000` — payload total. Acima disso, força truncação adicional.
+- `MAX_STRING_SIZE: 4096`: texto livre fica legível, body de email cabe.
+- `MAX_ARRAY_ITEMS: 20`: primeiros 20 itens dão contexto suficiente.
+- `MAX_DEPTH: 4`: payloads ficam navegáveis sem virar bola de neve.
+- `MAX_LOG_SIZE_BYTES: 200_000`: payload total. Acima disso, força truncação adicional.
 
 Esses são pontos de partida. Ajuste conforme distribuição de tamanho dos seus payloads reais.
 
@@ -51,18 +51,18 @@ Sempre marque que houve truncação. Sem marca, o investigador depois vai pensar
 
 Convenção:
 
-```
-{ message: "...primeira parte do conteúdo...", _truncated: true, _original_length: 12384 }
+```json
+{ "message": "...first part of content...", "_truncated": true, "_original_length": 12384 }
 ```
 
-Inclua `_original_length` quando viável — útil para detectar payloads anormalmente grandes.
+Inclua `_original_length` quando viável. Útil para detectar payloads anormalmente grandes.
 
 ## Campos sensíveis: redact, não trunca
 
-PII (e-mail, telefone, CPF), secret (token, chave) e dado sensível **não devem ser truncados**. Devem ser **redacted** — substituídos por marcador.
+PII (e-mail, telefone, CPF), secret (token, chave) e dado sensível **não devem ser truncados**. Devem ser **redacted**, substituídos por marcador.
 
-```
-{ email: "[REDACTED]", token: "[REDACTED]" }
+```json
+{ "email": "[REDACTED]", "token": "[REDACTED]" }
 ```
 
 Truncação parcial é perigoso: 5 caracteres de um token é informação suficiente para correlacionar com vazamento.
@@ -79,22 +79,22 @@ Truncar antes (no objeto) preserva estrutura. JSON serializado fica válido, mes
 
 ## Como instrumentar sem virar burocracia
 
-Toda chamada `logger.info(...)` passa pelo mesmo serializer central. Serializer aplica truncação + redaction antes de enviar. Endpoint não precisa lembrar — virou propriedade do logger.
+Toda chamada `logger.info(...)` passa pelo mesmo serializer central. Serializer aplica truncação + redaction antes de enviar. Endpoint não precisa lembrar, virou propriedade do logger.
 
-```
+```ts
 logger.info('Request received', { body, headers })
 // internally:
-//   truncate(redact({ body, headers })) → enviado para sink
+//   truncate(redact({ body, headers })) → sent to sink
 ```
 
 Quem escreve endpoint loga o que importa. Política de tamanho e segurança fica em uma camada só.
 
 ## Anti-padrões
 
-- **Truncar string serializada** — corta JSON em meio de objeto, gera string inválida.
-- **Não marcar truncação** — investigação depois confunde dado parcial com dado completo.
-- **Logar buffer/blob** — explode o log sem entregar valor; sempre `[Buffer size=...]`.
-- **Truncar campo sensível em vez de redact** — preserva 5 caracteres é leak parcial.
+- **Truncar string serializada**: corta JSON em meio de objeto, gera string inválida.
+- **Não marcar truncação**: investigação depois confunde dado parcial com dado completo.
+- **Logar buffer/blob**: explode o log sem entregar valor; sempre `[Buffer size=...]`.
+- **Truncar campo sensível em vez de redact**: preservar 5 caracteres é leak parcial.
 
 ## O ROI
 

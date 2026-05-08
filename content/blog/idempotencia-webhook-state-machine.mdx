@@ -1,7 +1,7 @@
 ---
 title: "Idempotência sem dor: deduplicar webhooks com chave composta"
 description: "Webhook chega duas vezes, três, dez. State machine + chave composta resolvem sem inflar banco e sem perder evento."
-date: "2026-05-08"
+date: "2026-02-10"
 coverComponent: "IdempotenciaCover"
 tags: ["Idempotência", "Webhook", "Backend", "Resiliência"]
 readingTime: "5 min"
@@ -17,11 +17,11 @@ A pergunta certa não é "como bloquear retransmissão". É "como tornar o handl
 
 Idempotente significa: aplicar a mesma operação N vezes produz o mesmo efeito que aplicar uma vez. Em webhook, isso vira um pacto:
 
-1. Cada evento tem **identidade estável**, derivada do payload — não do `id` interno do provider.
+1. Cada evento tem **identidade estável**, derivada do payload, não do `id` interno do provider.
 2. O sistema **persiste a chegada** antes de aplicar efeito.
 3. Se a chegada já foi vista, o handler **retorna 200 sem reaplicar**.
 
-A parte difícil é a primeira. `id` do provider parece estável, mas alguns provedores reusam. Hash do payload completo é forte demais — mudança cosmética (ordem de campos JSON, espaço extra) cria identidade falsa. O caminho prático é uma **chave composta**: `id externo + tipo do evento + hash dos campos críticos`.
+A parte difícil é a primeira. `id` do provider parece estável, mas alguns provedores reusam. Hash do payload completo é forte demais (mudança cosmética como ordem de campos JSON ou espaço extra cria identidade falsa). O caminho prático é uma **chave composta**: `id externo + tipo do evento + hash dos campos críticos`.
 
 ## State machine: estados, não flags
 
@@ -29,10 +29,10 @@ Marcar `processed: true` num registro funciona até o dia em que `processed=true
 
 Modelar como state machine deixa isso explícito:
 
-- `received` — webhook chegou, payload persistido, efeito ainda não aplicado.
-- `processed` — efeito aplicado com sucesso.
-- `failed` — efeito tentou aplicar mas falhou em erro retentável (timeout, lock, indisponibilidade).
-- `dead_letter` — falhou N vezes, precisa de análise humana.
+- `received`: webhook chegou, payload persistido, efeito ainda não aplicado.
+- `processed`: efeito aplicado com sucesso.
+- `failed`: efeito tentou aplicar mas falhou em erro retentável (timeout, lock, indisponibilidade).
+- `dead_letter`: falhou N vezes, precisa de análise humana.
 
 Cada chegada move o estado. `received → processed` é o caminho feliz. `received → failed → received → processed` é retry funcionando. `received → failed → dead_letter` é o caso onde algo está estruturalmente quebrado e ninguém quer um loop infinito.
 
@@ -40,7 +40,7 @@ Cada chegada move o estado. `received → processed` é o caminho feliz. `receiv
 
 Duas escolhas razoáveis:
 
-**Junto da entidade alvo** (campo JSON tipo `webhook_events` na tabela do recurso afetado). Vantagem: locality — investigar a entidade já mostra o histórico. Desvantagem: cresce o registro indefinidamente.
+**Junto da entidade alvo** (campo JSON tipo `webhook_events` na tabela do recurso afetado). Vantagem: locality, investigar a entidade já mostra o histórico. Desvantagem: cresce o registro indefinidamente.
 
 **Tabela separada** (`webhook_inbox` ou similar) com FK para a entidade. Vantagem: TTL fácil, queries analíticas limpas. Desvantagem: mais um JOIN para reconstruir contexto.
 
@@ -51,18 +51,18 @@ Para volume baixo a médio (até alguns milhares de eventos por dia por entidade
 1. Webhook chega.
 2. Calcula chave composta.
 3. Verifica se chave já existe no estado da entidade.
-4. Se existe e está `processed` — retorna 200, fim.
-5. Se existe e está `failed` ou `received` — entra em retry com backoff (ver [Retry seguro](/blog/retry-backoff-dead-letter)).
-6. Se não existe — cria registro `received`, aplica efeito em transação, atualiza para `processed`.
-7. Se aplicar efeito lança erro retentável — atualiza para `failed`, retorna 5xx para o provider tentar de novo.
-8. Após N falhas — marca `dead_letter`, retorna 200 (não queremos provider retentando para sempre), dispara alerta.
+4. Se existe e está `processed`, retorna 200, fim.
+5. Se existe e está `failed` ou `received`, entra em retry com backoff (ver [Retry seguro](/blog/retry-backoff-dead-letter)).
+6. Se não existe, cria registro `received`, aplica efeito em transação, atualiza para `processed`.
+7. Se aplicar efeito lança erro retentável, atualiza para `failed`, retorna 5xx para o provider tentar de novo.
+8. Após N falhas, marca `dead_letter`, retorna 200 (não queremos provider retentando para sempre), dispara alerta.
 
 ## Anti-padrões que vi em produção
 
-- **`if not exists insert`** sem transaction — race entre dois workers cria duplicata.
-- **Hash de payload bruto** sem normalização — mesma operação semântica gera chaves diferentes por causa de espaço em branco.
-- **DLQ silenciosa** — eventos vão para dead-letter mas ninguém recebe alerta. Descobre semanas depois quando o cliente reclama.
-- **Retry infinito sem deadline** — provider externo eventualmente desiste, mas seu handler continua tentando.
+- **`if not exists insert`** sem transaction: race entre dois workers cria duplicata.
+- **Hash de payload bruto** sem normalização: mesma operação semântica gera chaves diferentes por causa de espaço em branco.
+- **DLQ silenciosa**: eventos vão para dead-letter mas ninguém recebe alerta. Descobre semanas depois quando o cliente reclama.
+- **Retry infinito sem deadline**: provider externo eventualmente desiste, mas seu handler continua tentando.
 
 ## O que isso te dá
 
@@ -75,7 +75,7 @@ Para volume baixo a médio (até alguns milhares de eventos por dia por entidade
 
 Se o efeito do webhook é naturalmente idempotente (UPSERT puro com chave de negócio, soft-delete que é set-based), você ganha menos com state machine. Persistir a chegada ainda vale para auditoria, mas o pacto de não-duplicação já está no schema.
 
-A maior parte dos casos não é assim. Cobrança, notificação, contador, transição de estado de processo — todos exigem deduplicação explícita.
+A maior parte dos casos não é assim. Cobrança, notificação, contador, transição de estado de processo: todos exigem deduplicação explícita.
 
 ---
 

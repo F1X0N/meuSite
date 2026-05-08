@@ -1,6 +1,6 @@
 ---
 title: "Diagnóstico, observabilidade e segurança em produção"
-description: "Disciplina de incident response com Grafana, Loki e Sentry — consulta read-only, configuração segura, validação pós-mudança e diagnóstico orientado por evidências."
+description: "Disciplina de incident response com Grafana, Loki e Sentry: consulta read-only, configuração segura, validação pós-mudança e diagnóstico orientado por evidências."
 date: "2026-04-28"
 tags: ["Observabilidade", "Grafana", "Loki", "Sentry", "Incident"]
 coverImage: null
@@ -19,7 +19,7 @@ Padrões comuns que custam caro em produção:
 
 - Diagnóstico baseado em memória ("isso parece com aquele bug de mês passado") sem confirmação.
 - SQL ad-hoc com risco de side effect em ambiente compartilhado.
-- Mudança em produção sem validação posterior — assume que o fix funcionou só porque o erro sumiu da tela do usuário que reclamou.
+- Mudança em produção sem validação posterior, assume que o fix funcionou só porque o erro sumiu da tela do usuário que reclamou.
 - Configuração sensível tratada como configuração comum, exposta em log.
 - Hipótese formada antes de olhar log, métrica ou trace.
 
@@ -27,7 +27,7 @@ Padrões comuns que custam caro em produção:
 
 **Pirâmide de evidência:** logs estruturados (Loki) → métricas (Grafana) → erros agregados (Sentry) → consulta read-only no banco. Tudo nessa ordem antes de qualquer hipótese forte.
 
-**Read-only diagnostics como contrato.** Toda consulta de diagnóstico opera em modo somente leitura. Qualquer ação que muda estado é mudança planejada, com aprovação, runbook e validação pós-mudança — não diagnóstico.
+**Read-only diagnostics como contrato.** Toda consulta de diagnóstico opera em modo somente leitura. Qualquer ação que muda estado é mudança planejada, com aprovação, runbook e validação pós-mudança, não diagnóstico.
 
 **Configuração segura por padrão.** Segredos fora de log, fora de erro estruturado, fora de mensagem para usuário. Toda referência a config sensível passa por handler que sanitiza antes de logar.
 
@@ -45,7 +45,7 @@ Padrões comuns que custam caro em produção:
 
 ## Impacto
 
-**110 diagnósticos de incidente e recuperação** documentados no workspace profissional, com critério explícito de evidência. Esse volume reflete disciplina aplicada de forma recorrente — não exceção pontual.
+**110 diagnósticos de incidente e recuperação** documentados no workspace profissional, com critério explícito de evidência. Esse volume reflete disciplina aplicada de forma recorrente, não exceção pontual.
 
 Diagnóstico passa de "achismo confirmado por sorte" para método auditável. Quando o time muda, o conhecimento não vai embora junto: fica documentado em runbook e em histórico de incident.
 

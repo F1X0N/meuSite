@@ -29,14 +29,14 @@ Quando isso está claro, o agente vira "engenheiro júnior com cabeça boa em um
 
 ## Validação: saída sem schema é confiança ingênua
 
-LLM gera texto. Texto vira JSON. JSON vira ação. Em algum ponto desse pipeline, alguém vai assumir que o JSON está correto sem validar — e aí a aplicação quebra.
+LLM gera texto. Texto vira JSON. JSON vira ação. Em algum ponto desse pipeline, alguém vai assumir que o JSON está correto sem validar, e aí a aplicação quebra.
 
 Validação de saída não é cosmético. É:
 
 - Schema validation antes de qualquer consumo.
 - JSON repair como fallback para malformação recuperável (vírgula faltando, aspa não escapada, chave não fechada).
 - Log estruturado da saída original quando há repair, para auditoria.
-- Erro tratado quando a saída é irreparável — não exceção propagada para o usuário.
+- Erro tratado quando a saída é irreparável, não exceção propagada para o usuário.
 
 Sem validação, a confiança no agente é ingênua. Funciona até o dia que não funciona, e quando não funciona, ninguém sabe por quê.
 
@@ -65,7 +65,7 @@ Read-only por padrão. Tudo que vai além de leitura precisa de aprovação. Ess
 - Validação de saída antes do consumo.
 - Read-only por padrão, com aprovação humana para qualquer mudança de estado.
 - Telemetria por execução: provider, custo, latência, taxa de sucesso.
-- Runbook de falha — o que fazer quando o agente erra ou alucina.
+- Runbook de falha: o que fazer quando o agente erra ou alucina.
 - Janela de observação para identificar regressão silenciosa de qualidade.
 
 ## Conclusão

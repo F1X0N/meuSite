@@ -1,7 +1,7 @@
 ---
 title: "Timeouts em chamadas LLM: resiliência sem hang"
 description: "Modelo demora a responder, request fica pendurada, sistema upstream estressa. Promise.race com deadline aborta cedo e libera o caller."
-date: "2026-05-08"
+date: "2025-11-06"
 coverComponent: "TimeoutPromiseRaceCover"
 tags: ["Resiliência", "IA", "Backend", "Engenharia"]
 readingTime: "4 min"
@@ -13,8 +13,8 @@ Chamada para LLM com prompt grande. Provider está sobrecarregado, lento ou simp
 
 Sem timeout explícito, três coisas más acontecem:
 
-1. **Backpressure** — sua aplicação fica com requests acumulados, eventualmente esgota pool de conexões.
-2. **Sintoma errado no monitoramento** — não é erro, é latência alta. Dashboards de erro não disparam.
+1. **Backpressure**: sua aplicação fica com requests acumulados, eventualmente esgota pool de conexões.
+2. **Sintoma errado no monitoramento**: não é erro, é latência alta. Dashboards de erro não disparam.
 3. **Caller desiste** mas sua chamada continua executando, gastando tokens de uma resposta que ninguém vai ler.
 
 A solução é simples e estabelecida: **deadline explícito** combinado com `Promise.race`.
@@ -23,27 +23,27 @@ A solução é simples e estabelecida: **deadline explícito** combinado com `Pr
 
 Duas promises competindo:
 
-- **Operação real** — a chamada para o provider.
-- **Timer** — promise que resolve com erro depois de N segundos.
+- **Operação real**: a chamada para o provider.
+- **Timer**: promise que resolve com erro depois de N segundos.
 
-`Promise.race([operacao, timer])` resolve com a primeira que terminar. Se a operação foi mais rápida, retorna o resultado. Se o timer foi mais rápido, lança erro de timeout.
+`Promise.race([operation, timer])` resolve com a primeira que terminar. Se a operação foi mais rápida, retorna o resultado. Se o timer foi mais rápido, lança erro de timeout.
 
 Em pseudo-código:
 
-```
-const operacao = client.chat.completions.create({...})
+```ts
+const operation = client.chat.completions.create({...})
 const timer = new Promise((_, reject) =>
   setTimeout(() => reject(new TimeoutError()), 15_000)
 )
 
-const result = await Promise.race([operacao, timer])
+const result = await Promise.race([operation, timer])
 ```
 
 Com 15 segundos de teto, sua aplicação tem garantia de que nenhuma chamada vai segurar request por mais que isso.
 
 ## O detalhe que muita implementação esquece
 
-`Promise.race` resolve uma das promises, mas a outra **continua executando**. A operação real não é cancelada quando o timer ganha — ela só não tem mais alguém esperando.
+`Promise.race` resolve uma das promises, mas a outra **continua executando**. A operação real não é cancelada quando o timer ganha, ela só não tem mais alguém esperando.
 
 Isso significa duas coisas:
 
@@ -52,9 +52,9 @@ Isso significa duas coisas:
 
 Para cancelar de verdade, é preciso **AbortController**:
 
-```
+```ts
 const controller = new AbortController()
-const operacao = client.chat.completions.create({
+const operation = client.chat.completions.create({
   ...,
   signal: controller.signal,
 })
@@ -72,7 +72,7 @@ Agora o timer aborta ativamente a operação. Provider recebe sinal de cancelame
 
 Depende da tarefa.
 
-- **Classificação** (input curto, output curto): 5-10 segundos. Modelo mini responde em 1-2s; 5s já é avisos de problema.
+- **Classificação** (input curto, output curto): 5-10 segundos. Modelo mini responde em 1-2s; 5s já é aviso de problema.
 - **Extração estruturada** (input médio, output médio): 15-30 segundos.
 - **Geração longa** (output grande): 30-60 segundos. Acima disso, considere streaming em vez de batch.
 - **Processamento async** (worker drenando fila): pode ser maior, mas ainda finito. 2-5 minutos por chamada.
@@ -98,16 +98,16 @@ Convenção que funciona:
 - Log nível `warn` (não `error`) com causa `timeout`.
 - Inclui o deadline configurado e tempo decorrido (deve bater com o deadline).
 - Inclui modelo, tamanho aproximado de input, request_id correlacional.
-- Métrica separada: `llm_timeouts_total` por modelo. Subindo = problema upstream.
+- Métrica separada: `llm_timeouts_total` por modelo. Subindo significa problema upstream.
 
 Sem essa distinção, timeout some no meio de erros 500 e ninguém percebe que o provider está degradando.
 
 ## Anti-padrões
 
-- **Timeout sem AbortController** — recursos continuam pendurados, tokens gastos sem ack ao caller.
-- **Mesmo timeout para todas as tarefas** — classificação rápida com timeout de 60s mascara modelos lentos.
-- **Reportar timeout como erro genérico** — perde visibilidade de degradação.
-- **Aumentar timeout pra "dar tempo"** — 99% das vezes o problema não é timeout, é o sistema upstream.
+- **Timeout sem AbortController**: recursos continuam pendurados, tokens gastos sem ack ao caller.
+- **Mesmo timeout para todas as tarefas**: classificação rápida com timeout de 60s mascara modelos lentos.
+- **Reportar timeout como erro genérico**: perde visibilidade de degradação.
+- **Aumentar timeout pra "dar tempo"**: 99% das vezes o problema não é timeout, é o sistema upstream.
 
 ---
 

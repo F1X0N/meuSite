@@ -1,7 +1,7 @@
 ---
 title: "Correlação de logs por request_id: o básico que muita gente erra"
 description: "Investigar incidente sem trace_id é arqueologia. Um UUID propagado em toda log da request transforma horas de greppar em minutos de leitura."
-date: "2026-05-08"
+date: "2025-09-19"
 coverComponent: "RequestIdTraceCover"
 tags: ["Observabilidade", "Backend", "Engenharia", "Logging"]
 readingTime: "4 min"
@@ -43,7 +43,7 @@ Solução é instrumentação central, não disciplina manual:
 
 - Logger global recebe contexto da request via async context (Node: `AsyncLocalStorage`; outras linguagens: equivalente).
 - Cada log do logger inclui `request_id` automaticamente.
-- Endpoint não precisa lembrar de passar — está no contexto.
+- Endpoint não precisa lembrar de passar; está no contexto.
 
 Sem async context, request_id vira parâmetro espalhado por todas as funções. Funciona, mas polui assinatura de função e é fácil esquecer.
 
@@ -57,7 +57,7 @@ Header convencional: `X-Request-Id`. Quando o cliente abre ticket de suporte, vo
 
 Request_id da operação síncrona acaba quando a request termina. Mas a operação pode disparar trabalho assíncrono (fila, scheduler, worker).
 
-Padrão: **propagar o request_id para o trabalho async**. Listener de evento, mensagem em fila, registro em outbox — todos carregam o request_id original.
+Padrão: **propagar o request_id para o trabalho async**. Listener de evento, mensagem em fila, registro em outbox: todos carregam o request_id original.
 
 Quando o worker processa, ele continua usando aquele request_id em seus logs. Investigação cruza barreira sync/async sem perder o fio.
 
@@ -73,10 +73,10 @@ Regra prática: **comece com request_id UUID. Migre para OpenTelemetry quando o 
 
 ## Anti-padrões
 
-- **Logar request_id só no início e no fim** — meio da request fica sem correlação.
-- **Não retornar no header da response** — cliente não consegue dizer qual request bugou.
-- **Gerar ID novo em chamada async** — quebra cadeia causal.
-- **`request_id` como número sequencial** — colisão entre instâncias, vazamento de informação sobre volume.
+- **Logar request_id só no início e no fim**: meio da request fica sem correlação.
+- **Não retornar no header da response**: cliente não consegue dizer qual request bugou.
+- **Gerar ID novo em chamada async**: quebra cadeia causal.
+- **`request_id` como número sequencial**: colisão entre instâncias, vazamento de informação sobre volume.
 
 ## Bônus: log truncation safe
 

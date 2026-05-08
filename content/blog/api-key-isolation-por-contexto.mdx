@@ -1,7 +1,7 @@
 ---
 title: "Chaves API segregadas por contexto: least privilege na prática"
 description: "Uma key compartilhada para todo o sistema é o caminho rápido para vazamento ampliado. Chave por feature/produto isola dano e permite contabilidade granular."
-date: "2026-05-08"
+date: "2025-07-09"
 coverComponent: "ApiKeyIsolationCover"
 tags: ["Segurança", "Backend", "Engenharia", "IA"]
 readingTime: "4 min"
@@ -24,7 +24,7 @@ Eventualmente:
 - Key vaza em log debug que ficou em produção. Atacante descobre. Tem acesso a todos os contextos.
 - Você precisa rotacionar a key. Tem que coordenar com 5 features simultaneamente. Risco alto.
 - Custo da fatura subiu. Quem gastou? Sem etiqueta, é detetive.
-- Quer migrar uma feature para outro provider. Precisa adicionar nova key — agora você tem duas keys e dois mecanismos.
+- Quer migrar uma feature para outro provider. Precisa adicionar nova key, agora você tem duas keys e dois mecanismos.
 
 A solução é simples e estrutural: **chave por contexto de uso**, desde o início.
 
@@ -32,19 +32,19 @@ A solução é simples e estrutural: **chave por contexto de uso**, desde o iní
 
 Em vez de:
 
-```
+```ts
 const apiKey = process.env.PROVIDER_API_KEY
 const client = new ProviderClient({ apiKey })
 ```
 
 Você tem:
 
-```
+```ts
 function getProviderKey(usage: 'classifier' | 'validator' | 'chat' | 'batch'): string {
   const envVar = `PROVIDER_API_KEY_${usage.toUpperCase()}`
   const key = process.env[envVar]
   if (key) return key
-  // fallback para key genérica em ambientes onde rota não foi configurada (dev, staging)
+  // fallback to generic key in environments without per-usage routing (dev, staging)
   return process.env.PROVIDER_API_KEY
 }
 
@@ -67,7 +67,7 @@ Cada feature passa seu identificador. Roteador escolhe a key. Fallback para key 
 
 Mapa `usage → env_var` fica em código central:
 
-```
+```ts
 const ENV_VAR_BY_USAGE: Record<string, string> = {
   classifier: 'PROVIDER_API_KEY_CLASSIFIER',
   validator: 'PROVIDER_API_KEY_VALIDATOR',
@@ -82,9 +82,9 @@ Adicionar novo contexto vira mudança em uma linha + provisionamento de nova key
 
 A pergunta natural: "quantas keys?". Resposta depende.
 
-- **Por feature de IA** — bom default. Classificador é diferente de validador é diferente de chat.
-- **Por produto/cliente** — quando o sistema é multi-tenant e você quer rastreio por cliente.
-- **Por ambiente** — sempre. Dev, staging, prod nunca compartilham.
+- **Por feature de IA**: bom default. Classificador é diferente de validador é diferente de chat.
+- **Por produto/cliente**: quando o sistema é multi-tenant e você quer rastreio por cliente.
+- **Por ambiente**: sempre. Dev, staging, prod nunca compartilham.
 
 Granularidade fina demais (key por endpoint, por usuário) vira burocracia. Granularidade grossa demais (key única) é o problema que estamos resolvendo.
 
@@ -92,20 +92,20 @@ Sweet spot: **uma key por contexto operacional distinto**. Se duas features são
 
 ## Anti-padrões
 
-- **Key única para tudo** — risco e auditoria zero.
-- **Key versionada com prefixo** (`PROVIDER_KEY_V1`, `V2`) — não é segregação, é versionamento. Ambas têm o mesmo escopo.
-- **Mapa de keys com nome de cliente** — vaza informação sobre clientes via env vars.
-- **Fallback para key genérica em produção** — em dev é OK, em prod é violação do princípio.
+- **Key única para tudo**: risco e auditoria zero.
+- **Key versionada com prefixo** (`PROVIDER_KEY_V1`, `V2`): não é segregação, é versionamento. Ambas têm o mesmo escopo.
+- **Mapa de keys com nome de cliente**: vaza informação sobre clientes via env vars.
+- **Fallback para key genérica em produção**: em dev é OK, em prod é violação do princípio.
 
 ## Quando isso é overengineering
 
-- **Sistema com uma única integração de IA, uma feature** — não há contexto para segregar. Adicionar quando crescer.
-- **MVP** — adia. Custo é trocar env var depois, é trabalho linear, não exponencial.
-- **Provider que não suporta múltiplas keys gratuitas** — alguns têm custo por key. Trade-off financeiro.
+- **Sistema com uma única integração de IA, uma feature**: não há contexto para segregar. Adicionar quando crescer.
+- **MVP**: adia. Custo é trocar env var depois, é trabalho linear, não exponencial.
+- **Provider que não suporta múltiplas keys gratuitas**: alguns têm custo por key. Trade-off financeiro.
 
 ## A disciplina que sustenta
 
-Code review com olho nesse ponto. Pull request que adiciona uso de IA tem que declarar contexto. Sem `getProviderKey('xyz')` explícito, está usando default — sinal vermelho.
+Code review com olho nesse ponto. Pull request que adiciona uso de IA tem que declarar contexto. Sem `getProviderKey('xyz')` explícito, está usando default. Sinal vermelho.
 
 Configurar provisionamento de nova key como passo do "definition of done" para feature nova de IA. Sem nova key, não é done.
 
