@@ -15,11 +15,22 @@ const renderPrinciples = (principles) => (
   </ul>
 )
 
-const renderCTA = (cta) => (
-  <Link key={cta.href} href={cta.href}>
-    <Button variant="outline">{cta.label}</Button>
-  </Link>
-)
+const isExternalOrFile = (href: string) => /^https?:\/\//.test(href) || /\.(pdf|zip|doc|docx)$/i.test(href)
+
+const renderCTA = (cta) => {
+  if (isExternalOrFile(cta.href)) {
+    return (
+      <a key={cta.href} href={cta.href} target="_blank" rel="noopener noreferrer">
+        <Button variant="outline">{cta.label}</Button>
+      </a>
+    )
+  }
+  return (
+    <Link key={cta.href} href={cta.href}>
+      <Button variant="outline">{cta.label}</Button>
+    </Link>
+  )
+}
 
 const renderCTAs = (ctas) => (
   <div className="flex flex-wrap gap-4">
