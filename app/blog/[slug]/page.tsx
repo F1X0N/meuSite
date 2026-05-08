@@ -3,6 +3,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 import { Badge } from '@/components/ui/Badge'
 import { BackLink } from '@/components/ui/BackLink'
 import { getAllBlogPosts, getBlogPostBySlug } from '@/lib/mdx'
+import { getCoverComponent } from '@/components/blog-covers'
 
 export async function generateStaticParams() {
   const posts = getAllBlogPosts()
@@ -79,12 +80,19 @@ export default async function BlogPostPage({ params }) {
     notFound()
   }
 
+  const Cover = getCoverComponent(post.coverComponent)
+
   return (
     <div className="py-16 md:py-20 lg:py-24">
       <div className="container max-w-3xl">
         <div className="mb-6">
           <BackLink href="/blog" label="Voltar para o blog" />
         </div>
+        {Cover && (
+          <div className="mb-10 rounded-xl overflow-hidden border border-border bg-muted/30 aspect-[1200/630]">
+            <Cover className="w-full h-full" />
+          </div>
+        )}
         {renderPostHeader(post)}
         <div className="mt-12">
           {renderPostContent(post.content)}

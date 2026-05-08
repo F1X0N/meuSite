@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/Ca
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { SearchBar } from '@/components/ui/SearchBar'
+import { getCoverComponent } from '@/components/blog-covers'
 
 const renderTag = (tag) => (
   <Badge key={tag} variant="outline">
@@ -28,25 +29,35 @@ const formatDate = (dateString) => {
   })
 }
 
-const renderPostCard = (post) => (
-  <Card key={post.slug}>
-    <CardHeader>
-      <div className="text-sm text-muted-foreground">
-        {formatDate(post.date)} · {post.readingTime}
-      </div>
-      <CardTitle as="h2">{post.title}</CardTitle>
-      <CardDescription>{post.description}</CardDescription>
-      <div className="mt-4 space-y-3">
-        {renderTags(post.tags)}
-        <Link href={`/blog/${post.slug}`}>
-          <Button variant="ghost" size="sm">
-            Ler artigo →
-          </Button>
+const renderPostCard = (post) => {
+  const Cover = getCoverComponent(post.coverComponent)
+  return (
+    <Card key={post.slug} className="overflow-hidden flex flex-col">
+      {Cover && (
+        <Link href={`/blog/${post.slug}`} className="block bg-muted/30 border-b border-border">
+          <div className="aspect-[1200/630]">
+            <Cover className="w-full h-full" />
+          </div>
         </Link>
-      </div>
-    </CardHeader>
-  </Card>
-)
+      )}
+      <CardHeader className="flex-1">
+        <div className="text-sm text-muted-foreground">
+          {formatDate(post.date)} · {post.readingTime}
+        </div>
+        <CardTitle as="h2">{post.title}</CardTitle>
+        <CardDescription>{post.description}</CardDescription>
+        <div className="mt-4 space-y-3">
+          {renderTags(post.tags)}
+          <Link href={`/blog/${post.slug}`}>
+            <Button variant="ghost" size="sm">
+              Ler artigo →
+            </Button>
+          </Link>
+        </div>
+      </CardHeader>
+    </Card>
+  )
+}
 
 const sortPosts = (posts) => {
   return [...posts].sort((a, b) => {
