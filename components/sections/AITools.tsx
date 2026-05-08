@@ -111,6 +111,22 @@ const ModeToggle = ({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => voi
     </div>
 )
 
+type ResumeModalState = {
+    open: boolean
+    loading: boolean
+    markdown: string | null
+    error: string | null
+    sourceJd: string | null
+}
+
+const initialResumeModal: ResumeModalState = {
+    open: false,
+    loading: false,
+    markdown: null,
+    error: null,
+    sourceJd: null,
+}
+
 // ============ Component ============
 export const AITools = () => {
     const [mode, setMode] = useState<Mode>('ask')
@@ -120,6 +136,8 @@ export const AITools = () => {
     const [remaining, setRemaining] = useState<number | null>(null)
     const [sessionId] = useState(generateSessionId)
     const [isFocused, setIsFocused] = useState(false)
+    const [resumeModal, setResumeModal] = useState<ResumeModalState>(initialResumeModal)
+    const [lastJobDescription, setLastJobDescription] = useState<string | null>(null)
 
     const messagesContainerRef = useRef<HTMLDivElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -307,6 +325,10 @@ export const AITools = () => {
                 setMessages(prev => [...prev, { role: 'user', content: originalInput, mode }])
             }
 
+            if (mode === 'job_fit') {
+                setLastJobDescription(messageToSend)
+            }
+
             // 2. Send to AI Chat
             const response = await fetch('/api/ai/chat', {
                 method: 'POST',
@@ -421,6 +443,38 @@ export const AITools = () => {
         )
     }
 
+    // ============ Targeted Resume Modal ============
+    const handleGenerateTargetedResume = async () => {
+        if (!lastJobDescription) return
+        setResumeModal({ open: true, loading: true, markdown: null, error: null, sourceJd: lastJobDescription })
+        try {
+            const r = await fetch('/api/ai/targeted-resume', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ jobDescription: lastJobDescription, sessionId }),
+            })
+            const data = await r.json()
+            if (!r.ok) {
+                setResumeModal((prev) => ({ ...prev, loading: false, error: data.error || 'Erro ao gerar CV' }))
+                return
+            }
+            setResumeModal((prev) => ({ ...prev, loading: false, markdown: data.markdown }))
+        } catch {
+            setResumeModal((prev) => ({ ...prev, loading: false, error: 'Erro de conexão' }))
+        }
+    }
+
+    const handleCopyResume = async () => {
+        if (!resumeModal.markdown) return
+        try {
+            await navigator.clipboard.writeText(resumeModal.markdown)
+        } catch {
+            // ignore
+        }
+    }
+
+    const closeResumeModal = () => setResumeModal(initialResumeModal)
+
     // ============ Render Job Fit Response ============
     const renderJobFitResponse = (fitData: JobFitResponse) => (
         <div className="space-y-4">
@@ -437,6 +491,23 @@ export const AITools = () => {
 
             {/* Summary */}
             <p className="text-sm leading-relaxed">{fitData.summary_md}</p>
+
+            {/* Targeted Resume CTA — apenas quando match é alto */}
+            {fitData.match_score_0_100 >= 75 && lastJobDescription && (
+                <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+                    <p className="text-xs text-muted-foreground mb-2">
+                        Match alto detectado. Posso gerar um CV adaptado destacando os bullets mais alinhados a esta vaga (sem inventar nada — só reordena o que já está documentado).
+                    </p>
+                    <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleGenerateTargetedResume}
+                        disabled={resumeModal.loading}
+                    >
+                        {resumeModal.loading ? 'Gerando...' : 'Gerar CV adaptado'}
+                    </Button>
+                </div>
+            )}
 
             {/* Requirements */}
             {fitData.requirements?.length > 0 && (
@@ -746,6 +817,57 @@ export const AITools = () => {
             <p className="text-center text-[11px] text-muted-foreground/70 mt-4 max-w-md mx-auto">
                 💡 Respostas baseadas no conteúdo público deste site. Quando não houver evidência, será indicado.
             </p>
+
+            {/* Targeted Resume Modal */}
+            {resumeModal.open && (
+                <div
+                    className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md"
+                    onClick={closeResumeModal}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="CV adaptado para a vaga"
+                >
+                    <div
+                        className="bg-card w-full max-w-3xl max-h-[85vh] rounded-xl shadow-2xl border border-border flex flex-col overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between p-4 border-b">
+                            <h3 className="font-semibold text-sm">CV adaptado para a vaga</h3>
+                            <button
+                                type="button"
+                                onClick={closeResumeModal}
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                                aria-label="Fechar"
+                            >
+                                <GIcon name="close" size={18} />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4">
+                            {resumeModal.loading && (
+                                <p className="text-sm text-muted-foreground">Gerando CV adaptado...</p>
+                            )}
+                            {resumeModal.error && (
+                                <p className="text-sm text-destructive">{resumeModal.error}</p>
+                            )}
+                            {resumeModal.markdown && (
+                                <pre className="text-xs whitespace-pre-wrap font-mono bg-muted/40 p-4 rounded-lg leading-relaxed">
+                                    {resumeModal.markdown}
+                                </pre>
+                            )}
+                        </div>
+                        {resumeModal.markdown && (
+                            <div className="border-t p-3 flex justify-end gap-2">
+                                <Button type="button" variant="outline" size="sm" onClick={handleCopyResume}>
+                                    Copiar markdown
+                                </Button>
+                                <Button type="button" size="sm" onClick={closeResumeModal}>
+                                    Fechar
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
