@@ -59,14 +59,13 @@ const requestSchema = z.object({
   consent: z.literal(true),
 })
 
-const renderEmailHtml = (jobTitle?: string) => {
-  const subject = jobTitle ? ` para a vaga de ${escapeHtml(jobTitle)}` : ''
+const renderEmailHtml = () => {
   return `<!doctype html>
 <html lang="pt-BR">
 <body style="margin:0;padding:24px;font-family:Helvetica,Arial,sans-serif;background:#fafafa;color:#111">
   <div style="max-width:560px;margin:0 auto;background:#fff;padding:24px;border-radius:8px;border:1px solid #eee">
-    <h1 style="font-size:18px;margin:0 0 12px">CV adaptado${subject}</h1>
-    <p style="font-size:14px;line-height:1.5;margin:0 0 12px">Olá! Em anexo está o CV adaptado${subject}, com os bullets reordenados para destacar as competências mais alinhadas a esta vaga.</p>
+    <h1 style="font-size:18px;margin:0 0 12px">Currículo de Josivan Amorim</h1>
+    <p style="font-size:14px;line-height:1.5;margin:0 0 12px">Olá! Em anexo está o currículo de Josivan Amorim, conforme solicitado.</p>
     <p style="font-size:14px;line-height:1.5;margin:0 0 12px">Para responder ou agendar uma conversa, basta dar reply neste email — vai direto para Josivan.</p>
     <hr style="border:none;border-top:1px solid #eee;margin:18px 0">
     <p style="font-size:12px;color:#666;line-height:1.5;margin:0">Este é um envio único, solicitado em <strong>josivan-amorim.vercel.app</strong>. Seu email não fica salvo em nenhuma lista. Caso não tenha solicitado, ignore.</p>
@@ -134,7 +133,7 @@ export async function POST(request: Request) {
     const pdfBuffer = Buffer.from(await pdfFetch.arrayBuffer())
 
     const fromAddress = process.env.RESEND_FROM ?? 'cv@josivan-amorim.dev'
-    const subject = jobTitle ? `CV de Josivan Amorim — ${jobTitle}` : 'CV de Josivan Amorim'
+    const subject = 'Currículo de Josivan Amorim'
 
     const resend = new Resend(apiKey)
     const sent = await resend.emails.send({
@@ -142,7 +141,7 @@ export async function POST(request: Request) {
       to: recipientEmail,
       replyTo: 'amorimjosivan7@gmail.com',
       subject,
-      html: renderEmailHtml(jobTitle),
+      html: renderEmailHtml(),
       attachments: [{ filename: 'cv-josivan-amorim.pdf', content: pdfBuffer }],
     })
 

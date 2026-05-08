@@ -465,7 +465,7 @@ export const AITools = () => {
         )
     }
 
-    // ============ Targeted Resume Modal ============
+    // ============ Targeted Resume — abre PDF em nova aba imediato ============
     const handleGenerateTargetedResume = async () => {
         if (!lastJobDescription) return
         setResumeModal({
@@ -482,14 +482,18 @@ export const AITools = () => {
             })
             const data = await r.json()
             if (!r.ok) {
-                setResumeModal((prev) => ({ ...prev, loading: false, error: data.error || 'Erro ao gerar CV' }))
+                setResumeModal((prev) => ({ ...prev, loading: false, error: data.error || 'Erro ao abrir o currículo' }))
                 return
+            }
+            const pdfUrl = data.pdfUrl ?? null
+            if (pdfUrl) {
+                window.open(pdfUrl, '_blank', 'noopener,noreferrer')
             }
             setResumeModal((prev) => ({
                 ...prev,
                 loading: false,
                 markdown: data.markdown,
-                pdfUrl: data.pdfUrl ?? null,
+                pdfUrl,
             }))
         } catch {
             setResumeModal((prev) => ({ ...prev, loading: false, error: 'Erro de conexão' }))
@@ -575,11 +579,11 @@ export const AITools = () => {
             {/* Summary */}
             <p className="text-sm leading-relaxed">{fitData.summary_md}</p>
 
-            {/* Targeted Resume CTA — apenas quando match é alto */}
+            {/* CV CTA — apenas quando match é alto */}
             {fitData.match_score_0_100 >= 75 && lastJobDescription && (
                 <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
                     <p className="text-xs text-muted-foreground mb-2">
-                        Match alto detectado. Posso gerar um CV adaptado destacando os bullets mais alinhados a esta vaga (sem inventar nada — só reordena o que já está documentado).
+                        Quer ver o currículo completo de Josivan?
                     </p>
                     <Button
                         type="button"
@@ -587,7 +591,7 @@ export const AITools = () => {
                         onClick={handleGenerateTargetedResume}
                         disabled={resumeModal.loading}
                     >
-                        {resumeModal.loading ? 'Gerando...' : 'Gerar CV adaptado'}
+                        {resumeModal.loading ? 'Abrindo...' : 'Abrir currículo'}
                     </Button>
                 </div>
             )}
@@ -901,21 +905,21 @@ export const AITools = () => {
                 💡 Respostas baseadas no conteúdo público deste site. Quando não houver evidência, será indicado.
             </p>
 
-            {/* Targeted Resume Modal */}
+            {/* Resume Modal — discreto: PDF abre em nova aba, modal serve para opt-in */}
             {resumeModal.open && (
                 <div
                     className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md"
                     onClick={closeResumeModal}
                     role="dialog"
                     aria-modal="true"
-                    aria-label="CV adaptado para a vaga"
+                    aria-label="Currículo de Josivan Amorim"
                 >
                     <div
-                        className="bg-card w-full max-w-3xl max-h-[85vh] rounded-xl shadow-2xl border border-border flex flex-col overflow-hidden"
+                        className="bg-card w-full max-w-md rounded-xl shadow-2xl border border-border flex flex-col overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-4 border-b">
-                            <h3 className="font-semibold text-sm">CV adaptado para a vaga</h3>
+                            <h3 className="font-semibold text-sm">Currículo de Josivan Amorim</h3>
                             <button
                                 type="button"
                                 onClick={closeResumeModal}
@@ -925,43 +929,29 @@ export const AITools = () => {
                                 <GIcon name="close" size={18} />
                             </button>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
                             {resumeModal.loading && (
-                                <p className="text-sm text-muted-foreground">Gerando CV adaptado...</p>
+                                <p className="text-sm text-muted-foreground">Abrindo o currículo...</p>
                             )}
                             {resumeModal.error && (
                                 <p className="text-sm text-destructive">{resumeModal.error}</p>
                             )}
-                            {resumeModal.markdown && (
+                            {resumeModal.pdfUrl && (
                                 <>
-                                    <div className="rounded-lg border border-border bg-muted/40 p-3 max-h-48 overflow-y-auto">
-                                        <p className="text-xs font-mono whitespace-pre-wrap leading-relaxed text-muted-foreground">
-                                            {resumeModal.markdown.slice(0, 600)}{resumeModal.markdown.length > 600 ? '…' : ''}
-                                        </p>
+                                    <p className="text-sm">O currículo foi aberto em uma nova aba. Caso o navegador tenha bloqueado, use o link abaixo.</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <a
+                                            href={resumeModal.pdfUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center justify-center gap-1.5 h-9 px-3 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm transition-colors"
+                                        >
+                                            <GIcon name="open_in_new" size={14} /> Abrir currículo
+                                        </a>
+                                        <Button type="button" variant="outline" size="sm" onClick={handleCopyResume}>
+                                            Copiar texto
+                                        </Button>
                                     </div>
-                                    {resumeModal.pdfUrl && (
-                                        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
-                                            <p className="text-xs font-medium">PDF gerado e disponível para download.</p>
-                                            <div className="flex flex-wrap gap-2">
-                                                <a
-                                                    href={resumeModal.pdfUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center justify-center gap-1.5 h-9 px-3 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm transition-colors"
-                                                >
-                                                    <GIcon name="download" size={14} /> Baixar PDF
-                                                </a>
-                                                <Button type="button" variant="outline" size="sm" onClick={handleCopyResume}>
-                                                    Copiar markdown
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {!resumeModal.pdfUrl && (
-                                        <p className="text-[11px] text-muted-foreground">
-                                            ⚠️ PDF indisponível neste deploy (Blob não configurado). Markdown abaixo continua acessível.
-                                        </p>
-                                    )}
                                     <div className="rounded-lg border border-border p-3 space-y-2">
                                         <label className="flex items-start gap-2 text-xs cursor-pointer">
                                             <input
@@ -969,16 +959,15 @@ export const AITools = () => {
                                                 checked={resumeModal.email.enabled}
                                                 onChange={handleToggleEmailOptin}
                                                 className="mt-0.5"
-                                                disabled={!resumeModal.pdfUrl}
                                             />
                                             <span>
-                                                <strong className="block">Receber também por email (opcional)</strong>
+                                                <strong className="block">Receber por email</strong>
                                                 <span className="text-muted-foreground">
-                                                    Seu email é usado apenas para esta entrega e não fica salvo em nenhuma lista.
+                                                    Envio único. Seu email não fica salvo em nenhuma lista.
                                                 </span>
                                             </span>
                                         </label>
-                                        {resumeModal.email.enabled && resumeModal.pdfUrl && !resumeModal.email.sent && (
+                                        {resumeModal.email.enabled && !resumeModal.email.sent && (
                                             <div className="flex flex-col sm:flex-row gap-2 mt-2">
                                                 <input
                                                     type="email"
@@ -995,7 +984,7 @@ export const AITools = () => {
                                                     onClick={handleSendEmail}
                                                     disabled={resumeModal.email.sending || !resumeModal.email.address}
                                                 >
-                                                    {resumeModal.email.sending ? 'Enviando...' : 'Enviar para meu email'}
+                                                    {resumeModal.email.sending ? 'Enviando...' : 'Enviar'}
                                                 </Button>
                                             </div>
                                         )}
@@ -1003,13 +992,16 @@ export const AITools = () => {
                                             <p className="text-xs text-destructive">{resumeModal.email.error}</p>
                                         )}
                                         {resumeModal.email.sent && (
-                                            <p className="text-xs text-green-600 dark:text-green-400">✓ Email enviado. Confira sua caixa de entrada (ou spam).</p>
+                                            <p className="text-xs text-green-600 dark:text-green-400">✓ Email enviado. Confira sua caixa de entrada.</p>
                                         )}
                                     </div>
                                 </>
                             )}
+                            {!resumeModal.loading && !resumeModal.error && !resumeModal.pdfUrl && resumeModal.markdown && (
+                                <p className="text-sm text-muted-foreground">Currículo gerado. Use o botão Copiar texto para visualizar.</p>
+                            )}
                         </div>
-                        {resumeModal.markdown && (
+                        {(resumeModal.pdfUrl || resumeModal.markdown) && (
                             <div className="border-t p-3 flex justify-end gap-2">
                                 <Button type="button" size="sm" onClick={closeResumeModal}>
                                     Fechar
