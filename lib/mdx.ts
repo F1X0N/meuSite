@@ -8,6 +8,7 @@ type FrontmatterData = Record<string, unknown> & {
   date?: string
   tags?: string[]
   coverImage?: string | null
+  coverComponent?: string
   featured?: boolean
   readingTime?: string
 }
@@ -18,6 +19,7 @@ export type CaseStudyMeta = {
   date: string
   tags: string[]
   coverImage: string | null
+  coverComponent: string | null
   featured: boolean
   slug: string
 }
@@ -28,6 +30,7 @@ export type BlogPostMeta = {
   date: string
   tags: string[]
   readingTime: string
+  coverComponent: string | null
   slug: string
 }
 
@@ -61,6 +64,7 @@ const buildCaseStudyMetadata = (data: FrontmatterData, slug: string): CaseStudyM
   date: data.date || '',
   tags: data.tags || [],
   coverImage: data.coverImage || null,
+  coverComponent: data.coverComponent || null,
   featured: data.featured || false,
   slug,
 })
@@ -71,6 +75,7 @@ const buildBlogPostMetadata = (data: FrontmatterData, slug: string): BlogPostMet
   date: data.date || '',
   tags: data.tags || [],
   readingTime: data.readingTime || '5 min',
+  coverComponent: data.coverComponent || null,
   slug,
 })
 

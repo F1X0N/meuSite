@@ -4,6 +4,7 @@ export default {
     './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './content/**/*.{md,mdx}',
+    './lib/**/*.{ts,tsx}',
   ],
   theme: {
     container: {

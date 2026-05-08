@@ -3,6 +3,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc'
 import { Badge } from '@/components/ui/Badge'
 import { BackLink } from '@/components/ui/BackLink'
 import { getAllCaseStudies, getCaseStudyBySlug } from '@/lib/mdx'
+import { getCoverComponent } from '@/components/blog-covers'
 
 export async function generateStaticParams() {
   const cases = getAllCaseStudies()
@@ -70,12 +71,19 @@ export default async function CaseStudyPage({ params }) {
     notFound()
   }
 
+  const Cover = getCoverComponent(caseStudy.coverComponent)
+
   return (
     <div className="py-16 md:py-20 lg:py-24">
       <div className="container max-w-3xl">
         <div className="mb-6">
           <BackLink href="/case-studies" label="Voltar para case studies" />
         </div>
+        {Cover && (
+          <div className="mb-10 rounded-xl overflow-hidden border border-border bg-muted/30 aspect-[1200/630]">
+            <Cover className="w-full h-full" />
+          </div>
+        )}
         {renderCaseHeader(caseStudy)}
         <div className="mt-12">
           {renderCaseContent(caseStudy.content)}
