@@ -1,11 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { SearchBar } from '@/components/ui/SearchBar'
+import {
+  DateFilter,
+  filterByDateRange,
+  type DateFilterRange,
+} from '@/components/ui/DateFilter'
+import { getCoverComponent } from '@/components/blog-covers'
 
 const renderTag = (tag) => (
   <Badge key={tag} variant="outline">
@@ -19,25 +25,33 @@ const renderTags = (tags) => (
   </div>
 )
 
-const renderCaseCard = (caseStudy) => (
-  <Card key={caseStudy.slug}>
-    <CardHeader>
-      <div className="text-sm text-muted-foreground">
-        {caseStudy.date}
-      </div>
-      <CardTitle as="h2">{caseStudy.title}</CardTitle>
-      <CardDescription>{caseStudy.description}</CardDescription>
-      <div className="mt-4 space-y-3">
-        {renderTags(caseStudy.tags)}
-        <Link href={`/case-studies/${caseStudy.slug}`}>
-          <Button variant="ghost" size="sm">
-            Ler caso →
-          </Button>
-        </Link>
-      </div>
-    </CardHeader>
-  </Card>
-)
+const renderCaseCard = (caseStudy) => {
+  const Cover = getCoverComponent(caseStudy.coverComponent)
+  return (
+    <Card key={caseStudy.slug} className="overflow-hidden">
+      <CardHeader>
+        <div className="text-sm text-muted-foreground">
+          {caseStudy.date}
+        </div>
+        <CardTitle as="h2">{caseStudy.title}</CardTitle>
+        <CardDescription>{caseStudy.description}</CardDescription>
+        <div className="mt-5 space-y-4">
+          {renderTags(caseStudy.tags)}
+          <Link href={`/case-studies/${caseStudy.slug}`} className="inline-block">
+            <Button variant="ghost" size="sm">
+              Ler caso →
+            </Button>
+          </Link>
+        </div>
+        {Cover && (
+          <div className="mt-5 -mx-6 -mb-6 border-t border-border bg-muted/20">
+            <Cover className="w-full h-auto" />
+          </div>
+        )}
+      </CardHeader>
+    </Card>
+  )
+}
 
 const sortCases = (cases) => {
   return [...cases].sort((a, b) => {
@@ -63,7 +77,13 @@ const renderResultsCount = (count, total) => {
 }
 
 export default function CaseStudiesClient({ initialCases }) {
-  const [filteredCases, setFilteredCases] = useState(initialCases)
+  const [searchFiltered, setSearchFiltered] = useState(initialCases)
+  const [dateRange, setDateRange] = useState<DateFilterRange>('all')
+
+  const finalFiltered = useMemo(
+    () => filterByDateRange(searchFiltered, dateRange),
+    [searchFiltered, dateRange],
+  )
 
   return (
     <div className="py-16 md:py-20 lg:py-24">
@@ -77,15 +97,19 @@ export default function CaseStudiesClient({ initialCases }) {
         </p>
 
         <div className="mt-8">
-          <SearchBar items={initialCases} onFilteredResults={setFilteredCases} />
+          <SearchBar items={initialCases} onFilteredResults={setSearchFiltered} />
+        </div>
+
+        <div className="mt-4">
+          <DateFilter active={dateRange} onChange={setDateRange} />
         </div>
 
         <div className="mt-6">
-          {renderResultsCount(filteredCases.length, initialCases.length)}
+          {renderResultsCount(finalFiltered.length, initialCases.length)}
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3 md:gap-6">
-          {renderCaseCards(filteredCases)}
+          {renderCaseCards(finalFiltered)}
         </div>
       </div>
     </div>
