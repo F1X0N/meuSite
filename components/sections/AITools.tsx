@@ -111,20 +111,42 @@ const ModeToggle = ({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => voi
     </div>
 )
 
+type EmailState = {
+    enabled: boolean
+    address: string
+    sending: boolean
+    sent: boolean
+    error: string | null
+}
+
 type ResumeModalState = {
     open: boolean
     loading: boolean
     markdown: string | null
+    pdfUrl: string | null
     error: string | null
     sourceJd: string | null
+    jobTitle: string | null
+    email: EmailState
+}
+
+const initialEmailState: EmailState = {
+    enabled: false,
+    address: '',
+    sending: false,
+    sent: false,
+    error: null,
 }
 
 const initialResumeModal: ResumeModalState = {
     open: false,
     loading: false,
     markdown: null,
+    pdfUrl: null,
     error: null,
     sourceJd: null,
+    jobTitle: null,
+    email: initialEmailState,
 }
 
 // ============ Component ============
@@ -446,7 +468,12 @@ export const AITools = () => {
     // ============ Targeted Resume Modal ============
     const handleGenerateTargetedResume = async () => {
         if (!lastJobDescription) return
-        setResumeModal({ open: true, loading: true, markdown: null, error: null, sourceJd: lastJobDescription })
+        setResumeModal({
+            ...initialResumeModal,
+            open: true,
+            loading: true,
+            sourceJd: lastJobDescription,
+        })
         try {
             const r = await fetch('/api/ai/targeted-resume', {
                 method: 'POST',
@@ -458,7 +485,12 @@ export const AITools = () => {
                 setResumeModal((prev) => ({ ...prev, loading: false, error: data.error || 'Erro ao gerar CV' }))
                 return
             }
-            setResumeModal((prev) => ({ ...prev, loading: false, markdown: data.markdown }))
+            setResumeModal((prev) => ({
+                ...prev,
+                loading: false,
+                markdown: data.markdown,
+                pdfUrl: data.pdfUrl ?? null,
+            }))
         } catch {
             setResumeModal((prev) => ({ ...prev, loading: false, error: 'Erro de conexão' }))
         }
@@ -470,6 +502,57 @@ export const AITools = () => {
             await navigator.clipboard.writeText(resumeModal.markdown)
         } catch {
             // ignore
+        }
+    }
+
+    const handleToggleEmailOptin = () => {
+        setResumeModal((prev) => ({
+            ...prev,
+            email: { ...prev.email, enabled: !prev.email.enabled, error: null, sent: false },
+        }))
+    }
+
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        setResumeModal((prev) => ({ ...prev, email: { ...prev.email, address: value, error: null } }))
+    }
+
+    const handleSendEmail = async () => {
+        const { email, pdfUrl } = resumeModal
+        if (!pdfUrl) return
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.address)) {
+            setResumeModal((prev) => ({ ...prev, email: { ...prev.email, error: 'Email inválido' } }))
+            return
+        }
+        setResumeModal((prev) => ({ ...prev, email: { ...prev.email, sending: true, error: null } }))
+        try {
+            const r = await fetch('/api/ai/targeted-resume/email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pdfUrl,
+                    recipientEmail: email.address,
+                    sessionId,
+                    consent: true,
+                }),
+            })
+            const data = await r.json()
+            if (!r.ok) {
+                setResumeModal((prev) => ({
+                    ...prev,
+                    email: { ...prev.email, sending: false, error: data.error || 'Falha no envio' },
+                }))
+                return
+            }
+            setResumeModal((prev) => ({
+                ...prev,
+                email: { ...prev.email, sending: false, sent: true },
+            }))
+        } catch {
+            setResumeModal((prev) => ({
+                ...prev,
+                email: { ...prev.email, sending: false, error: 'Erro de conexão' },
+            }))
         }
     }
 
@@ -842,7 +925,7 @@ export const AITools = () => {
                                 <GIcon name="close" size={18} />
                             </button>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4">
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
                             {resumeModal.loading && (
                                 <p className="text-sm text-muted-foreground">Gerando CV adaptado...</p>
                             )}
@@ -850,16 +933,84 @@ export const AITools = () => {
                                 <p className="text-sm text-destructive">{resumeModal.error}</p>
                             )}
                             {resumeModal.markdown && (
-                                <pre className="text-xs whitespace-pre-wrap font-mono bg-muted/40 p-4 rounded-lg leading-relaxed">
-                                    {resumeModal.markdown}
-                                </pre>
+                                <>
+                                    <div className="rounded-lg border border-border bg-muted/40 p-3 max-h-48 overflow-y-auto">
+                                        <p className="text-xs font-mono whitespace-pre-wrap leading-relaxed text-muted-foreground">
+                                            {resumeModal.markdown.slice(0, 600)}{resumeModal.markdown.length > 600 ? '…' : ''}
+                                        </p>
+                                    </div>
+                                    {resumeModal.pdfUrl && (
+                                        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
+                                            <p className="text-xs font-medium">PDF gerado e disponível para download.</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                <a
+                                                    href={resumeModal.pdfUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center justify-center gap-1.5 h-9 px-3 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm transition-colors"
+                                                >
+                                                    <GIcon name="download" size={14} /> Baixar PDF
+                                                </a>
+                                                <Button type="button" variant="outline" size="sm" onClick={handleCopyResume}>
+                                                    Copiar markdown
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {!resumeModal.pdfUrl && (
+                                        <p className="text-[11px] text-muted-foreground">
+                                            ⚠️ PDF indisponível neste deploy (Blob não configurado). Markdown abaixo continua acessível.
+                                        </p>
+                                    )}
+                                    <div className="rounded-lg border border-border p-3 space-y-2">
+                                        <label className="flex items-start gap-2 text-xs cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={resumeModal.email.enabled}
+                                                onChange={handleToggleEmailOptin}
+                                                className="mt-0.5"
+                                                disabled={!resumeModal.pdfUrl}
+                                            />
+                                            <span>
+                                                <strong className="block">Receber também por email (opcional)</strong>
+                                                <span className="text-muted-foreground">
+                                                    Seu email é usado apenas para esta entrega e não fica salvo em nenhuma lista.
+                                                </span>
+                                            </span>
+                                        </label>
+                                        {resumeModal.email.enabled && resumeModal.pdfUrl && !resumeModal.email.sent && (
+                                            <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                                                <input
+                                                    type="email"
+                                                    inputMode="email"
+                                                    placeholder="seu@email.com"
+                                                    value={resumeModal.email.address}
+                                                    onChange={handleEmailChange}
+                                                    className="flex-1 px-3 py-2 text-sm bg-background border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                                    disabled={resumeModal.email.sending}
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    onClick={handleSendEmail}
+                                                    disabled={resumeModal.email.sending || !resumeModal.email.address}
+                                                >
+                                                    {resumeModal.email.sending ? 'Enviando...' : 'Enviar para meu email'}
+                                                </Button>
+                                            </div>
+                                        )}
+                                        {resumeModal.email.error && (
+                                            <p className="text-xs text-destructive">{resumeModal.email.error}</p>
+                                        )}
+                                        {resumeModal.email.sent && (
+                                            <p className="text-xs text-green-600 dark:text-green-400">✓ Email enviado. Confira sua caixa de entrada (ou spam).</p>
+                                        )}
+                                    </div>
+                                </>
                             )}
                         </div>
                         {resumeModal.markdown && (
                             <div className="border-t p-3 flex justify-end gap-2">
-                                <Button type="button" variant="outline" size="sm" onClick={handleCopyResume}>
-                                    Copiar markdown
-                                </Button>
                                 <Button type="button" size="sm" onClick={closeResumeModal}>
                                     Fechar
                                 </Button>

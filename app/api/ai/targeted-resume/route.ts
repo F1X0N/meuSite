@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { OpenAI } from 'openai'
+import { put } from '@vercel/blob'
 import { z } from 'zod'
 import { logger } from '@/lib/logger'
 import { AUDIT_EVENTS } from '@/lib/audit-events'
@@ -9,6 +10,7 @@ import {
   generateTargetedResumeMarkdown,
   validateMarkdownIsSubset,
 } from '@/lib/agent-tools/resume'
+import { generateResumePDF } from '@/lib/agent-tools/resume-pdf'
 import { createHash } from 'node:crypto'
 
 const RATE_LIMIT_WINDOW_MS = 3600_000
@@ -116,10 +118,46 @@ export async function POST(request: Request) {
       md_hash,
     })
 
+    let pdfUrl: string | null = null
+    let pdfSizeBytes: number | null = null
+    let pdfHash: string | null = null
+
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      try {
+        const pdfStartedAt = Date.now()
+        const pdfBuffer = await generateResumePDF(prioritySkills)
+        pdfHash = createHash('sha256').update(pdfBuffer).digest('hex').slice(0, 16)
+        pdfSizeBytes = pdfBuffer.length
+
+        const filename = `cv-targeted-${md_hash}.pdf`
+        const blob = await put(filename, pdfBuffer, {
+          access: 'public',
+          addRandomSuffix: true,
+          contentType: 'application/pdf',
+        })
+        pdfUrl = blob.url
+
+        logger.info(AUDIT_EVENTS.TARGETED_RESUME_PDF_UPLOADED, {
+          request_id: requestId,
+          ip_hash: ctx?.ip_hash,
+          pdf_url: pdfUrl,
+          pdf_size_bytes: pdfSizeBytes,
+          pdf_hash: pdfHash,
+          pdf_latency_ms: Date.now() - pdfStartedAt,
+        })
+      } catch (pdfError) {
+        logger.error(AUDIT_EVENTS.TARGETED_RESUME_PDF_FAILED, {
+          request_id: requestId,
+          error_class: pdfError instanceof Error ? pdfError.constructor.name : 'unknown',
+          error_message: pdfError instanceof Error ? pdfError.message.slice(0, 200) : 'unknown',
+        })
+      }
+    }
+
     const headers = new Headers()
     if (requestId) headers.set('x-request-id', requestId)
     return NextResponse.json(
-      { markdown, prioritySkills, hash: md_hash },
+      { markdown, prioritySkills, hash: md_hash, pdfUrl, pdfSizeBytes, pdfHash },
       { headers },
     )
   } catch (error) {

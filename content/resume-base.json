@@ -1,25 +1,28 @@
 {
   "header": {
     "name": "Josivan Amorim",
-    "title": "Engenheiro de Software | IA & Backend",
+    "title": "Engenheiro de Software | IA Aplicada, Backend & Operação Técnica",
     "email": "amorimjosivan7@gmail.com",
     "phone": "+55 75 99182-6325",
+    "location": "Brasil (remoto)",
     "linkedin": "https://www.linkedin.com/in/josivan-amorim-44401120a/",
     "github": "https://github.com/F1X0N",
-    "portfolio": "https://josivan-amorim.vercel.app/"
+    "portfolio": "https://josivan-amorim.vercel.app"
   },
-  "summary": "Engenheiro de software full stack com foco em IA aplicada, backend e sistemas de produção. Experiência em SaaS LegalTech, integrando LLMs, OpenAI, RAG, automações, APIs, PostgreSQL e interfaces web para transformar fluxos operacionais complexos em soluções confiáveis, observáveis e seguras. Atua conectando produto, suporte técnico e engenharia, com disciplina em diagnóstico por evidências, documentação, revisão técnica, critérios de aceite e validação pós-mudança.",
+  "summary": "Engenheiro de Software full stack com mais de 4 anos de experiência em IA aplicada (OpenAI, RAG, agentes com supervisão humana, MCP), backend (Python, Node.js, TypeScript, PostgreSQL) e operação técnica em produção (observabilidade com Grafana, Loki e Sentry). Atuação em SaaS LegalTech e em operação industrial com mais de 28 mil colaboradores. Histórico documentado com mais de 184 features entregues, mais de 110 diagnósticos de incidente recuperados e mais de 74 fluxos operacionais ativos. Diferencial: combina profundidade técnica com responsabilidade operacional — diagnóstico orientado por evidências, supervisão de agentes de IA com critério humano, validação pós-mudança e disciplina de deploy.",
   "skills": {
     "ai_llm": [
       "OpenAI API",
-      "RAG",
+      "RAG (Retrieval Augmented Generation)",
       "embeddings",
       "busca semântica",
       "prompt engineering",
       "LLM workflows",
-      "agentes de IA",
-      "MCP",
-      "validação de saídas estruturadas"
+      "agentes de IA com supervisão humana",
+      "MCP (Model Context Protocol)",
+      "validação de saídas estruturadas",
+      "JSON repair",
+      "governança multi-provider"
     ],
     "backend": [
       "Python",
@@ -29,7 +32,8 @@
       "REST APIs",
       "integrações entre sistemas",
       "automações",
-      "pipelines de processamento"
+      "pipelines de processamento",
+      "PHP"
     ],
     "data": [
       "PostgreSQL",
@@ -37,7 +41,7 @@
       "Redis",
       "Firestore",
       "diagnóstico read-only",
-      "segurança operacional",
+      "segurança operacional em consultas",
       "configuração segura",
       "bancos vetoriais"
     ],
@@ -49,26 +53,54 @@
       "análise de incidentes",
       "latência",
       "performance",
-      "validação em produção"
+      "validação em produção",
+      "logs estruturados",
+      "métricas",
+      "tracing"
     ],
     "devops": [
       "Docker",
       "AWS S3",
       "Git",
       "GitHub",
+      "GitHub Actions",
       "CI/CD",
       "versionamento",
       "runbooks",
-      "documentação técnica"
+      "documentação técnica",
+      "PowerShell"
     ],
     "frontend": [
       "React",
-      "Next.js",
+      "Next.js 15",
       "Angular",
       "Tailwind CSS",
       "Bootstrap",
       "HTML5",
-      "CSS3"
+      "CSS3",
+      "MDX",
+      "Framer Motion"
+    ],
+    "methodologies": [
+      "Lean",
+      "Scrum",
+      "Kanban",
+      "Agile",
+      "evidence-based delivery",
+      "release validation",
+      "critérios de aceite explícitos",
+      "operational discipline"
+    ],
+    "soft_skills": [
+      "comunicação executiva",
+      "escrita analítica",
+      "síntese de evidências",
+      "decision framing",
+      "ownership",
+      "liderança técnica",
+      "disciplina operacional",
+      "disciplina de revisão",
+      "julgamento cross-functional"
     ]
   },
   "experience": [
@@ -76,26 +108,31 @@
       "company": "SaaS LegalTech",
       "role": "Desenvolvedor Full Stack",
       "period": "Julho 2024 — Presente",
+      "location": "Remoto",
       "bullets": [
         {
-          "text": "Desenvolve funcionalidades full stack em produto LegalTech SaaS, atuando em backend, frontend, automações e integrações com IA.",
-          "tags": ["full-stack", "backend", "frontend", "automation", "ai", "llm"]
+          "text": "Desenvolve funcionalidades full stack em produto LegalTech SaaS atuando em backend (Node.js, Python), frontend (React), automações e integrações com IA, no ciclo completo de feature.",
+          "tags": ["full-stack", "backend", "frontend", "automation", "ai", "llm", "nodejs", "python", "react"]
         },
         {
-          "text": "Integra serviços de inteligência artificial em fluxos de produto, incluindo OpenAI, RAG, assistentes, prompts estruturados e geração/análise de conteúdo.",
-          "tags": ["ai", "openai", "rag", "llm", "prompts", "agent-supervision"]
+          "text": "Integra serviços de IA em fluxos de produto: OpenAI, RAG, assistentes, prompts estruturados, validação de saídas com JSON repair, governança multi-provider e supervisão humana de agentes.",
+          "tags": ["ai", "openai", "rag", "llm", "prompts", "agent-supervision", "json-repair", "governance"]
         },
         {
-          "text": "Atua com Node.js, Python, React e PostgreSQL para construir APIs, rotinas operacionais, telas de produto e integrações entre sistemas.",
-          "tags": ["nodejs", "python", "react", "postgresql", "rest", "integration"]
+          "text": "Atua com Node.js, Python, React e PostgreSQL para construir APIs REST, rotinas operacionais, telas de produto, integrações entre sistemas e pipelines de processamento.",
+          "tags": ["nodejs", "python", "react", "postgresql", "rest", "integration", "pipelines"]
         },
         {
-          "text": "Conduz diagnósticos técnicos orientados por evidências com observabilidade, consultas seguras, análise de comportamento em produção e validação pós-mudança.",
+          "text": "Conduz diagnósticos técnicos orientados por evidências com observabilidade (Grafana, Loki, Sentry), consultas read-only seguras, análise de comportamento em produção e validação pós-mudança.",
           "tags": ["observability", "incident", "monitoring", "sql-safety", "validation", "grafana", "loki", "sentry"]
         },
         {
-          "text": "Estrutura documentação técnica, runbooks, critérios de aceite e planos de validação para reduzir ambiguidades e aumentar segurança operacional.",
+          "text": "Estrutura documentação técnica, runbooks, critérios de aceite e planos de validação para reduzir ambiguidades e aumentar segurança operacional em entregas.",
           "tags": ["runbooks", "release-validation", "acceptance-criteria", "documentation", "operational-discipline"]
+        },
+        {
+          "text": "Mantém disciplina de evidência documentada: mais de 184 features planejadas entregues, mais de 110 diagnósticos de incidente recuperados e 74 fluxos operacionais ativos no workspace profissional.",
+          "tags": ["impact", "metrics", "delivery", "incident", "operational-volume"]
         }
       ]
     },
@@ -103,10 +140,11 @@
       "company": "Grupo Dass",
       "role": "Desenvolvedor Full Stack",
       "period": "Fevereiro 2022 — Julho 2024",
+      "location": "Brasil + Argentina (remoto/híbrido)",
       "bullets": [
         {
-          "text": "Desenvolveu sistemas internos, automações e aplicações web para digitalizar processos em uma operação com mais de 28 mil colaboradores.",
-          "tags": ["scale", "internal-tools", "process-automation", "fullstack"]
+          "text": "Desenvolveu sistemas internos, automações e aplicações web para digitalizar processos em operação industrial com mais de 28 mil colaboradores no Brasil e Argentina.",
+          "tags": ["scale", "internal-tools", "process-automation", "fullstack", "industrial"]
         },
         {
           "text": "Atuou no ciclo completo de software: requisitos, desenvolvimento backend/frontend, entrega, apresentação e sustentação com Angular, React, JavaScript, Node.js, PHP e PostgreSQL.",
@@ -114,11 +152,27 @@
         },
         {
           "text": "Contribuiu para aumento de 30% na eficiência de processos internos e redução de 50% no tempo de processamento de documentos.",
-          "tags": ["impact", "efficiency", "process-automation", "metrics"]
+          "tags": ["impact", "efficiency", "process-automation", "metrics", "kpi"]
         },
         {
-          "text": "Trabalhou em ambiente orientado a melhoria contínua, com práticas Lean, Scrum, Kanban e colaboração entre áreas.",
-          "tags": ["lean", "scrum", "kanban", "agile", "collaboration"]
+          "text": "Trabalhou em ambiente orientado a melhoria contínua com práticas Lean, Scrum, Kanban e colaboração cross-functional entre engenharia, operação e PCP.",
+          "tags": ["lean", "scrum", "kanban", "agile", "collaboration", "cross-functional"]
+        }
+      ]
+    },
+    {
+      "company": "Grupo Dass",
+      "role": "Cronometrista (PCP)",
+      "period": "Fevereiro 2021 — Fevereiro 2022",
+      "location": "Bahia (presencial)",
+      "bullets": [
+        {
+          "text": "Atuou em Planejamento e Controle de Produção (PCP) com ZWCAD, projetando layouts funcionais e previsões produtivas no chão de fábrica.",
+          "tags": ["pcp", "production-planning", "zwcad", "industrial", "layout"]
+        },
+        {
+          "text": "Aplicou práticas Lean, Scrum e Kanban em melhoria contínua de processos produtivos, com foco em redução de desperdício e previsibilidade operacional.",
+          "tags": ["lean", "scrum", "kanban", "continuous-improvement", "operations"]
         }
       ]
     },
@@ -126,42 +180,107 @@
       "company": "Freelancer",
       "role": "Desenvolvedor Frontend",
       "period": "Julho 2021 — Julho 2024",
+      "location": "Remoto",
       "bullets": [
         {
           "text": "Desenvolveu websites responsivos e páginas institucionais com JavaScript, Bootstrap, HTML5 e CSS3, com foco em presença digital, clareza visual e responsividade.",
-          "tags": ["frontend", "responsive", "javascript", "bootstrap", "html5", "css3"]
+          "tags": ["frontend", "responsive", "javascript", "bootstrap", "html5", "css3", "freelance"]
         }
       ]
     }
   ],
-  "publicProject": {
-    "title": "Portfólio técnico com IA",
-    "url": "josivan-amorim.vercel.app",
-    "bullets": [
-      {
-        "text": "Site pessoal e portfólio técnico construído com Next.js 15, React 19, TypeScript, Tailwind CSS, MDX, Framer Motion, OpenAI API e deploy na Vercel.",
-        "tags": ["nextjs", "react", "typescript", "tailwind", "mdx", "openai", "vercel"]
-      },
-      {
-        "text": "Inclui case studies públicos sobre IA em produção, observabilidade, validação de entregas e orquestração de agentes com supervisão humana.",
-        "tags": ["case-studies", "ai", "observability", "validation", "agent-supervision"]
-      },
-      {
-        "text": "Agente conversacional com skills por conteúdo (padrão Claude Code), tools de sugestão de cases relevantes e geração de CV adaptado por vaga.",
-        "tags": ["agent", "skills", "tools", "ai", "rag"]
-      }
-    ]
-  },
+  "publicProjects": [
+    {
+      "title": "Portfólio Técnico com IA",
+      "role": "Solo",
+      "url": "https://josivan-amorim.vercel.app",
+      "repo": "https://github.com/F1X0N",
+      "bullets": [
+        {
+          "text": "Site pessoal e portfólio técnico construído com Next.js 15, React 19, TypeScript, Tailwind CSS, MDX, Framer Motion, OpenAI API e deploy na Vercel com CI/CD via GitHub Actions e Lighthouse CI.",
+          "tags": ["nextjs", "react", "typescript", "tailwind", "mdx", "openai", "vercel", "ci-cd", "lighthouse"]
+        },
+        {
+          "text": "Agente conversacional com skills por conteúdo (padrão Claude Code), tools de sugestão de cases relevantes, geração de CV adaptado por vaga e validação anti-invenção em runtime.",
+          "tags": ["agent", "skills", "tools", "ai", "rag", "validation"]
+        },
+        {
+          "text": "Inclui case studies públicos sobre IA em produção, observabilidade, validação de entregas e orquestração de agentes com supervisão humana, com headers de segurança (CSP, HSTS) e logging estruturado.",
+          "tags": ["case-studies", "ai", "observability", "validation", "agent-supervision", "security", "logging"]
+        }
+      ]
+    },
+    {
+      "title": "Case: Diagnóstico, Observabilidade e Segurança em Produção",
+      "role": "Autor",
+      "url": "https://josivan-amorim.vercel.app/case-studies/diagnostico-observabilidade-producao",
+      "bullets": [
+        {
+          "text": "Disciplina de incident response com Grafana, Loki e Sentry — logs estruturados, métricas e erros agregados como base de diagnóstico antes de hipóteses.",
+          "tags": ["observability", "incident", "grafana", "loki", "sentry"]
+        }
+      ]
+    },
+    {
+      "title": "Case: Orquestração de IA Aplicada à Operação Técnica",
+      "role": "Autor",
+      "url": "https://josivan-amorim.vercel.app/case-studies/orquestracao-ia-operacao",
+      "bullets": [
+        {
+          "text": "Agentes com supervisão humana para diagnóstico e suporte: skills focadas, read-only por padrão, validação de saída via JSON repair, governança multi-provider e telemetria por execução.",
+          "tags": ["ai", "agent-supervision", "skills", "json-repair", "governance"]
+        }
+      ]
+    },
+    {
+      "title": "Case: Validação de Features, Critérios de Aceite e Impacto Operacional",
+      "role": "Autor",
+      "url": "https://josivan-amorim.vercel.app/case-studies/validacao-criterios-aceite",
+      "bullets": [
+        {
+          "text": "Release validation, evidência de entrega e mensuração de impacto reduzindo retrabalho e ambiguidade — disciplina contra suposição.",
+          "tags": ["release-validation", "acceptance-criteria", "evidence-based-delivery", "operational-discipline"]
+        }
+      ]
+    }
+  ],
+  "notableMetrics": [
+    "184+ features planejadas entregues com critérios de aceite explícitos",
+    "110+ diagnósticos de incidente e recuperação documentados",
+    "74 fluxos de trabalho operacional ativos",
+    "21 skills de agentes e procedimentos operacionais documentados",
+    "17 templates de workflow e runbooks reutilizáveis",
+    "30% de aumento de eficiência em processos internos (Grupo Dass)",
+    "50% de redução no tempo de processamento de documentos (Grupo Dass)",
+    "28.000+ colaboradores impactados em operação industrial Brasil/Argentina"
+  ],
   "education": [
     {
-      "institution": "UNIFACS",
+      "institution": "UNIFACS — Universidade Salvador",
       "degree": "Análise e Desenvolvimento de Sistemas",
-      "period": "2021–2023"
+      "period": "2021–2023",
+      "coursework": [
+        "Engenharia de Software",
+        "Banco de Dados",
+        "Estruturas de Dados",
+        "Programação Orientada a Objetos",
+        "Análise de Requisitos"
+      ]
     }
   ],
   "certifications": [
     "Curso em Vídeo — HTML5, CSS3 e JavaScript",
     "DIO — Bootcamp Desenvolvimento Frontend com Angular"
   ],
-  "languages": ["Inglês técnico"]
+  "languages": [
+    "Português (nativo)",
+    "Inglês (técnico — leitura e escrita)"
+  ],
+  "principles": [
+    "Evidência antes de opinião: logs, métricas e replays vêm antes de hipóteses.",
+    "IA com controle humano: agentes e LLMs são alavancas, não substitutos de critério técnico.",
+    "Operação é parte do produto: runbooks, observabilidade e validação pós-mudança são responsabilidade de engenharia.",
+    "Métricas que pagam a conta: eficiência, custo, risco e impacto operacional sustentam decisões técnicas.",
+    "Disciplina sobre cerimônia: critérios de aceite explícitos, segurança em consultas (read-only), configuração segura, deploy controlado."
+  ]
 }

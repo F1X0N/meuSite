@@ -2,6 +2,19 @@
 
 Este documento descreve a estrutura de logs estruturados, eventos auditáveis e como reproduzir trilhas de eventos a partir de um `request_id`.
 
+## Variáveis de ambiente
+
+| Var | Obrigatória? | Onde | Para que |
+|---|---|---|---|
+| `OPENAI_API_KEY` | sim | Vercel (prod+preview) | Chat, Job Fit, extract-job, targeted-resume |
+| `RESEND_API_KEY` | sim | Vercel (prod+preview) | Contato + envio do CV adaptado por email |
+| `BLOB_READ_WRITE_TOKEN` | sim para CV adaptado em PDF | Vercel (prod+preview) | Upload do PDF gerado para Vercel Blob (criar Blob store no dashboard, copiar token) |
+
+### Pendências externas (configuração manual)
+
+- **Vercel Blob store**: criar via dashboard (Storage → Create → Blob) e copiar `BLOB_READ_WRITE_TOKEN` para `production` + `preview` envs. Sem isso, o endpoint `/api/ai/targeted-resume` continua funcionando mas não retorna `pdfUrl` (apenas markdown).
+- **Resend domain `josivan-amorim.dev`**: verificar no dashboard Resend e adicionar SPF/DKIM/DMARC no DNS. Sem isso, envio de email do CV adaptado falha em prod (UI continua funcionando para download direto do PDF).
+
 ## Princípios
 
 1. **Evidência antes de opinião**: cada request HTTP recebe um `request_id` (UUID v4) propagado em todos os logs daquela request. Dado um `request_id`, é possível reconstruir toda a vida da request — entrada → processamento → saída → erro se houver.
