@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { TransitionLink } from '@/components/layout/TransitionLink'
 import { GIcon } from '@/components/icons/GIcon'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
@@ -19,7 +19,7 @@ export const BackLink = ({ href, label = 'Voltar' }: BackLinkProps) => {
 
   return (
     <motion.div initial={initial} animate={animate} transition={transition}>
-      <Link
+      <TransitionLink
         href={href}
         className="group inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
       >
@@ -29,7 +29,7 @@ export const BackLink = ({ href, label = 'Voltar' }: BackLinkProps) => {
           className="transition-transform group-hover:-translate-x-1 duration-200"
         />
         {label}
-      </Link>
+      </TransitionLink>
     </motion.div>
   )
 }

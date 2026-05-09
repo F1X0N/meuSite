@@ -81,7 +81,10 @@ export default async function CaseStudyPage({ params }) {
           <BackLink href="/case-studies" label="Voltar para case studies" />
         </div>
         {Cover && (
-          <div className="mb-10">
+          <div
+            className="mb-10 cover-interactive"
+            style={{ viewTransitionName: `cover-case-${slug}` } as React.CSSProperties}
+          >
             <Cover className="w-full h-auto" />
           </div>
         )}

@@ -1,7 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import Link from 'next/link'
+import { useMemo, useState, type CSSProperties } from 'react'
+import { TransitionLink } from '@/components/layout/TransitionLink'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -12,6 +12,9 @@ import {
   type DateFilterRange,
 } from '@/components/ui/DateFilter'
 import { getCoverComponent } from '@/components/blog-covers'
+
+const coverStyle = (slug: string): CSSProperties =>
+  ({ viewTransitionName: `cover-case-${slug}` } as CSSProperties)
 
 const renderTag = (tag) => (
   <Badge key={tag} variant="outline">
@@ -37,14 +40,17 @@ const renderCaseCard = (caseStudy) => {
         <CardDescription>{caseStudy.description}</CardDescription>
         <div className="mt-5 space-y-4">
           {renderTags(caseStudy.tags)}
-          <Link href={`/case-studies/${caseStudy.slug}`} className="inline-block">
+          <TransitionLink href={`/case-studies/${caseStudy.slug}`} className="inline-block">
             <Button variant="ghost" size="sm">
               Ler caso →
             </Button>
-          </Link>
+          </TransitionLink>
         </div>
         {Cover && (
-          <div className="mt-5 -mx-6 -mb-6 border-t border-border bg-muted/20">
+          <div
+            className="mt-5 -mx-6 -mb-6 border-t border-border bg-muted/20"
+            style={coverStyle(caseStudy.slug)}
+          >
             <Cover className="w-full h-auto" />
           </div>
         )}

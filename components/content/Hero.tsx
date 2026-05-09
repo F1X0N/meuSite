@@ -1,65 +1,74 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
+import { HeroNetworkGraph } from '@/components/content/HeroNetworkGraph'
 import { copy } from '@/config/copy'
 
 const renderCTA = () => (
-  <div className="flex flex-wrap gap-4">
+  <div className="flex flex-wrap gap-3">
     <Link href="/case-studies">
       <Button variant="primary" size="lg">
         {copy.hero.cta.primary}
       </Button>
     </Link>
-    <Link href="/contact">
+    <Link href="#ai-tools">
       <Button variant="outline" size="lg">
-        {copy.hero.cta.secondary}
+        Conversar com a IA do site
       </Button>
     </Link>
   </div>
 )
 
-const renderSignalCard = (signal, index) => (
-  <div
-    key={index}
-    className="rounded-lg border bg-card p-4 text-sm shadow-sm hover:shadow-md transition-shadow"
-  >
-    <div className="font-medium">{signal.title}</div>
-    <div className="text-muted-foreground text-xs mt-1">{signal.subtitle}</div>
-  </div>
-)
-
-const renderSignalCards = () => {
+const renderSignalRow = () => {
   const signals = [
-    { title: 'IA com controle humano', subtitle: 'Agentes & MCP' },
-    { title: 'Observabilidade', subtitle: 'Grafana / Loki / Sentry' },
-    { title: 'Operação técnica', subtitle: 'Runbooks & validação' },
-    { title: 'Validação por evidência', subtitle: 'Critério de aceite' },
+    { label: 'IA com controle humano', glyph: '◆' },
+    { label: 'Observabilidade', glyph: '◇' },
+    { label: 'Operação técnica', glyph: '◈' },
   ]
-
   return (
-    <div className="grid gap-3">
-      {signals.map(renderSignalCard)}
-    </div>
+    <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+      {signals.map((signal) => (
+        <li key={signal.label} className="inline-flex items-center gap-2">
+          <span className="text-primary" aria-hidden="true">{signal.glyph}</span>
+          {signal.label}
+        </li>
+      ))}
+    </ul>
   )
 }
 
 export const Hero = () => (
-  <section className="py-16 md:py-20 lg:py-24">
+  <section className="relative overflow-hidden py-16 md:py-20 lg:py-24">
     <div className="container">
-      <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
-        <div className="lg:col-span-8">
-          <h1 className="text-4xl font-bold leading-tight tracking-tight md:text-5xl md:leading-[1.05] text-balance">
-            {copy.hero.title}
+      <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
+        <div className="lg:col-span-7">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1 text-xs text-muted-foreground">
+            <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
+            IA aplicada · Observabilidade · Operação
+          </div>
+          <h1 className="mt-5 text-4xl font-bold leading-[1.05] tracking-tight md:text-5xl lg:text-6xl text-balance">
+            {copy.hero.title.split(' ').map((word, i, arr) => {
+              const isLast = i === arr.length - 1
+              const isHighlight = /respons|operacional/i.test(word)
+              return (
+                <span key={i} className={isHighlight ? 'text-primary' : ''}>
+                  {word}{!isLast ? ' ' : ''}
+                </span>
+              )
+            })}
           </h1>
-          <p className="mt-6 text-lg text-muted-foreground leading-relaxed md:mt-8 max-w-3xl">
+          <p className="mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed md:mt-8">
             {copy.hero.subtitle}
           </p>
           <div className="mt-8 md:mt-10">
             {renderCTA()}
           </div>
+          {renderSignalRow()}
         </div>
 
-        <div className="lg:col-span-4">
-          {renderSignalCards()}
+        <div className="lg:col-span-5">
+          <div className="relative mx-auto max-w-md lg:max-w-none">
+            <HeroNetworkGraph />
+          </div>
         </div>
       </div>
     </div>

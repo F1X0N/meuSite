@@ -90,7 +90,10 @@ export default async function BlogPostPage({ params }) {
           <BackLink href="/blog" label="Voltar para o blog" />
         </div>
         {Cover && (
-          <div className="mb-10">
+          <div
+            className="mb-10 cover-interactive"
+            style={{ viewTransitionName: `cover-blog-${slug}` } as React.CSSProperties}
+          >
             <Cover className="w-full h-auto" />
           </div>
         )}

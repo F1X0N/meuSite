@@ -723,12 +723,12 @@ export const AITools = () => {
             {/* Header */}
             <Reveal>
                 <div className={`text-center max-w-2xl mx-auto mb-6 transition-all duration-300 ${isFocused ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
-                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center justify-center gap-2">
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-balance flex items-center justify-center gap-2">
                         <GIcon name="smart_toy" size={28} className="text-primary" />
-                        AI Tools
+                        Pergunte ao site sobre meu trabalho
                     </h2>
                     <p className="mt-3 text-muted-foreground">
-                        Tire dúvidas sobre minha experiência ou analise compatibilidade com vagas.
+                        Uma IA com acesso ao meu portfólio responde dúvidas técnicas ou avalia o fit com uma vaga em segundos.
                     </p>
                 </div>
             </Reveal>

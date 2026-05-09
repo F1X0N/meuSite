@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Design system para covers de blog/case-studies.
  *
@@ -7,6 +9,8 @@
  * - Sem rotular elementos individuais. Comunica o conceito visualmente, não didaticamente.
  * - Cores via CSS vars (Tailwind classes) → herda tema light/dark do site.
  * - ViewBox fixo 1200×630 (Open Graph standard).
+ * - Reveal animado ao entrar viewport (CoverFrame faz IntersectionObserver).
+ *   Respeita prefers-reduced-motion.
  */
 
 import * as React from 'react'
@@ -43,39 +47,77 @@ type CoverFrameProps = {
   className?: string
 }
 
+const useCoverReveal = () => {
+  const ref = React.useRef<SVGSVGElement | null>(null)
+  const [revealed, setRevealed] = React.useState(false)
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce) {
+      setRevealed(true)
+      return
+    }
+    const node = ref.current
+    if (!node) return
+    if (typeof IntersectionObserver === 'undefined') {
+      setRevealed(true)
+      return
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setRevealed(true)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -8% 0px' },
+    )
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
+  return { ref, revealed }
+}
+
 /**
  * Wrapper canônico de cover. ViewBox fixo, título + subtitle no rodapé.
  * Garante consistência de composição entre todas as covers.
  * ariaLabel opcional — fallback usa title.
  */
-export const CoverFrame = ({ title, subtitle, ariaLabel, children, className = '' }: CoverFrameProps) => (
-  <svg
-    viewBox={VIEWBOX}
-    xmlns="http://www.w3.org/2000/svg"
-    role="img"
-    aria-label={ariaLabel ?? title}
-    className={`w-full h-auto font-sans ${className}`}
-  >
-    <CoverDefs />
-    {children}
-    <text
-      x="600" y={TITLE_Y}
-      textAnchor="middle" fontSize="16" fontWeight="700" letterSpacing="2"
-      className="fill-primary"
+export const CoverFrame = ({ title, subtitle, ariaLabel, children, className = '' }: CoverFrameProps) => {
+  const { ref, revealed } = useCoverReveal()
+  return (
+    <svg
+      ref={ref}
+      viewBox={VIEWBOX}
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-label={ariaLabel ?? title}
+      data-revealed={revealed ? 'true' : 'false'}
+      className={`cover-frame w-full h-auto font-sans ${revealed ? 'cover-revealed' : ''} ${className}`}
     >
-      {title.toUpperCase()}
-    </text>
-    {subtitle && (
+      <CoverDefs />
+      {children}
       <text
-        x="600" y={SUBTITLE_Y}
-        textAnchor="middle" fontSize="12"
-        className="fill-muted-foreground"
+        x="600" y={TITLE_Y}
+        textAnchor="middle" fontSize="16" fontWeight="700" letterSpacing="2"
+        className="cover-title fill-primary"
       >
-        {subtitle}
+        {title.toUpperCase()}
       </text>
-    )}
-  </svg>
-)
+      {subtitle && (
+        <text
+          x="600" y={SUBTITLE_Y}
+          textAnchor="middle" fontSize="12"
+          className="cover-subtitle fill-muted-foreground"
+        >
+          {subtitle}
+        </text>
+      )}
+    </svg>
+  )
+}
 
 type Variant = 'primary' | 'muted' | 'destructive'
 

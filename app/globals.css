@@ -85,6 +85,116 @@ html {
   }
 }
 
+/* Hero network graph — pulses correm pelas edges em loop sutil.
+   stroke-dasharray cria um "pacote" curto que viaja pelo path.
+   pathLength="1" não é definido, então o path tem comprimento real;
+   dasharray maior que o path mais longo garante que o gap nunca é visível. */
+@keyframes hero-graph-pulse {
+  0% { stroke-dashoffset: 320; opacity: 0; }
+  10% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { stroke-dashoffset: -320; opacity: 0; }
+}
+
+@keyframes hero-graph-node-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.hero-graph-pulse {
+  stroke-dasharray: 18 320;
+  animation: hero-graph-pulse 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.hero-graph-node {
+  animation: hero-graph-node-in 600ms cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-graph-pulse {
+    animation: none;
+    stroke-dasharray: none;
+  }
+  .hero-graph-node {
+    animation: none;
+  }
+}
+
+/* Cover reveal — fade-in suave ao entrar viewport.
+   CoverFrame em lib/cover-design.tsx aplica .cover-revealed via IntersectionObserver.
+   Transition em opacity (transform em SVG é arriscado por viewBox quirks). */
+.cover-frame > path,
+.cover-frame > circle,
+.cover-frame > polygon {
+  opacity: 0;
+  transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cover-frame > .cover-title,
+.cover-frame > .cover-subtitle {
+  opacity: 0;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+}
+
+.cover-frame.cover-revealed > path,
+.cover-frame.cover-revealed > circle,
+.cover-frame.cover-revealed > polygon,
+.cover-frame.cover-revealed > .cover-title,
+.cover-frame.cover-revealed > .cover-subtitle {
+  opacity: 1;
+}
+
+/* Hover state — só ativo quando o cover está num wrapper marcado como interativo
+   (página individual de post/case, NÃO listagem). */
+.cover-interactive .cover-frame {
+  transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cover-interactive .cover-frame:hover {
+  filter: drop-shadow(0 0 14px hsl(var(--primary) / 0.28));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cover-frame > path,
+  .cover-frame > circle,
+  .cover-frame > polygon,
+  .cover-frame > .cover-title,
+  .cover-frame > .cover-subtitle {
+    opacity: 1;
+    transition: none;
+  }
+
+  .cover-interactive .cover-frame:hover {
+    filter: none;
+  }
+}
+
+/* View Transitions API — crossfade entre rotas + shared element nas covers.
+   Triggered programmatically pelo TransitionLink. Browsers sem suporte caem
+   para navegação normal sem animação. */
+@keyframes vt-fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+}
+
+::view-transition-old(root) {
+  animation: vt-fade-out 220ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+::view-transition-new(root) {
+  animation: vt-fade-in 320ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
 /* MDX code rendering — rehype-pretty-code + Shiki dual theme */
 @layer components {
   /* Inline code (não dentro de <pre>) */
