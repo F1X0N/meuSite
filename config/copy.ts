@@ -2,7 +2,7 @@ const createCopyConfig = () => ({
   hero: {
     title: 'Engenharia de software com responsabilidade operacional',
     subtitle:
-      'IA aplicada, observabilidade e operação técnica em produção. Transformo problemas recorrentes em sistemas mais previsíveis, auditáveis e seguros.',
+      'IA aplicada, robustez operacional e observabilidade. Transformo problemas recorrentes em sistemas mais previsíveis, auditáveis e seguros.',
     cta: {
       primary: 'Ver Case Studies',
       secondary: 'Vamos conversar',
@@ -53,7 +53,7 @@ const createCopyConfig = () => ({
   },
   about: {
     intro:
-      'Sou engenheiro de software com foco em IA aplicada, observabilidade e operação técnica em produção. Atuo conectando produto, suporte técnico e engenharia para transformar problemas recorrentes em sistemas mais previsíveis, auditáveis e seguros. Diferencial: combino profundidade técnica com responsabilidade operacional — entender o sistema, reduzir risco, comunicar com clareza e usar IA como alavanca de produtividade sem perder controle humano.',
+      'Sou engenheiro de software com foco em IA aplicada, robustez operacional e observabilidade. Atuo conectando produto, suporte técnico e engenharia para transformar problemas recorrentes em sistemas mais previsíveis, auditáveis e seguros. Diferencial: combino profundidade técnica com responsabilidade operacional — entender o sistema, reduzir risco, comunicar com clareza e usar IA como alavanca de produtividade sem perder controle humano.',
     principles: [
       'Evidência antes de opinião: logs, métricas e replays vêm antes de hipóteses.',
       'IA com controle humano: agentes e LLMs são alavancas, não substitutos de critério técnico.',
@@ -113,7 +113,7 @@ const createCopyConfig = () => ({
   },
   contact: {
     title: 'Vamos conversar?',
-    description: 'Disponível para discutir oportunidades, projetos e trocar ideias sobre IA aplicada, observabilidade e operação técnica em produção.',
+    description: 'Disponível para discutir oportunidades, projetos e trocar ideias sobre IA aplicada, robustez operacional e observabilidade.',
     social: {
       linkedin: 'https://www.linkedin.com/in/josivan-amorim/',
       github: 'https://github.com/F1X0N',
