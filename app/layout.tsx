@@ -1,6 +1,17 @@
 import './globals.css'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
+import { Bricolage_Grotesque } from 'next/font/google'
+
+// Display font para H1 de impacto (hero da home + headers de post/case).
+// Não substitui Geist no body — usado apenas em headings selecionados via
+// classe Tailwind `font-display`.
+const bricolageGrotesque = Bricolage_Grotesque({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  variable: '--font-bricolage',
+  display: 'swap',
+})
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { PageTransition } from '@/components/layout/PageTransition'
@@ -26,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="pt-BR"
-      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${bricolageGrotesque.variable}`}
       suppressHydrationWarning
     >
       <head>

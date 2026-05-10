@@ -45,7 +45,7 @@ export const Hero = () => (
             <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
             IA aplicada · Observabilidade · Operação
           </div>
-          <h1 className="mt-5 text-4xl font-bold leading-[1.05] tracking-tight md:text-5xl lg:text-6xl text-balance">
+          <h1 className="mt-5 font-display text-4xl font-bold leading-[1.05] tracking-tight md:text-5xl lg:text-6xl text-balance">
             {copy.hero.title.split(' ').map((word, i, arr) => {
               const isLast = i === arr.length - 1
               const isHighlight = /respons|operacional/i.test(word)
