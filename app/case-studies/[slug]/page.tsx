@@ -6,6 +6,7 @@ import { PostAside } from '@/components/content/PostAside'
 import { getAllCaseStudies, getCaseStudyBySlug } from '@/lib/mdx'
 import { getCoverComponent } from '@/components/blog-covers'
 import { mdxOptions } from '@/lib/mdx-options'
+import { mdxComponents } from '@/components/mdx/components'
 
 export async function generateStaticParams() {
   const cases = getAllCaseStudies()
@@ -61,7 +62,7 @@ const renderCaseHeader = (caseStudy) => (
 
 const renderCaseContent = (content) => (
   <article className="prose prose-lg dark:prose-invert max-w-none">
-    <MDXRemote source={content} options={mdxOptions} />
+    <MDXRemote source={content} options={mdxOptions} components={mdxComponents} />
   </article>
 )
 
