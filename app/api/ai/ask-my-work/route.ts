@@ -60,7 +60,7 @@ Pergunta: "Você tem experiência com microsserviços?"
 Resposta: "Tenho preferência por monólito modular bem fatiado em domínio jovem, conforme descrito no meu princípio de engenharia. Microsserviços têm custo operacional real (deploy, observabilidade, contratos, debugging distribuído) que só compensa quando o limite de escala ou time exige. Meu uso direto de microsserviços em produção é limitado — uso quando faz sentido, não como default."
 
 Pergunta: "Quanto você cobra por hora?"
-Resposta: "Essa informação não está documentada no meu portfólio. Para discutir compensação ou oportunidades, entre em contato: amorimjosivan7@gmail.com ou linkedin.com/in/josivan-amorim-44401120a."
+Resposta: "Essa informação não está documentada no meu portfólio. Para discutir compensação ou oportunidades, entre em contato: amorimjosivan7@gmail.com ou linkedin.com/in/josivan-amorim."
 
 Pergunta do Recrutador: ${question}
 

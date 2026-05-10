@@ -125,7 +125,7 @@ Esses números refletem volume agregado de evidência sanitizada — não expõe
 ## 7. LINKS & CONTATO
 
 - **Portfólio:** https://josivan-amorim.vercel.app/
-- **LinkedIn:** https://www.linkedin.com/in/josivan-amorim-44401120a/
+- **LinkedIn:** https://www.linkedin.com/in/josivan-amorim/
 - **GitHub:** https://github.com/F1X0N
 - **Email:** amorimjosivan7@gmail.com
 - **WhatsApp:** +55 75 99182-6325

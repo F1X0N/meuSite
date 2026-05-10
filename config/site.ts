@@ -5,7 +5,7 @@ const createSiteConfig = () => ({
   email: 'amorimjosivan7@gmail.com',
   social: {
     github: 'https://github.com/F1X0N',
-    linkedin: 'https://www.linkedin.com/in/josivan-amorim-44401120a/',
+    linkedin: 'https://www.linkedin.com/in/josivan-amorim/',
     whatsapp: 'https://wa.me/5575991826325',
   },
   nav: {

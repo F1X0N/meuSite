@@ -115,7 +115,7 @@ const createCopyConfig = () => ({
     title: 'Vamos conversar?',
     description: 'Disponível para discutir oportunidades, projetos e trocar ideias sobre IA aplicada, observabilidade e operação técnica em produção.',
     social: {
-      linkedin: 'https://www.linkedin.com/in/josivan-amorim-44401120a/',
+      linkedin: 'https://www.linkedin.com/in/josivan-amorim/',
       github: 'https://github.com/F1X0N',
       email: 'amorimjosivan7@gmail.com',
     },
