@@ -62,6 +62,7 @@ meuSite/
 │   ├── blog/                     # Blog técnico
 │   ├── about/                    # Sobre
 │   ├── contact/                  # Contato com formulário
+│   ├── play/4-digitos/           # Side project: Mastermind multiplayer (link externo)
 │   └── api/
 │       └── ai/
 │           ├── chat/             # Endpoint do Clone Digital
@@ -72,9 +73,10 @@ meuSite/
 │   ├── ui/                       # Button, Card, Badge, CommandPalette
 │   ├── layout/                   # Header, Footer, ThemeToggle, TransitionLink
 │   ├── content/                  # Hero, HeroNetworkGraph, Highlights, FinalCTA
-│   ├── sections/                 # AITools, FeaturedCases, FeaturedBlog, Experience, About, Contact
+│   ├── sections/                 # AITools, FeaturedCases, FeaturedBlog, Experience, SideProjects, About, Contact
 │   ├── motion/                   # Reveal, FadeIn, StaggerContainer
 │   ├── blog-covers/              # 15 SVG covers inline (registry com next/dynamic)
+│   ├── play/                     # Covers e helpers de side projects
 │   └── easter/                   # ConsoleArt, EasterEggProvider, MatrixOverlay, TechLeadOverlay
 ├── config/                       # site.ts, copy.ts, motion.ts
 ├── content/                      # MDX de blog/case-studies + knowledge-base.md

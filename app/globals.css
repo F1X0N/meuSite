@@ -141,7 +141,8 @@ html {
    Transition em opacity (transform em SVG é arriscado por viewBox quirks). */
 .cover-frame > path,
 .cover-frame > circle,
-.cover-frame > polygon {
+.cover-frame > polygon,
+.cover-frame > rect {
   opacity: 0;
   transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -155,6 +156,7 @@ html {
 .cover-frame.cover-revealed > path,
 .cover-frame.cover-revealed > circle,
 .cover-frame.cover-revealed > polygon,
+.cover-frame.cover-revealed > rect,
 .cover-frame.cover-revealed > .cover-title,
 .cover-frame.cover-revealed > .cover-subtitle {
   opacity: 1;
@@ -174,6 +176,7 @@ html {
   .cover-frame > path,
   .cover-frame > circle,
   .cover-frame > polygon,
+  .cover-frame > rect,
   .cover-frame > .cover-title,
   .cover-frame > .cover-subtitle {
     opacity: 1;
