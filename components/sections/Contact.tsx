@@ -1,10 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
 import { copy } from '@/config/copy'
 import { contactSchema, formatZodErrors } from '@/lib/validation'
+
+const INTENT_SEEDS: Record<string, string> = {
+  hire: 'Olá Josivan, encontrei seu portfólio e tenho uma vaga ou oportunidade para discutir. ',
+}
 
 const buildInputClasses = () =>
   'w-full rounded-lg border bg-background px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:outline-none'
@@ -29,6 +33,19 @@ const createInitialState = (): ContactState => ({
 
 export const Contact = () => {
   const [state, setState] = useState(createInitialState())
+  const seededRef = useRef(false)
+
+  // Pré-preenche a mensagem quando vindo da Command Palette (Cmd+K → :hire).
+  // Usa window.location pra evitar Suspense boundary do useSearchParams.
+  useEffect(() => {
+    if (seededRef.current || typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const intent = params.get('intent')
+    if (intent && INTENT_SEEDS[intent]) {
+      seededRef.current = true
+      setState((prev) => ({ ...prev, message: INTENT_SEEDS[intent] }))
+    }
+  }, [])
 
   const handleChange = (field) => (event) => {
     setState({ ...state, [field]: event.target.value, error: null })

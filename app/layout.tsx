@@ -6,6 +6,8 @@ import { Footer } from '@/components/layout/Footer'
 import { PageTransition } from '@/components/layout/PageTransition'
 import { CommandPalette } from '@/components/ui/CommandPalette'
 import { TechLeadOverlay } from '@/components/easter/TechLeadOverlay'
+import { EasterEggProvider } from '@/components/easter/EasterEggProvider'
+import { MatrixOverlay } from '@/components/easter/MatrixOverlay'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
@@ -43,13 +45,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen flex flex-col" suppressHydrationWarning>
-        <Header />
-        <main className="flex-1">
-          <PageTransition>{children}</PageTransition>
-        </main>
-        <Footer />
-        <CommandPalette />
-        <TechLeadOverlay />
+        <EasterEggProvider>
+          <Header />
+          <main className="flex-1">
+            <PageTransition>{children}</PageTransition>
+          </main>
+          <Footer />
+          <CommandPalette />
+          <TechLeadOverlay />
+          <MatrixOverlay />
+        </EasterEggProvider>
         {/* Vercel Analytics + Speed Insights só em produção (em local com
             npm start, esses scripts dão 404 e poluem console errors no
             Lighthouse CI). Em previews também desabilita. */}

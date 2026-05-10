@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Command } from 'cmdk'
 import { site } from '@/config/site'
 import { GIcon } from '@/components/icons/GIcon'
+import { useEasterEggs } from '@/components/easter/EasterEggProvider'
 
 type NavItem = {
   label: string
@@ -16,13 +17,21 @@ type NavItem = {
 export const CommandPalette = () => {
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [inputValue, setInputValue] = useState('')
   const router = useRouter()
   const pathname = usePathname()
+  const { triggerMatrix, reset: resetEasterEggs } = useEasterEggs()
 
   // Garantir que só renderiza no client
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Limpa o input quando a palette fecha. Evita que o grupo "secret"
+  // permaneça visível na próxima abertura por causa de um ":" antigo.
+  useEffect(() => {
+    if (!open) setInputValue('')
+  }, [open])
 
   // Scroll para seção na Home
   const scrollToSection = useCallback((id: string) => {
@@ -56,6 +65,54 @@ export const CommandPalette = () => {
     setOpen(false)
   }, [])
 
+  const showSecret = inputValue.trim().startsWith(':')
+
+  const closeAndClear = useCallback(() => {
+    setOpen(false)
+    setInputValue('')
+  }, [])
+
+  const secretItems: NavItem[] = useMemo(() => [
+    {
+      label: ':hire — abrir contato como recrutador',
+      action: () => {
+        // Rota direta para /#contact preservando a query.
+        // /contact redireciona dropando search string (ver app/contact/page.tsx).
+        router.push('/?intent=hire#contact')
+        closeAndClear()
+      },
+      icon: 'work',
+      group: 'Secret',
+    },
+    {
+      label: ':source — repositório no GitHub',
+      action: () => {
+        openExternal('https://github.com/F1X0N/meuSite')
+        closeAndClear()
+      },
+      icon: 'code',
+      group: 'Secret',
+    },
+    {
+      label: ':matrix — ativar overlay matrix por 8s',
+      action: () => {
+        triggerMatrix()
+        closeAndClear()
+      },
+      icon: 'auto_awesome',
+      group: 'Secret',
+    },
+    {
+      label: ':reset — desativar easter eggs',
+      action: () => {
+        resetEasterEggs()
+        closeAndClear()
+      },
+      icon: 'restart_alt',
+      group: 'Secret',
+    },
+  ], [router, openExternal, triggerMatrix, resetEasterEggs, closeAndClear])
+
   // Construir lista de itens
   const navItems: NavItem[] = [
     // Seções da Home
@@ -84,8 +141,9 @@ export const CommandPalette = () => {
     { label: 'Baixar CV (PDF)', action: () => openExternal('/cv.pdf'), icon: 'download', group: 'Ações' },
   ]
 
-  // Agrupar itens
-  const groupedItems = navItems.reduce<Record<string, NavItem[]>>((acc, item) => {
+  // Agrupar itens. Quando o input começa com ":", mostra apenas o grupo Secret.
+  const visibleItems = showSecret ? secretItems : navItems
+  const groupedItems = visibleItems.reduce<Record<string, NavItem[]>>((acc, item) => {
     if (!acc[item.group]) acc[item.group] = []
     acc[item.group].push(item)
     return acc
@@ -127,6 +185,8 @@ export const CommandPalette = () => {
           <div className="flex items-center border-b px-4">
             <GIcon name="search" size={20} className="text-muted-foreground mr-2" />
             <Command.Input
+              value={inputValue}
+              onValueChange={setInputValue}
               placeholder="Buscar páginas, seções ou ações..."
               className="flex-1 bg-transparent py-4 text-sm outline-none placeholder:text-muted-foreground"
               autoFocus
