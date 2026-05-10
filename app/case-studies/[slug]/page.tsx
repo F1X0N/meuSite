@@ -48,7 +48,7 @@ const renderCaseHeader = (caseStudy) => (
     <div className="text-sm text-muted-foreground mb-4">
       {caseStudy.date}
     </div>
-    <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
+    <h1 className="font-display text-4xl font-bold tracking-tight md:text-5xl">
       {caseStudy.title}
     </h1>
     <p className="mt-4 text-lg text-muted-foreground">

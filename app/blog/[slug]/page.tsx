@@ -57,7 +57,7 @@ const renderPostHeader = (post) => (
     <div className="text-sm text-muted-foreground mb-4">
       {formatDate(post.date)} · {post.readingTime}
     </div>
-    <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
+    <h1 className="font-display text-4xl font-bold tracking-tight md:text-5xl">
       {post.title}
     </h1>
     <p className="mt-4 text-lg text-muted-foreground">
