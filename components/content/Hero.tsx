@@ -22,7 +22,7 @@ const renderSignalRow = () => {
   const signals = [
     { label: 'IA com controle humano', glyph: '◆' },
     { label: 'Observabilidade', glyph: '◇' },
-    { label: 'Operação técnica', glyph: '◈' },
+    { label: 'Engenharia operacional', glyph: '◈' },
   ]
   return (
     <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">

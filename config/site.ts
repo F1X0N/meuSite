@@ -1,7 +1,7 @@
 const createSiteConfig = () => ({
   name: 'Josivan Amorim',
   headline: 'Engenheiro de Software | IA aplicada | Observabilidade | Operação técnica',
-  bio: 'Engenharia full stack com foco em IA aplicada, observabilidade e operação técnica em produção. Agentes com controle humano, diagnóstico orientado por evidências e validação por critério.',
+  bio: 'Engenharia full stack com foco em IA aplicada, robustez operacional e observabilidade. Agentes com controle humano, diagnóstico orientado por evidências e validação por critério.',
   email: 'amorimjosivan7@gmail.com',
   social: {
     github: 'https://github.com/F1X0N',

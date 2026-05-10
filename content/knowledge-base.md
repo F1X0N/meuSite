@@ -3,7 +3,7 @@
 
 ## 1. RESUMO EXECUTIVO
 
-Engenheiro de software full stack com foco em **IA aplicada, observabilidade e operação técnica em produção**. Atua na intersecção entre produto, suporte técnico, engenharia e operação para transformar problemas recorrentes em sistemas mais previsíveis, auditáveis e seguros.
+Engenheiro de software full stack com foco em **IA aplicada, robustez operacional e observabilidade**. Atua na intersecção entre produto, suporte técnico, engenharia e operação para transformar problemas recorrentes em sistemas mais previsíveis, auditáveis e seguros.
 
 Atualmente em SaaS LegalTech, conectando arquitetura de software, supervisão de agentes de IA, diagnóstico orientado por evidências, validação de entregas e disciplina de deploy.
 
@@ -136,7 +136,7 @@ Esses números refletem volume agregado de evidência sanitizada — não expõe
 ### Perfil e Trajetória
 
 **P: Me conte sobre você.**
-R: Sou engenheiro de software com foco em IA aplicada, observabilidade e operação técnica em produção. Atuo conectando produto, suporte e engenharia para transformar problemas recorrentes em sistemas mais previsíveis e auditáveis. Hoje trabalho em uma SaaS LegalTech, supervisionando agentes de IA, conduzindo diagnóstico técnico e validando entregas com critérios de aceite explícitos.
+R: Sou engenheiro de software com foco em IA aplicada, robustez operacional e observabilidade. Atuo conectando produto, suporte e engenharia para transformar problemas recorrentes em sistemas mais previsíveis e auditáveis. Hoje trabalho em uma SaaS LegalTech, supervisionando agentes de IA, conduzindo diagnóstico técnico e validando entregas com critérios de aceite explícitos.
 
 **P: O que você faz no dia a dia?**
 R: Desenvolvo funcionalidades full stack, integro LLMs em fluxos de produto, faço diagnóstico de incidentes com observabilidade (Grafana/Loki/Sentry), escrevo runbooks, valido entregas e supervisiono agentes de IA aplicados à operação técnica.
