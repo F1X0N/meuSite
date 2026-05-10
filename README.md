@@ -1,314 +1,278 @@
 # Portfolio Técnico 2026 🚀
 
-Site pessoal moderno com **Clone Digital IA** construído com **Next.js 15**, **TypeScript**, **Tailwind CSS** e integração com **OpenAI API**.
+Site pessoal moderno construído com **Next.js 15 (App Router)**, **React 19**, **TypeScript**, **Tailwind CSS** e integração com **OpenAI**. Inclui clone digital de IA, view transitions, covers SVG animados, easter eggs técnicos e overlay de tech-lead via Konami code.
+
+URL ativa em produção: [josivan-amorim-cvd3xueje-f1x0ns-projects.vercel.app](https://josivan-amorim-cvd3xueje-f1x0ns-projects.vercel.app/)
 
 ## ✨ Características Principais
 
 ### 🤖 Clone Digital com IA
 - **Chat Inteligente** com contexto completo do perfil profissional
-- **Job Fit Analyzer** para análise automática de vagas
+- **Job Fit Analyzer** para análise automática de vagas (modo `:job_fit`)
 - **Knowledge Base Otimizada** (~70% redução de tokens via resumos estáticos)
 - **Multi-Provider Resilience** pronto para fallback OpenAI/Anthropic
 - **Validação em 2 Etapas** (mensagem isolada + contexto total)
-- **Rate Limiting** inteligente por sessão
-- **Modo Foco** com ESC global e scroll automático
+- **Rate Limiting** por sessão
+- **Modo Foco** com Esc global e scroll automático
 
 ### 🎨 Design & UX
-- ✅ **Design System** completo com temas claro/escuro
-- ✅ **Animações Fluidas** com Framer Motion
-- ✅ **Responsivo** mobile-first
-- ✅ **Acessibilidade** (ARIA, keyboard navigation)
+- **View Transitions API nativa** com shared element entre listagem e post (covers "voam" para o topo do post aberto). Fallback gracioso em browsers sem suporte e em `prefers-reduced-motion`.
+- **15 Covers SVG inline** com reveal por IntersectionObserver e hover state com drop-shadow nas páginas individuais.
+- **Hero animado** com network graph (Cliente → Gateway → LLM Primary/Fallback → Cache → Trace) e pulses correndo pelas edges em loop sutil.
+- **Variable Fonts** Geist Sans + Geist Mono via `next/font`.
+- **Bento layout** na seção Highlights (1 card grande + 2 compactos).
+- **Dark/Light** com no-flash script e CSS vars.
+- **Acessibilidade** ARIA completo, navegação por teclado, foco visível, `prefers-reduced-motion` respeitado em todas as animações.
+
+### 🥚 Easter eggs e atalhos
+- **`⌘+K` / `Ctrl+K`** abre Command Palette com busca de páginas, seções e ações.
+- **`⌘+K`, depois `:`** revela grupo *Secret* com 4 comandos:
+  - `:hire` — abre o contato com mensagem pré-preenchida estilo recrutador.
+  - `:source` — abre o repositório no GitHub.
+  - `:matrix` — overlay matrix por 8s (canvas 2D, Esc fecha, render estático em reduced-motion).
+  - `:reset` — desativa qualquer easter egg em curso.
+- **Konami code** (`↑↑↓↓←→←→BA`) ativa o **Tech Lead Mode**: overlay no canto inferior direito com commit hash, branch, deploy time e TTFB do request atual.
+- **Console do browser** imprime convite com link do repo e dica do `⌘+K`.
+- **Página 404** com stack-trace estilizado e três sugestões de rota próximas calculadas via Levenshtein normalizado.
 
 ### 📝 Conteúdo Dinâmico
-- ✅ **Case Studies** em MDX com estrutura padronizada
-- ✅ **Blog Técnico** com syntax highlighting
-- ✅ **Knowledge Base** anonimizada (compliance-safe)
+- **Case Studies** em MDX com estrutura padronizada
+- **Blog Técnico** com syntax highlighting via rehype-pretty-code + Shiki dual-theme
+- **Knowledge Base** anonimizada (compliance-safe)
+- **CV** gerado dinamicamente via `@react-pdf/renderer` no prebuild
 
 ### ⚡ Performance & SEO
-- ✅ **SSG** para todas as páginas estáticas
-- ✅ **Image Optimization** via `next/image`
-- ✅ **Bundle Splitting** automático
-- ✅ **SEO Completo** (metadados, Open Graph, JSON-LD)
+- **SSG/ISR** para páginas de conteúdo
+- **Bundle Splitting** automático
+- **next/font** Geist (sem layout shift)
+- **Sitemap + RSS + robots.txt** automáticos
+- **Open Graph** e metadados por página
+- **Lighthouse CI** integrado
 
 ## 🗂️ Estrutura do Projeto
 
 ```
 meuSite/
 ├── app/                          # App Router (Next.js 15)
-│   ├── layout.tsx                # Layout raiz com tema
-│   ├── page.tsx                  # Home com seções integradas
+│   ├── layout.tsx                # Root layout, EasterEggProvider, fontes Geist
+│   ├── page.tsx                  # Home (Hero, AITools, Highlights, Cases, Blog, About, Contact)
+│   ├── not-found.tsx             # 404 server (busca slugs e passa para client)
+│   ├── not-found-client.tsx      # 404 client com usePathname e sugestões
 │   ├── case-studies/             # Listagem e detalhe de cases
 │   ├── blog/                     # Blog técnico
 │   ├── about/                    # Sobre
 │   ├── contact/                  # Contato com formulário
-│   └── api/                      # API Routes
+│   └── api/
 │       └── ai/
-│           └── chat/             # Endpoint do Clone Digital
+│           ├── chat/             # Endpoint do Clone Digital
+│           ├── ask-my-work/      # IA com contexto do portfólio
+│           ├── job-fit/          # Análise de aderência a vaga
+│           └── targeted-resume/  # CV adaptado por vaga
 ├── components/
-│   ├── ui/                       # Componentes base (Button, Card, Badge)
-│   ├── layout/                   # Header, Footer, ThemeToggle
-│   ├── content/                  # Hero, Highlights, FeaturedCases
-│   ├── sections/                 # AIChat (Clone Digital)
-│   └── motion/                   # Wrappers de animação
-├── config/                       # Configuração centralizada
-│   ├── site.ts                   # Identidade, navegação, links
-│   ├── copy.ts                   # Textos (Hero, Highlights, About)
-│   └── motion.ts                 # Variantes de animação
-├── content/                      # Conteúdo MDX
-│   ├── case-studies/             # Cases em MDX
-│   ├── blog/                     # Artigos técnicos
-│   └── knowledge-base.md         # Base de conhecimento da IA
-└── lib/                          # Utilities e helpers
-    ├── mdx.ts                    # Parser MDX
-    └── profile.ts                # Carregador de knowledge base
+│   ├── ui/                       # Button, Card, Badge, CommandPalette
+│   ├── layout/                   # Header, Footer, ThemeToggle, TransitionLink
+│   ├── content/                  # Hero, HeroNetworkGraph, Highlights, FinalCTA
+│   ├── sections/                 # AITools, FeaturedCases, FeaturedBlog, Experience, About, Contact
+│   ├── motion/                   # Reveal, FadeIn, StaggerContainer
+│   ├── blog-covers/              # 15 SVG covers inline (registry com next/dynamic)
+│   └── easter/                   # ConsoleArt, EasterEggProvider, MatrixOverlay, TechLeadOverlay
+├── config/                       # site.ts, copy.ts, motion.ts
+├── content/                      # MDX de blog/case-studies + knowledge-base.md
+├── hooks/                        # useReducedMotion, useKonami
+├── lib/                          # mdx, profile, validation, route-suggestions, cover-design
+└── __tests__/                    # Vitest + Testing Library (95 testes)
 ```
 
 ## 🚀 Começando
 
 ### Pré-requisitos
 
-- Node.js 18+ 
-- OpenAI API Key (para o Clone Digital)
+- Node.js 22+
+- OpenAI API Key (opcional, para o Clone Digital — sem ela, o chat entra em mock mode)
 
 ### Instalação
 
 ```bash
-# Clonar repositório
-git clone <repo-url>
+git clone https://github.com/F1X0N/meuSite.git
 cd meuSite
-
-# Instalar dependências
 npm install
-
-# Configurar variáveis de ambiente
-cp .env.example .env
-# Edite .env e adicione sua OPENAI_API_KEY
+cp .env.example .env   # editar e adicionar OPENAI_API_KEY (opcional)
 ```
 
 ### Desenvolvimento
 
 ```bash
-npm run dev
+npm run dev   # Next.js com Turbopack em http://localhost:3000
 ```
 
-Acesse [http://localhost:3000](http://localhost:3000).
-
-### Build de Produção
+### Testes
 
 ```bash
-npm run build
-npm start
+npm test            # vitest run (uma execução, 95 testes)
+npm run test:watch  # watch mode
+npm run test:ui     # vitest UI
+npm run lint        # eslint (next config)
+npx tsc --noEmit    # type check
 ```
+
+### Build
+
+```bash
+npm run build       # gera .next/, regenera public/cv.pdf via script
+npm start           # serve a build
+```
+
+## 🔄 Fluxo de entrega
+
+Trabalho não-trivial segue branch + PR + merge:
+
+```bash
+git checkout -b feat/<scope>
+# implementar, commitar
+git push -u origin feat/<scope>
+gh pr create --title "..." --body "..."
+gh pr merge --squash --delete-branch
+```
+
+Histórico de PRs grandes em `https://github.com/F1X0N/meuSite/pulls?q=is%3Apr+is%3Aclosed`.
 
 ## 🤖 Clone Digital IA
 
 ### Configuração
 
 1. Adicione sua OpenAI API Key no `.env`:
-```env
-OPENAI_API_KEY=sk-...
-```
-
-2. Personalize a Knowledge Base em `content/knowledge-base.md`
-
-3. O sistema automaticamente:
+   ```env
+   OPENAI_API_KEY=sk-...
+   ```
+2. Personalize a Knowledge Base em `content/knowledge-base.md`.
+3. O sistema:
    - Detecta se a mensagem é uma Job Description (>100 chars + 2 keywords)
    - Valida tamanho da entrada (limite: 5000 chars)
-   - Gerencia contexto total (knowledge base + histórico)
+   - Faz trimming de histórico para caber em 8000 tokens
    - Retorna JSON estruturado para análise de fit
 
-### Fluxo de Job Fit
+### Limites
 
-```typescript
-// Usuário cola descrição de vaga
-POST /api/ai/chat
-{
-  "message": "Job Description...",
-  "sessionId": "session_123",
-  "history": []
-}
-
-// Resposta automática
-{
-  "type": "job_fit",
-  "fitScore": 85,
-  "summary": "Excelente fit técnico...",
-  "skillsMatch": [...],
-  "skillsGap": [...],
-  "highlights": [...],
-  "nextSteps": "..."
-}
-```
-
-### Limites de Tokens
-
-- **Mensagem isolada**: 5000 caracteres (~1400 tokens)
-- **Contexto total**: 8000 tokens (knowledge base + histórico + mensagem)
-- **Trimming automático**: Remove histórico antigo se necessário
+- **Mensagem isolada:** 5000 caracteres (~1400 tokens)
+- **Contexto total:** 8000 tokens (knowledge base + histórico + mensagem)
+- **Trimming automático:** remove histórico antigo se necessário
+- **Rate limit:** 10 mensagens/hora por sessão
 
 ## 📝 Adicionando Conteúdo
 
 ### Criar um Case Study
 
-1. Crie `content/case-studies/seu-case.mdx`:
-
-```markdown
----
-title: "Título do Case"
-description: "Descrição curta"
-date: "2026-01-24"
-tags: ["IA", "OCR", "FinOps"]
-featured: true
----
-
-## Contexto
-...
-
-## Problema
-...
-
-## Decisão e Trade-offs
-...
-
-## Implementação
-```code
-...
-```
-
-## Validação
-...
-
-## Impacto
-...
-
-## Stack Evidenciada
-...
-```
-
-2. O case aparecerá automaticamente na listagem
+1. Crie `content/case-studies/seu-case.mdx` com frontmatter:
+   ```markdown
+   ---
+   title: "Título do Case"
+   description: "Descrição curta"
+   date: "2026-01-24"
+   tags: ["IA", "OCR", "FinOps"]
+   featured: true
+   coverComponent: "CostLedgerLlmCover"
+   ---
+   ```
+2. (Opcional) Adicione um cover SVG novo em `components/blog-covers/` e registre em `components/blog-covers/index.ts`.
 
 ### Criar um Post de Blog
 
-Siga a mesma estrutura em `content/blog/`.
+Mesma estrutura em `content/blog/`. Os 15 covers existentes seguem o design system em `lib/cover-design.tsx` (CoverFrame, CoverDot, CoverEdge, CoverHex).
 
 ## 🎨 Sistema de Design
 
 ### Cores (CSS Variables)
 
-Defina tokens em `app/globals.css`:
-- `--primary` - Cor principal (cyan por padrão)
-- `--background` / `--foreground` - Fundos e textos
-- `--card` - Cor de cards
-- `--muted` - Elementos secundários
-- `--border` - Bordas
+Em `app/globals.css`:
+- `--primary` — cyan, único accent
+- `--background` / `--foreground`
+- `--card`, `--muted`, `--border`, `--destructive`
+- `--ring` para focus visível
 
-**🚫 Regra Purple Ban:** Evite violet/purple (conforme design guidelines).
+**🚫 Regra Purple Ban:** sem violet/purple.
 
 ### Componentes Base
 
-- **Button**: `primary`, `secondary`, `outline`, `ghost`, `link`
-- **Card**: Para destacar conteúdo
-- **Badge**: Para tags
-- **Reveal**: Animação de entrada
+- **Button** — `primary | secondary | outline | ghost | link`
+- **Card** — wrapper de conteúdo com bordas e sombra
+- **Badge** — tags
+- **CommandPalette** — `cmdk` com modo foco e grupo Secret
+- **TransitionLink** — wrapper de `next/link` que aciona `document.startViewTransition`
 
 ### Animações
 
-Variantes centralizadas em `config/motion.ts`:
-- `revealUp` - Elementos surgem com fade + slide
-- `stagger` - Animação sequencial em listas
-- `hoverLift` - Elevação em hover
+- `Reveal`, `FadeIn`, `StaggerContainer` em `components/motion/`
+- View Transitions configuradas em `app/globals.css` (crossfade default + shared element nos covers)
+- `prefers-reduced-motion` desliga toda animação adicional
 
 ## 🏗️ Arquitetura
 
-### Princípios Funcionais
+### Princípios
 
-Todo código segue paradigma funcional puro:
-- ✅ Funções pequenas e single-purpose
-- ✅ Early returns (sem else/elif)
-- ✅ Sem nested ifs
-- ✅ Data-driven strategies
-- ✅ Nomes descritivos em inglês
-- ✅ Zero comentários desnecessários (código auto-explicativo)
+- Funções pequenas, single-purpose, early returns
+- Sem nested ifs
+- Data-driven strategies sobre switch/if-chains
+- Nomes descritivos em inglês no código
+- Comentários só onde o "porque" não é óbvio
 
 ### Performance
 
-- **SSG** para todas as páginas estáticas
-- **Image Optimization** via `next/image`
-- **Bundle Splitting** automático
-- **Font Optimization** com `next/font`
-- **Knowledge Base Estática** (~70% economia de tokens)
+- SSG para páginas estáticas, ISR onde apropriado
+- next/dynamic para os 15 covers (cada cover em chunk próprio)
+- next/font Geist (zero layout shift)
+- Knowledge Base estática (~70% economia vs envio inline)
+
+### Segurança
+
+- CSP em `next.config.ts` (script-src/style-src/img-src/...)
+- Strict-Transport-Security, X-Content-Type-Options, X-Frame-Options, Referrer-Policy
+- Rate limiting por sessão na API de chat
+- Anonimização do conteúdo público
 
 ### SEO
 
 - Metadados por página
-- Open Graph tags
-- Structured data (JSON-LD)
+- Open Graph
 - Sitemap automático
+- RSS (`/rss.xml`)
 - robots.txt
-
-## 🔒 Segurança & Compliance
-
-- ✅ **Anonimização**: Nomes de empresas substituídos por descrições genéricas
-- ✅ **Rate Limiting**: 10 mensagens/hora por sessão
-- ✅ **Validação de Input**: Sanitização de mensagens
-- ✅ **Environment Variables**: Secrets protegidas
 
 ## 📦 Deploy
 
-### Vercel (Recomendado)
+### Vercel (canonical)
 
-1. Push para GitHub
-2. Conecte no Vercel
-3. Adicione `OPENAI_API_KEY` nas Environment Variables
-4. Deploy automático em cada commit
+1. Push para `main`
+2. Vercel build automático
+3. Variáveis de ambiente:
+   - `OPENAI_API_KEY` — Clone Digital
+   - `RESEND_API_KEY` — envio de email do formulário de contato
+   - `BLOB_READ_WRITE_TOKEN` — Vercel Blob (CV adaptado)
+   - `NEXT_PUBLIC_SITE_URL` — origem pública do site (ex: `https://meu-dominio.com`); usada por `sitemap.ts`, `robots.ts` e `rss.xml/route.ts`. Sem ela, esses endpoints caem em `http://localhost:3000`, vazando localhost para crawlers.
+
+Domínio canônico atual: `josivan-amorim-cvd3xueje-f1x0ns-projects.vercel.app`.
 
 ### Outras Plataformas
 
 ```bash
 npm run build
+npm start
 ```
 
-Deploy a pasta `.next` em qualquer plataforma que suporte Node.js.
-
-**Requisitos de Runtime:**
-- Node.js 18+
-- Variável de ambiente: `OPENAI_API_KEY`
-
-## 🧪 Desenvolvimento
-
-### Type Check
-
-```bash
-npm run type-check
-```
-
-### Lint
-
-```bash
-npm run lint
-```
+Requer Node.js 22+.
 
 ## 📊 Logs e Debug
 
-O sistema fornece logs detalhados:
+Logs estruturados via `lib/logger.ts`:
 
 ```
-[Request] Message length: 1234 chars
-[Context] Knowledge base length: 8967 chars
-[AI Intent] Detected: JOB_DESCRIPTION
-[Tokens] Estimated: 2345 / MAX: 8000
-POST /api/ai/chat 200 in 5432ms
-```
-
-Em caso de erro:
-```
-[REJECT] User message too long: 6789 chars
-[REJECT] Context too large after trimming
+[chat.request.received] { request_id, session_id, mode, message_length }
+[chat.context_too_large_after_trim] { ... }
+[chat.mock_mode] { request_id, mode }
 ```
 
 ## 🤝 Contribuindo
 
-Este é um portfolio pessoal, mas sugestões são bem-vindas via issues.
+Portfolio pessoal, mas sugestões via issues são bem-vindas.
 
 ## 📄 Licença
 
@@ -316,6 +280,6 @@ Uso pessoal. Código disponível para referência educacional.
 
 ---
 
-**Stack Principal**: Next.js 15 · React 19 · TypeScript · Tailwind CSS · MDX · Framer Motion · OpenAI API
+**Stack:** Next.js 15 · React 19 · TypeScript · Tailwind CSS · MDX · Framer Motion · cmdk · Geist · OpenAI · Vitest · Lighthouse CI
 
-**Features Destacadas**: Clone Digital IA · Job Fit Analyzer · Knowledge Base Otimizada · Multi-Provider Ready
+**Destaques:** View Transitions · Covers SVG vivos · Hero IA-graph animado · Easter eggs (Konami, console, palette secret, 404 caprichada) · Clone Digital IA · Job Fit Analyzer
