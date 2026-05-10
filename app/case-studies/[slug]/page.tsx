@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import { Badge } from '@/components/ui/Badge'
 import { BackLink } from '@/components/ui/BackLink'
+import { PostAside } from '@/components/content/PostAside'
 import { getAllCaseStudies, getCaseStudyBySlug } from '@/lib/mdx'
 import { getCoverComponent } from '@/components/blog-covers'
 import { mdxOptions } from '@/lib/mdx-options'
@@ -76,21 +77,26 @@ export default async function CaseStudyPage({ params }) {
 
   return (
     <div className="py-16 md:py-20 lg:py-24">
-      <div className="container max-w-3xl">
-        <div className="mb-6">
-          <BackLink href="/case-studies" label="Voltar para case studies" />
-        </div>
-        {Cover && (
-          <div
-            className="mb-10 cover-interactive"
-            style={{ viewTransitionName: `cover-case-${slug}` } as React.CSSProperties}
-          >
-            <Cover className="w-full h-auto" />
+      <div className="container">
+        <div className="lg:flex lg:items-start lg:gap-8">
+          <div className="mx-auto max-w-3xl flex-1 min-w-0">
+            <div className="mb-6">
+              <BackLink href="/case-studies" label="Voltar para case studies" />
+            </div>
+            {Cover && (
+              <div
+                className="mb-10 cover-interactive"
+                style={{ viewTransitionName: `cover-case-${slug}` } as React.CSSProperties}
+              >
+                <Cover className="w-full h-auto" />
+              </div>
+            )}
+            {renderCaseHeader(caseStudy)}
+            <div className="mt-12">
+              {renderCaseContent(caseStudy.content)}
+            </div>
           </div>
-        )}
-        {renderCaseHeader(caseStudy)}
-        <div className="mt-12">
-          {renderCaseContent(caseStudy.content)}
+          <PostAside title={caseStudy.title} />
         </div>
       </div>
     </div>
