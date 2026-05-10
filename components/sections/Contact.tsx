@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
 import { copy } from '@/config/copy'
 import { contactSchema, formatZodErrors } from '@/lib/validation'
+import { ContactChannels } from './ContactChannels'
 
 const INTENT_SEEDS: Record<string, string> = {
   hire: 'Olá Josivan, encontrei seu portfólio e tenho uma vaga ou oportunidade para discutir. ',
@@ -105,8 +106,8 @@ export const Contact = () => {
   }
 
   return (
-    <div className="container max-w-2xl">
-      <div className="text-center mb-8">
+    <div className="container max-w-5xl">
+      <div className="text-center mb-10 max-w-2xl mx-auto">
         <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
           {copy.contact.title}
         </h2>
@@ -115,9 +116,12 @@ export const Contact = () => {
         </p>
       </div>
 
-      <Card>
+      <div className="grid gap-6 lg:grid-cols-5 lg:gap-8 lg:items-start">
+        <ContactChannels className="lg:col-span-2" />
+
+        <Card className="lg:col-span-3">
         <CardHeader>
-          <CardTitle>Formulário de Contato</CardTitle>
+          <CardTitle as="h3">Formulário</CardTitle>
           <CardDescription>
             Preencha os campos abaixo e retornarei em breve.
           </CardDescription>
@@ -195,7 +199,8 @@ export const Contact = () => {
             </form>
           )}
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   )
 }
