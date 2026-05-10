@@ -85,6 +85,22 @@ html {
   }
 }
 
+/* Heading anchors gerados por rehype-autolink-headings (behavior=wrap).
+   Mantém o estilo do heading inalterado (sem cor de link, sem underline). */
+.prose :is(h2, h3, h4) > .heading-anchor {
+  color: inherit;
+  text-decoration: none;
+}
+.prose :is(h2, h3, h4) > .heading-anchor:hover {
+  color: hsl(var(--primary));
+}
+
+/* Headings recebem scroll-margin-top para que ao clicar no TOC eles não
+   fiquem grudados no header sticky de 4rem. */
+.prose :is(h2, h3, h4)[id] {
+  scroll-margin-top: 5rem;
+}
+
 /* Hero network graph — pulses correm pelas edges em loop sutil.
    stroke-dasharray cria um "pacote" curto que viaja pelo path.
    pathLength="1" não é definido, então o path tem comprimento real;
