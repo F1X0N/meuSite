@@ -13,6 +13,7 @@ const createStaticPages = (baseUrl) => [
   createSitemapEntry(baseUrl, '/contact', new Date(), 0.8),
   createSitemapEntry(baseUrl, '/case-studies', new Date(), 0.9),
   createSitemapEntry(baseUrl, '/blog', new Date(), 0.9),
+  createSitemapEntry(baseUrl, '/play/4-digitos', new Date(), 0.6),
 ]
 
 const createCasePages = (baseUrl, cases) => {

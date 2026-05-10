@@ -4,6 +4,7 @@ import { FeaturedCaseStudies } from '@/components/sections/FeaturedCaseStudies'
 import { FeaturedBlog } from '@/components/sections/FeaturedBlog'
 import { Experience } from '@/components/sections/Experience'
 import { AITools } from '@/components/sections/AITools'
+import { SideProjects } from '@/components/sections/SideProjects'
 import { About } from '@/components/sections/About'
 import { Contact } from '@/components/sections/Contact'
 
@@ -33,11 +34,15 @@ export default function HomePage() {
         <FeaturedBlog />
       </section>
 
-      <section id="about" className="scroll-mt-24 py-16 md:py-20 lg:py-24">
+      <section id="side-projects" className="scroll-mt-24 py-16 md:py-20 lg:py-24">
+        <SideProjects />
+      </section>
+
+      <section id="about" className="scroll-mt-24 py-16 md:py-20 lg:py-24 bg-muted/30">
         <About />
       </section>
 
-      <section id="contact" className="scroll-mt-24 py-16 md:py-20 lg:py-24 bg-muted/30">
+      <section id="contact" className="scroll-mt-24 py-16 md:py-20 lg:py-24">
         <Contact />
       </section>
     </main>

@@ -13,6 +13,7 @@ const createSiteConfig = () => ({
       { label: 'AI Tools', id: 'ai-tools' },
       { label: 'Trajetória', id: 'experience' },
       { label: 'Highlights', id: 'highlights' },
+      { label: 'Side projects', id: 'side-projects' },
       { label: 'Sobre', id: 'about' },
       { label: 'Contato', id: 'contact' },
     ],
