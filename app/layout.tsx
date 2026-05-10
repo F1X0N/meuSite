@@ -8,6 +8,7 @@ import { CommandPalette } from '@/components/ui/CommandPalette'
 import { TechLeadOverlay } from '@/components/easter/TechLeadOverlay'
 import { EasterEggProvider } from '@/components/easter/EasterEggProvider'
 import { MatrixOverlay } from '@/components/easter/MatrixOverlay'
+import { ConsoleArt } from '@/components/easter/ConsoleArt'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CommandPalette />
           <TechLeadOverlay />
           <MatrixOverlay />
+          <ConsoleArt />
         </EasterEggProvider>
         {/* Vercel Analytics + Speed Insights só em produção (em local com
             npm start, esses scripts dão 404 e poluem console errors no
