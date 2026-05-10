@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { PageTransition } from '@/components/layout/PageTransition'
 import { CommandPalette } from '@/components/ui/CommandPalette'
+import { TechLeadOverlay } from '@/components/easter/TechLeadOverlay'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </main>
         <Footer />
         <CommandPalette />
+        <TechLeadOverlay />
         {/* Vercel Analytics + Speed Insights só em produção (em local com
             npm start, esses scripts dão 404 e poluem console errors no
             Lighthouse CI). Em previews também desabilita. */}

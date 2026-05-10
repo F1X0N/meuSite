@@ -37,6 +37,14 @@ const nextConfig: NextConfig = {
   experimental: {
     mdxRs: true,
   },
+  // Expõe metadados de build (commit/branch) para o easter egg do Konami code.
+  // Apenas dados não sensíveis, todos já públicos no GitHub do repo.
+  env: {
+    NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA ?? '',
+    NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF: process.env.VERCEL_GIT_COMMIT_REF ?? '',
+    NEXT_PUBLIC_VERCEL_DEPLOYMENT_CREATED_AT:
+      process.env.VERCEL_DEPLOYMENT_ID ? new Date().toISOString() : '',
+  },
   async headers() {
     return [
       {
