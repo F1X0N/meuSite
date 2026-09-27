@@ -63,6 +63,7 @@ meuSite/
 │   ├── about/                    # Sobre
 │   ├── contact/                  # Contato com formulário
 │   ├── play/4-digitos/           # Side project: Mastermind multiplayer (link externo)
+│   ├── play/proxima-sessao/      # Side project: escolha de filmes e séries (link externo)
 │   └── api/
 │       └── ai/
 │           ├── chat/             # Endpoint do Clone Digital
