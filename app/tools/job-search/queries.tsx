@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { BackLink } from '@/components/ui/BackLink'
 import { jobSearchGroups } from '@/content/job-search-queries'
 
@@ -31,6 +32,10 @@ export const JobSearchQueries = () => {
             Queries para encontrar oportunidades em engenharia de software. Copie uma busca ou abra-a no LinkedIn e ajuste os filtros conforme a vaga que procura.
           </p>
         </header>
+
+        <Link href="/blog/buscar-vagas-engenharia-linkedin" className="mt-6 inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline">
+          Entenda como montar e ajustar essas buscas →
+        </Link>
 
         <div className="mt-10 rounded-2xl border bg-muted/30 p-6">
           <h2 className="font-semibold">Como usar</h2>
