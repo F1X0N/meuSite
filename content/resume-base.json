@@ -12,7 +12,7 @@
   },
   "summaryClauses": [
     {
-      "text": "Full-stack software engineer with 4+ years building React front ends, Node.js and Python services, and PostgreSQL-backed products.",
+      "text": "Full-stack software engineer with 4+ years of professional experience across web applications, using React, Node.js, Python, and PostgreSQL.",
       "tags": ["software-engineering", "full-stack", "backend", "python", "nodejs", "typescript", "postgresql"],
       "default": true,
       "sourceRefs": ["content/knowledge-base.md", "workspace/professional-context/profile-context.md"]
@@ -376,7 +376,7 @@
       "sourceRefs": ["content/knowledge-base.md"]
     },
     {
-      "text": "English - Working proficiency in technical discussions, reading, and writing",
+      "text": "English - B2 (professional working proficiency)",
       "sourceRefs": ["content/knowledge-base.md"]
     }
   ]
