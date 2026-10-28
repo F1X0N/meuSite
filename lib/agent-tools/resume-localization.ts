@@ -5,7 +5,7 @@ export type ResumeLanguage = 'en' | 'pt'
 const portugueseText: Record<string, string> = {
   'Full-Stack Software Engineer | React, Node.js, Python | Cloud & Applied AI': 'Engenheiro de Software Full Stack | React, Node.js, Python | Cloud e IA aplicada',
   Brazil: 'Brasil',
-  'Full-stack software engineer with 4+ years building React front ends, Node.js and Python services, and PostgreSQL-backed products.': 'Engenheiro de software full stack com mais de 4 anos de experiência em interfaces React, serviços Node.js e Python e produtos com PostgreSQL.',
+  'Full-stack software engineer with 4+ years of professional experience across web applications, using React, Node.js, Python, and PostgreSQL.': 'Engenheiro de software full stack com mais de 4 anos de experiência profissional em aplicações web, usando React, Node.js, Python e PostgreSQL.',
   'Takes features from requirements through release, with CI/CD, cloud storage, and production observability using Grafana, Loki, and Sentry.': 'Conduz funcionalidades desde os requisitos até a publicação, com CI/CD, armazenamento em nuvem e observabilidade de produção com Grafana, Loki e Sentry.',
   'Builds AI workflows with OpenAI API, RAG, and supervised agents, backed by output validation and human review.': 'Desenvolve fluxos de IA com OpenAI API, RAG e agentes supervisionados, com validação das respostas e revisão humana.',
   'Previously built internal web applications and automation for large-scale industrial operations.': 'Desenvolveu aplicações web internas e automações para operações industriais de grande porte.',
@@ -53,7 +53,7 @@ const portugueseText: Record<string, string> = {
   'Documented technical case studies on applied AI, observability, and release validation to explain engineering trade-offs and outcomes.': 'Documentou estudos de caso técnicos sobre IA aplicada, observabilidade e validação de releases para explicar decisões de engenharia e resultados.',
   'Technologist Degree in Systems Analysis and Development': 'Tecnólogo em Análise e Desenvolvimento de Sistemas',
   'Portuguese - Native': 'Português - Nativo',
-  'English - Working proficiency in technical discussions, reading, and writing': 'Inglês - Proficiência de trabalho em discussões técnicas, leitura e escrita',
+  'English - B2 (professional working proficiency)': 'Inglês - B2 (proficiência profissional)',
 }
 
 export const localizeResumeBase = (base: ResumeBase, language: ResumeLanguage): ResumeBase => {
