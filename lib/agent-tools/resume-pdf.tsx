@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer'
 import { buildTargetedResumeModel, type ResumeRenderModel } from './resume'
+import type { ResumeLanguage } from './resume-localization'
 
 const COLOR_PRIMARY = '#0e7490'
 const COLOR_TEXT = '#111111'
@@ -8,11 +9,11 @@ const COLOR_MUTED = '#444444'
 
 const styles = StyleSheet.create({
   page: {
-    paddingTop: 30,
-    paddingBottom: 30,
+    paddingTop: 23,
+    paddingBottom: 23,
     paddingHorizontal: 38,
     fontFamily: 'Helvetica',
-    fontSize: 9.4,
+    fontSize: 9.1,
     color: COLOR_TEXT,
     lineHeight: 1.3,
   },
@@ -26,16 +27,16 @@ const styles = StyleSheet.create({
     color: COLOR_PRIMARY,
     textTransform: 'uppercase',
     letterSpacing: 0.4,
-    marginTop: 10,
-    marginBottom: 4,
+    marginTop: 6,
+    marginBottom: 2,
     paddingBottom: 1.5,
     borderBottomWidth: 0.5,
     borderBottomColor: COLOR_PRIMARY,
   },
-  summary: { fontSize: 9.3, marginBottom: 2 },
-  skillsRow: { fontSize: 8.8, marginBottom: 2, lineHeight: 1.35 },
+  summary: { fontSize: 9.1, marginBottom: 1.5 },
+  skillsRow: { fontSize: 8.7, marginBottom: 1.5, lineHeight: 1.3 },
   skillsLabel: { fontFamily: 'Helvetica-Bold' },
-  experienceItem: { marginBottom: 6 },
+  experienceItem: { marginBottom: 4 },
   experienceHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -45,7 +46,7 @@ const styles = StyleSheet.create({
   roleCompany: { fontSize: 9.6, fontFamily: 'Helvetica-Bold' },
   period: { fontSize: 8.4, color: COLOR_MUTED },
   location: { fontSize: 8.4, color: COLOR_MUTED, fontStyle: 'italic', marginBottom: 1.5 },
-  bullet: { flexDirection: 'row', marginBottom: 1.5 },
+  bullet: { flexDirection: 'row', marginBottom: 1.2 },
   bulletDash: { width: 8, fontSize: 8.8 },
   bulletText: { flex: 1, fontSize: 8.8 },
   projectItem: { marginBottom: 5 },
@@ -133,27 +134,33 @@ const renderProject = (project: ResumeRenderModel['publicProjects'][number]) => 
   </View>
 )
 
-export const ResumeDocument = ({ prioritySkills = [] }: { prioritySkills?: string[] }) => {
-  const model = buildTargetedResumeModel(prioritySkills)
+const pdfTitles = {
+  en: { summary: 'Summary', skills: 'Skills', experience: 'Experience', projects: 'Projects', education: 'Education', training: 'Training', languages: 'Languages' },
+  pt: { summary: 'Resumo', skills: 'Competências', experience: 'Experiência', projects: 'Projetos', education: 'Formação', training: 'Cursos', languages: 'Idiomas' },
+}
+
+export const ResumeDocument = ({ prioritySkills = [], language = 'en' }: { prioritySkills?: string[]; language?: ResumeLanguage }) => {
+  const model = buildTargetedResumeModel(prioritySkills, language)
+  const titles = pdfTitles[language]
 
   return (
     <Document title={`${model.header.name} - CV`} author={model.header.name}>
       <Page size="A4" style={styles.page}>
         {renderHeader(model)}
 
-        <Section title="Resumo">{renderSummary(model)}</Section>
+        <Section title={titles.summary}>{renderSummary(model)}</Section>
 
-        <Section title="Competências">{renderSkills(model)}</Section>
+        <Section title={titles.skills}>{renderSkills(model)}</Section>
 
-        <Section title="Experiência">
+        <Section title={titles.experience}>
           {model.experience.map(renderExperience)}
         </Section>
 
-        <Section title="Projetos">
+        <Section title={titles.projects}>
           {model.publicProjects.map(renderProject)}
         </Section>
 
-        <Section title="Formação">
+        <Section title={titles.education}>
           {model.education.map((education) => (
             <Text key={`${education.institution}-${education.period}`} style={styles.compactItem}>
               {education.institution} - {education.degree} ({education.period})
@@ -161,15 +168,17 @@ export const ResumeDocument = ({ prioritySkills = [] }: { prioritySkills?: strin
           ))}
         </Section>
 
-        <Section title="Certificações">
-          {model.certifications.map((certification) => (
-            <Text key={certification.text} style={styles.compactItem}>
-              - {certification.text}
-            </Text>
-          ))}
-        </Section>
+        {model.certifications.length > 0 && (
+          <Section title={titles.training}>
+            {model.certifications.map((certification) => (
+              <Text key={certification.text} style={styles.compactItem}>
+                - {certification.text}
+              </Text>
+            ))}
+          </Section>
+        )}
 
-        <Section title="Idiomas">
+        <Section title={titles.languages}>
           {model.languages.map((language) => (
             <Text key={language.text} style={styles.compactItem}>
               - {language.text}
@@ -181,8 +190,8 @@ export const ResumeDocument = ({ prioritySkills = [] }: { prioritySkills?: strin
   )
 }
 
-export const generateResumePDF = async (prioritySkills: string[] = []): Promise<Buffer> => {
-  const instance = pdf(<ResumeDocument prioritySkills={prioritySkills} />)
+export const generateResumePDF = async (prioritySkills: string[] = [], language: ResumeLanguage = 'en'): Promise<Buffer> => {
+  const instance = pdf(<ResumeDocument prioritySkills={prioritySkills} language={language} />)
   const stream = (await instance.toBuffer()) as NodeJS.ReadableStream
   const chunks: Buffer[] = []
   return new Promise<Buffer>((resolve, reject) => {

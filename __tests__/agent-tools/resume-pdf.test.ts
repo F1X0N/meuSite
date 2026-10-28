@@ -2,6 +2,12 @@ import { describe, it, expect } from 'vitest'
 import { generateResumePDF } from '@/lib/agent-tools/resume-pdf'
 
 describe('agent-tools/resume-pdf', () => {
+  it('gera PDF em português a partir do mesmo modelo de evidências', async () => {
+    const buffer = await generateResumePDF(['must:React'], 'pt')
+    expect(buffer.subarray(0, 4).toString('utf-8')).toBe('%PDF')
+    expect(buffer.length).toBeGreaterThan(2000)
+  }, 30_000)
+
   it('gera PDF válido (magic %PDF) com tamanho razoável (CV default)', async () => {
     const buf = await generateResumePDF([])
     expect(buf.length).toBeGreaterThan(2000)

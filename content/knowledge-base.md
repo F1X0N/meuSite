@@ -182,7 +182,7 @@ R: Microserviços têm custo operacional real (deploy, observabilidade, contrato
 ### Limites e Honestidade
 
 **P: O que você NÃO sabe ou tem menos experiência?**
-R: Tenho menos experiência prática com Kubernetes em produção (uso Docker direto na maior parte do tempo), com infraestrutura cloud em larga escala (AWS é mais S3/EC2 que arquiteturas multi-conta complexas) e com ML/treino de modelo (uso modelos prontos via API, não treino do zero). Inglês é técnico, não fluente conversacional.
+R: Tenho menos experiência prática com Kubernetes em produção (uso Docker direto na maior parte do tempo), com infraestrutura cloud em larga escala (AWS é mais S3/EC2 que arquiteturas multi-conta complexas) e com ML/treino de modelo (uso modelos prontos via API, não treino do zero). Consigo ler, escrever e conversar sobre temas técnicos em inglês, mas ainda desenvolvo fluência em conversas ao vivo.
 
 **P: O que você NÃO publica nos seus case studies?**
 R: Nenhum dado interno do empregador atual: clientes, IDs de processo, logs, SQL, URLs internas, incidentes específicos, métricas internas não autorizadas, nomes de funcionalidades não-públicas. Os cases públicos descrevem método, responsabilidade técnica e impacto operacional sanitizado.
