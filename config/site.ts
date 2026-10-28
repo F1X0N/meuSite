@@ -20,6 +20,7 @@ const createSiteConfig = () => ({
     pages: [
       { label: 'Case Studies', href: '/case-studies' },
       { label: 'Blog', href: '/blog' },
+      { label: 'Ferramentas', href: '/tools/job-search' },
     ],
     utils: [
       { label: 'Baixar CV', href: '/cv.pdf' },
