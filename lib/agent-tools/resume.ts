@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import type { OpenAI } from 'openai'
 import resumeBase from '@/content/resume-base.json'
+import { localizeResumeBase, type ResumeLanguage } from './resume-localization'
 import type {
   ResumeBase as ResumeBaseData,
   ResumeBullet,
@@ -293,7 +294,7 @@ export const calculateResumeFitScore = (prioritySkills: string[], base: ResumeBa
 }
 
 const shouldTargetResume = (prioritySkills: string[], base: ResumeBase = resumeBase as ResumeBase): boolean =>
-  prioritySkills.length > 0 && weightedSignalsTotal(decodeTargetingSignals(prioritySkills)) > 0 && calculateResumeFitScore(prioritySkills, base) >= 60
+  prioritySkills.length > 0 && weightedSignalsTotal(decodeTargetingSignals(prioritySkills)) > 0 && calculateResumeFitScore(prioritySkills, base) > 0
 
 export const matchScore = (bullet: Bullet, prioritySkills: string[]): number => {
   if (!shouldTargetResume(prioritySkills)) return 0
@@ -352,38 +353,48 @@ const sortSkillGroup = ([key, group]: [string, ResumeSkillGroup], prioritySkills
 const skillGroupScore = (group: ResumeSkillGroupView, prioritySkills: string[]): number =>
   group.items.reduce((total, item) => total + scoreSkillItem(item, prioritySkills), 0)
 
+const defaultSkillGroupPriority: Record<string, number> = {
+  frontend: 6,
+  backend: 5,
+  data: 4,
+  devops_delivery: 3,
+  observability: 2,
+  ai_llm: 1,
+}
+
 const selectSkillGroups = (skills: ResumeBase['skills'], prioritySkills: string[]): ResumeSkillGroupView[] => {
   const groups = Object.entries(skills).map((entry) => sortSkillGroup(entry, prioritySkills))
-  if (!shouldTargetResume(prioritySkills)) return groups
+  if (!shouldTargetResume(prioritySkills)) return sortByScore(groups, (group) => defaultSkillGroupPriority[group.key] ?? 0)
   return sortByScore(groups, (group) => skillGroupScore(group, prioritySkills))
 }
 
-export const buildTargetedResumeModel = (prioritySkills: string[] = []): ResumeRenderModel => {
+export const buildTargetedResumeModel = (prioritySkills: string[] = [], language: ResumeLanguage = 'en'): ResumeRenderModel => {
   const base = resumeBase as ResumeBase
   const activePrioritySkills = shouldTargetResume(prioritySkills, base) ? prioritySkills : []
+  const localizedBase = localizeResumeBase(base, language)
 
   return {
-    header: base.header,
-    summaryClauses: selectSummaryClauses(base.summaryClauses, activePrioritySkills),
-    skills: selectSkillGroups(base.skills, activePrioritySkills),
-    experience: base.experience.map((experience) => ({
+    header: localizedBase.header,
+    summaryClauses: selectSummaryClauses(localizedBase.summaryClauses, activePrioritySkills),
+    skills: selectSkillGroups(localizedBase.skills, activePrioritySkills),
+    experience: localizedBase.experience.map((experience) => ({
       ...experience,
       bullets: selectBulletsByPriority(experience.bullets, activePrioritySkills, Math.min(2, experience.bullets.length)),
     })),
-    publicProjects: base.publicProjects.map((project) => ({
+    publicProjects: localizedBase.publicProjects.map((project) => ({
       ...project,
       bullets: selectBulletsByPriority(project.bullets, activePrioritySkills, 1),
     })),
-    education: base.education,
-    certifications: base.certifications,
-    languages: base.languages,
+    education: localizedBase.education,
+    certifications: localizedBase.certifications,
+    languages: localizedBase.languages,
   }
 }
 
-const renderHeader = (header: ResumeBase['header']): string => {
+const renderHeader = (header: ResumeBase['header'], language: ResumeLanguage): string => {
   const contactLine = [header.email, header.phone, header.linkedin].filter(Boolean).join(' | ')
   const linksLine = [`GitHub: ${header.github}`, `Portfolio: ${header.portfolio}`].join(' | ')
-  const locationLine = header.location ? [`Location: ${header.location}`] : []
+  const locationLine = header.location ? [`${language === 'pt' ? 'Localização' : 'Location'}: ${header.location}`] : []
   return [`# ${header.name}`, '', header.title, '', contactLine, linksLine, ...locationLine].join('\n')
 }
 
@@ -402,30 +413,36 @@ const renderPublicProject = (project: PublicProject): string => {
   return `${heading}\n${project.url}\n\n${project.bullets.map((bullet) => `- ${bullet.text}`).join('\n')}`
 }
 
-export const generateTargetedResumeMarkdown = (prioritySkills: string[] = []): string => {
-  const model = buildTargetedResumeModel(prioritySkills)
+const sectionTitles = {
+  en: { summary: 'Summary', skills: 'Skills', experience: 'Experience', projects: 'Projects', education: 'Education', training: 'Training', languages: 'Languages' },
+  pt: { summary: 'Resumo', skills: 'Competências', experience: 'Experiência', projects: 'Projetos', education: 'Formação', training: 'Cursos', languages: 'Idiomas' },
+}
+
+export const generateTargetedResumeMarkdown = (prioritySkills: string[] = [], language: ResumeLanguage = 'en'): string => {
+  const model = buildTargetedResumeModel(prioritySkills, language)
+  const titles = sectionTitles[language]
   return [
-    renderHeader(model.header),
+    renderHeader(model.header, language),
     '',
-    '## Summary',
+    `## ${titles.summary}`,
     ...model.summaryClauses.map((clause) => clause.text),
     '',
-    '## Skills',
+    `## ${titles.skills}`,
     renderSkillsBlock(model.skills),
     '',
-    '## Experience',
+    `## ${titles.experience}`,
     ...model.experience.flatMap((experience) => ['', renderExperience(experience)]),
     '',
-    '## Projects',
+    `## ${titles.projects}`,
     ...model.publicProjects.flatMap((project) => ['', renderPublicProject(project)]),
     '',
-    '## Education',
+    `## ${titles.education}`,
     ...model.education.map((education) => `- ${education.institution} - ${education.degree} (${education.period})`),
+    ...(model.certifications.length > 0
+      ? ['', `## ${titles.training}`, ...model.certifications.map((certification) => `- ${certification.text}`)]
+      : []),
     '',
-    '## Certifications',
-    ...model.certifications.map((certification) => `- ${certification.text}`),
-    '',
-    '## Languages',
+    `## ${titles.languages}`,
     ...model.languages.map((language) => `- ${language.text}`),
   ].join('\n')
 }
@@ -442,16 +459,10 @@ const allowedSkillLine = (line: string, base: ResumeBase): boolean => {
   return values.split(', ').every((value) => allowedItems.has(value))
 }
 
-const allowedMarkdownLines = (base: ResumeBase): Set<string> =>
+const allowedMarkdownLines = (base: ResumeBase, language: ResumeLanguage): Set<string> =>
   new Set([
-    ...renderHeader(base.header).split('\n').map((line) => line.trim()).filter(Boolean),
-    '## Summary',
-    '## Skills',
-    '## Experience',
-    '## Projects',
-    '## Education',
-    '## Certifications',
-    '## Languages',
+    ...renderHeader(base.header, language).split('\n').map((line) => line.trim()).filter(Boolean),
+    ...Object.values(sectionTitles[language]).map((title) => `## ${title}`),
     ...base.summaryClauses.map((clause) => clause.text),
     ...base.experience.flatMap((experience) => [
       `### ${experience.role} - ${experience.company}`,
@@ -468,9 +479,9 @@ const allowedMarkdownLines = (base: ResumeBase): Set<string> =>
     ...base.languages.map((language) => `- ${language.text}`),
   ])
 
-export const validateMarkdownIsSubset = (markdown: string): { ok: boolean; invalidBullets: string[] } => {
-  const base = resumeBase as ResumeBase
-  const allowedLines = allowedMarkdownLines(base)
+export const validateMarkdownIsSubset = (markdown: string, language: ResumeLanguage = 'en'): { ok: boolean; invalidBullets: string[] } => {
+  const base = localizeResumeBase(resumeBase as ResumeBase, language)
+  const allowedLines = allowedMarkdownLines(base, language)
   const invalidBullets = markdown
     .split('\n')
     .map((line) => line.trim())

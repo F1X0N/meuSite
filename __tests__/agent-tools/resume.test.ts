@@ -6,8 +6,10 @@ import {
   generateTargetedResumeMarkdown,
   matchScore,
   validateMarkdownIsSubset,
+  buildTargetedResumeModel,
   type Bullet,
 } from '@/lib/agent-tools/resume'
+import { generateCoverLetter } from '@/lib/agent-tools/cover-letter'
 
 const createMockOpenAiClient = (content: string): OpenAI => ({
   chat: {
@@ -29,6 +31,53 @@ describe('agent-tools/resume', () => {
     expect(markdown).toMatch(/## Skills/)
     expect(markdown).toMatch(/## Experience/)
     expect(markdown).not.toMatch(/Métricas e Resultados|Princípios/)
+  })
+
+  it('gera currículo em português com a mesma validação de evidências', () => {
+    const markdown = generateTargetedResumeMarkdown(['must:React', 'must:Node.js'], 'pt')
+
+    expect(markdown).toContain('## Resumo')
+    expect(markdown).toContain('## Experiência')
+    expect(markdown).toContain('Engenheiro de Software Full Stack')
+    expect(markdown).toContain('Desenvolveu funcionalidades de produto')
+    expect(markdown).not.toContain('Built full-stack product features')
+    expect(validateMarkdownIsSubset(markdown, 'pt').ok).toBe(true)
+  })
+
+  it('mantém todos os textos narrativos traduzidos e verificáveis', () => {
+    const english = buildTargetedResumeModel([], 'en')
+    const portuguese = buildTargetedResumeModel([], 'pt')
+
+    expect(portuguese.summaryClauses.every((clause, index) => clause.text !== english.summaryClauses[index].text)).toBe(true)
+    expect(portuguese.experience.every((experience, experienceIndex) =>
+      experience.bullets.every((bullet, bulletIndex) => bullet.text !== english.experience[experienceIndex].bullets[bulletIndex].text),
+    )).toBe(true)
+    expect(portuguese.publicProjects.every((project, projectIndex) =>
+      project.bullets.every((bullet, bulletIndex) => bullet.text !== english.publicProjects[projectIndex].bullets[bulletIndex].text),
+    )).toBe(true)
+  })
+
+  it('carta usa cargo, empresa e experiência verificada no idioma escolhido', () => {
+    const portugueseLetter = generateCoverLetter({
+      prioritySkills: ['must:React'],
+      language: 'pt',
+      role: 'Engenheiro Full Stack',
+      company: 'Empresa Exemplo',
+      motivation: 'Gosto de construir produtos de ponta a ponta.',
+    })
+    const englishLetter = generateCoverLetter({
+      prioritySkills: ['must:React'],
+      language: 'en',
+      role: 'Full-Stack Engineer',
+      company: 'Example Company',
+    })
+
+    expect(portugueseLetter).toContain('Empresa Exemplo')
+    expect(portugueseLetter).toContain('Desenvolvi funcionalidades de produto')
+    expect(portugueseLetter).toContain('Gosto de construir produtos de ponta a ponta.')
+    expect(englishLetter).toContain('Example Company')
+    expect(englishLetter).toContain('I built full-stack product features')
+    expect(englishLetter).not.toContain('Gosto de construir')
   })
 
   it('extractPrioritySkills extrai sinais estruturados e codifica sem quebrar o endpoint atual', async () => {
@@ -67,25 +116,33 @@ describe('agent-tools/resume', () => {
   it('personalizacao reordena summary, skills e filtra bullets irrelevantes', () => {
     const markdown = generateTargetedResumeMarkdown(['llm', 'openai', 'rag'])
 
-    expect(markdown.indexOf('Atua com IA aplicada')).toBeLessThan(markdown.indexOf('Engenheiro de Software full stack'))
-    expect(markdown.indexOf('Integra OpenAI')).toBeLessThan(markdown.indexOf('Desenvolve features full stack'))
-    expect(markdown).not.toContain('Estrutura runbooks, planos de validação')
-    expect(markdown).not.toContain('Colaborou com engenharia, operação e PCP')
+    expect(markdown.indexOf('Builds AI workflows')).toBeLessThan(markdown.indexOf('Full-stack software engineer'))
+    expect(markdown.indexOf('Developed applied AI workflows')).toBeLessThan(markdown.indexOf('Built full-stack product features'))
+    expect(markdown).not.toContain('Contributed to Docker-based delivery')
+    expect(markdown).not.toContain('Collaborated with engineering and operations teams')
   })
 
   it('reordena grupos e itens de skills, nao apenas bullets', () => {
     const markdown = generateTargetedResumeMarkdown(['must:PostgreSQL', 'must:Redis'])
 
-    expect(markdown.indexOf('**Dados e Persistência:** PostgreSQL, Redis')).toBeGreaterThan(-1)
-    expect(markdown.indexOf('**Dados e Persistência:**')).toBeLessThan(markdown.indexOf('**AI e LLMs:**'))
+    expect(markdown.indexOf('**Data & Storage:** PostgreSQL, Redis')).toBeGreaterThan(-1)
+    expect(markdown.indexOf('**Data & Storage:**')).toBeLessThan(markdown.indexOf('**Applied AI:**'))
   })
 
-  it('usa CV-base quando o score deterministico fica abaixo de 60', () => {
+  it('usa CV-base quando a vaga não tem competências verificadas no perfil', () => {
     const defaultMarkdown = generateTargetedResumeMarkdown([])
     const lowFitMarkdown = generateTargetedResumeMarkdown(['must:Kubernetes'])
 
     expect(calculateResumeFitScore(['must:Kubernetes'])).toBe(0)
     expect(lowFitMarkdown).toBe(defaultMarkdown)
+  })
+
+  it('personaliza uma vaga com correspondência parcial sem inventar requisitos', () => {
+    const markdown = generateTargetedResumeMarkdown(['must:React', 'must:Kubernetes'])
+
+    expect(markdown).not.toBe(generateTargetedResumeMarkdown([]))
+    expect(markdown).not.toContain('Kubernetes')
+    expect(validateMarkdownIsSubset(markdown).ok).toBe(true)
   })
 
   it('validateMarkdownIsSubset retorna ok=true para markdown gerado', () => {
@@ -99,7 +156,7 @@ describe('agent-tools/resume', () => {
   it('validateMarkdownIsSubset detecta summary ou bullet inventado', () => {
     const markdown = generateTargetedResumeMarkdown([])
     const tampered = markdown.replace(
-      'Engenheiro de Software full stack com mais de 4 anos de experiência em Python, Node.js, TypeScript e PostgreSQL.',
+      'Full-stack software engineer with 4+ years building React front ends, Node.js and Python services, and PostgreSQL-backed products.',
       'Engenheiro inventado com dez anos de Kubernetes em escala global.',
     )
     const result = validateMarkdownIsSubset(tampered)

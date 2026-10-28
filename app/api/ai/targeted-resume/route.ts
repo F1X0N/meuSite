@@ -11,6 +11,7 @@ import {
   validateMarkdownIsSubset,
 } from '@/lib/agent-tools/resume'
 import { generateResumePDF } from '@/lib/agent-tools/resume-pdf'
+import { generateCoverLetter } from '@/lib/agent-tools/cover-letter'
 import { createHash } from 'node:crypto'
 
 const RATE_LIMIT_WINDOW_MS = 3600_000
@@ -38,6 +39,10 @@ const checkLimit = (
 
 const requestSchema = z.object({
   jobDescription: z.string().min(50).max(10_000),
+  language: z.enum(['pt', 'en']).default('en'),
+  role: z.string().trim().min(2).max(120).optional(),
+  company: z.string().trim().max(120).optional(),
+  motivation: z.string().trim().max(350).optional(),
   sessionId: z.string().min(8).max(100).optional(),
 })
 
@@ -62,7 +67,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { jobDescription, sessionId } = parsed.data
+    const { jobDescription, sessionId, language, role, company, motivation } = parsed.data
     const sessionKey = sessionId ?? ctx?.ip_hash ?? 'anon'
 
     logger.info(AUDIT_EVENTS.TARGETED_RESUME_REQUESTED, {
@@ -94,9 +99,10 @@ export async function POST(request: Request) {
 
     const startedAt = Date.now()
     const prioritySkills = await extractPrioritySkills(client, jobDescription)
-    const markdown = generateTargetedResumeMarkdown(prioritySkills)
+    const markdown = generateTargetedResumeMarkdown(prioritySkills, language)
+    const coverLetter = role ? generateCoverLetter({ prioritySkills, language, role, company, motivation }) : null
 
-    const validation = validateMarkdownIsSubset(markdown)
+    const validation = validateMarkdownIsSubset(markdown, language)
     if (!validation.ok) {
       logger.error(AUDIT_EVENTS.TARGETED_RESUME_VALIDATION_FAILED, {
         request_id: requestId,
@@ -118,18 +124,15 @@ export async function POST(request: Request) {
       md_hash,
     })
 
+    const pdfBuffer = await generateResumePDF(prioritySkills, language)
     let pdfUrl: string | null = null
-    let pdfSizeBytes: number | null = null
-    let pdfHash: string | null = null
+    const pdfSizeBytes = pdfBuffer.length
+    const pdfHash = createHash('sha256').update(pdfBuffer).digest('hex').slice(0, 16)
 
     if (process.env.BLOB_READ_WRITE_TOKEN) {
       try {
         const pdfStartedAt = Date.now()
-        const pdfBuffer = await generateResumePDF(prioritySkills)
-        pdfHash = createHash('sha256').update(pdfBuffer).digest('hex').slice(0, 16)
-        pdfSizeBytes = pdfBuffer.length
-
-        const filename = `cv-targeted-${md_hash}.pdf`
+        const filename = `cv-targeted-${language}-${md_hash}.pdf`
         const blob = await put(filename, pdfBuffer, {
           access: 'public',
           addRandomSuffix: true,
@@ -157,7 +160,7 @@ export async function POST(request: Request) {
     const headers = new Headers()
     if (requestId) headers.set('x-request-id', requestId)
     return NextResponse.json(
-      { markdown, prioritySkills, hash: md_hash, pdfUrl, pdfSizeBytes, pdfHash },
+      { markdown, coverLetter, language, prioritySkills, hash: md_hash, pdfUrl, pdfBase64: pdfBuffer.toString('base64'), pdfSizeBytes, pdfHash },
       { headers },
     )
   } catch (error) {

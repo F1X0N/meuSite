@@ -1,0 +1,90 @@
+import type { ResumeBase } from '@/lib/resume-schema'
+
+export type ResumeLanguage = 'en' | 'pt'
+
+const portugueseText: Record<string, string> = {
+  'Full-Stack Software Engineer | React, Node.js, Python | Cloud & Applied AI': 'Engenheiro de Software Full Stack | React, Node.js, Python | Cloud e IA aplicada',
+  Brazil: 'Brasil',
+  'Full-stack software engineer with 4+ years building React front ends, Node.js and Python services, and PostgreSQL-backed products.': 'Engenheiro de software full stack com mais de 4 anos de experiência em interfaces React, serviços Node.js e Python e produtos com PostgreSQL.',
+  'Takes features from requirements through release, with CI/CD, cloud storage, and production observability using Grafana, Loki, and Sentry.': 'Conduz funcionalidades desde os requisitos até a publicação, com CI/CD, armazenamento em nuvem e observabilidade de produção com Grafana, Loki e Sentry.',
+  'Builds AI workflows with OpenAI API, RAG, and supervised agents, backed by output validation and human review.': 'Desenvolve fluxos de IA com OpenAI API, RAG e agentes supervisionados, com validação das respostas e revisão humana.',
+  'Previously built internal web applications and automation for large-scale industrial operations.': 'Desenvolveu aplicações web internas e automações para operações industriais de grande porte.',
+  'Combines engineering ownership, clear acceptance criteria, and cross-functional communication across product and operations.': 'Assume responsabilidade técnica, define critérios de aceite claros e se comunica com produto e operações.',
+  'Applied AI': 'IA aplicada',
+  'Backend & APIs': 'Backend e APIs',
+  'Data & Storage': 'Dados e armazenamento',
+  Observability: 'Observabilidade',
+  Frontend: 'Frontend',
+  'Cloud & Delivery': 'Cloud e entrega',
+  'Structured prompts': 'Prompts estruturados',
+  'Supervised AI agents': 'Agentes de IA supervisionados',
+  'Structured output validation': 'Validação de respostas estruturadas',
+  'API design': 'Design de APIs',
+  'System integrations': 'Integrações de sistemas',
+  'Read-only diagnostics': 'Diagnósticos somente leitura',
+  'Data validation': 'Validação de dados',
+  Monitoring: 'Monitoramento',
+  'Production diagnostics': 'Diagnóstico de produção',
+  'Release validation': 'Validação de releases',
+  Runbooks: 'Guias operacionais',
+  'Deployment validation': 'Validação de implantação',
+  'Legal technology SaaS': 'SaaS de tecnologia jurídica',
+  'Full-Stack Software Engineer': 'Engenheiro de Software Full Stack',
+  'Full-Stack Developer': 'Desenvolvedor Full Stack',
+  'Frontend Developer (Freelance)': 'Desenvolvedor Frontend (freelancer)',
+  'Jul 2024 - Present': 'Jul 2024 - Atual',
+  'Feb 2022 - Jul 2024': 'Fev 2022 - Jul 2024',
+  'Jul 2021 - Jul 2024': 'Jul 2021 - Jul 2024',
+  'Remote, Brazil': 'Remoto, Brasil',
+  'On-site, Brazil': 'Presencial, Brasil',
+  'Remote, part-time': 'Remoto, meio período',
+  'Built full-stack product features across React interfaces, Node.js and Python APIs, and PostgreSQL-backed workflows.': 'Desenvolveu funcionalidades de produto de ponta a ponta com interfaces React, APIs em Node.js e Python e fluxos apoiados em PostgreSQL.',
+  'Developed applied AI workflows with OpenAI API, RAG, and supervised agents, adding output checks and human review.': 'Desenvolveu fluxos de IA aplicada com OpenAI API, RAG e agentes supervisionados, incluindo validação de respostas e revisão humana.',
+  'Connected frontend, backend, and integrations with acceptance criteria and release validation across end-to-end product flows.': 'Conectou frontend, backend e integrações em fluxos completos de produto, com critérios de aceite e validação de releases.',
+  'Investigated production issues with Grafana, Loki, Sentry, and read-only SQL, then verified changes after deployment.': 'Investigou problemas em produção com Grafana, Loki, Sentry e SQL somente leitura, e verificou as mudanças após a implantação.',
+  'Contributed to Docker-based delivery, CI/CD, and AWS S3 storage, validating releases and monitoring production behavior.': 'Contribuiu para entregas com Docker, CI/CD e armazenamento AWS S3, validando releases e monitorando o comportamento em produção.',
+  'Built internal web applications and process automations with Angular, Node.js, PHP, and PostgreSQL for industrial operations.': 'Desenvolveu aplicações web internas e automações de processos com Angular, Node.js, PHP e PostgreSQL para operações industriais.',
+  'Owned feature work from requirements through frontend and backend implementation, release, and ongoing application support.': 'Conduziu funcionalidades dos requisitos à implementação frontend e backend, publicação e suporte contínuo às aplicações.',
+  'Collaborated with engineering and operations teams in Lean, Scrum, and Kanban workflows to turn needs into maintainable software.': 'Colaborou com equipes de engenharia e operações em processos Lean, Scrum e Kanban para transformar necessidades em software sustentável.',
+  'Delivered responsive websites and interfaces with React, JavaScript, Bootstrap, HTML, and CSS for independent clients.': 'Entregou sites e interfaces responsivas com React, JavaScript, Bootstrap, HTML e CSS para clientes independentes.',
+  'Technical Portfolio': 'Portfólio técnico',
+  'Public project': 'Projeto público',
+  'Built this portfolio with Next.js, React, TypeScript, Tailwind CSS, MDX, Vercel, and automated Lighthouse checks.': 'Desenvolveu este portfólio com Next.js, React, TypeScript, Tailwind CSS, MDX, Vercel e verificações automatizadas com Lighthouse.',
+  'Documented technical case studies on applied AI, observability, and release validation to explain engineering trade-offs and outcomes.': 'Documentou estudos de caso técnicos sobre IA aplicada, observabilidade e validação de releases para explicar decisões de engenharia e resultados.',
+  'Technologist Degree in Systems Analysis and Development': 'Tecnólogo em Análise e Desenvolvimento de Sistemas',
+  'Portuguese - Native': 'Português - Nativo',
+  'English - Working proficiency in technical discussions, reading, and writing': 'Inglês - Proficiência de trabalho em discussões técnicas, leitura e escrita',
+}
+
+export const localizeResumeBase = (base: ResumeBase, language: ResumeLanguage): ResumeBase => {
+  if (language === 'en') return base
+  const translate = (value: string): string => portugueseText[value] ?? value
+
+  return {
+    ...base,
+    header: { ...base.header, title: translate(base.header.title), location: base.header.location ? translate(base.header.location) : undefined },
+    summaryClauses: base.summaryClauses.map((clause) => ({ ...clause, text: translate(clause.text) })),
+    skills: Object.fromEntries(Object.entries(base.skills).map(([key, group]) => [key, {
+      ...group,
+      label: translate(group.label),
+      items: group.items.map((item) => ({ ...item, text: translate(item.text) })),
+    }])),
+    experience: base.experience.map((experience) => ({
+      ...experience,
+      company: translate(experience.company),
+      role: translate(experience.role),
+      period: translate(experience.period),
+      location: experience.location ? translate(experience.location) : undefined,
+      bullets: experience.bullets.map((bullet) => ({ ...bullet, text: translate(bullet.text) })),
+    })),
+    publicProjects: base.publicProjects.map((project) => ({
+      ...project,
+      title: translate(project.title),
+      role: project.role ? translate(project.role) : undefined,
+      bullets: project.bullets.map((bullet) => ({ ...bullet, text: translate(bullet.text) })),
+    })),
+    education: base.education.map((education) => ({ ...education, degree: translate(education.degree) })),
+    certifications: base.certifications.map((certification) => ({ ...certification, text: translate(certification.text) })),
+    languages: base.languages.map((item) => ({ ...item, text: translate(item.text) })),
+  }
+}

@@ -1,10 +1,10 @@
 {
   "header": {
     "name": "Josivan Amorim",
-    "title": "Engenheiro de Software | IA Aplicada, Backend e Operação Técnica",
+    "title": "Full-Stack Software Engineer | React, Node.js, Python | Cloud & Applied AI",
     "email": "amorimjosivan7@gmail.com",
     "phone": "+55 75 99182-6325",
-    "location": "Brasil (remoto)",
+    "location": "Brazil",
     "linkedin": "https://www.linkedin.com/in/josivan-amorim/",
     "github": "https://github.com/F1X0N",
     "portfolio": "https://josivan-amorim.vercel.app",
@@ -12,31 +12,31 @@
   },
   "summaryClauses": [
     {
-      "text": "Engenheiro de Software full stack com mais de 4 anos de experiência em Python, Node.js, TypeScript e PostgreSQL.",
+      "text": "Full-stack software engineer with 4+ years building React front ends, Node.js and Python services, and PostgreSQL-backed products.",
       "tags": ["software-engineering", "full-stack", "backend", "python", "nodejs", "typescript", "postgresql"],
       "default": true,
       "sourceRefs": ["content/knowledge-base.md", "workspace/professional-context/profile-context.md"]
     },
     {
-      "text": "Atua com IA aplicada, OpenAI, RAG e agentes supervisionados em produto SaaS LegalTech.",
+      "text": "Takes features from requirements through release, with CI/CD, cloud storage, and production observability using Grafana, Loki, and Sentry.",
+      "tags": ["cloud", "ci-cd", "observability", "release-validation", "grafana", "loki", "sentry"],
+      "default": true,
+      "sourceRefs": ["content/knowledge-base.md", "content/case-studies/diagnostico-observabilidade-producao.mdx"]
+    },
+    {
+      "text": "Builds AI workflows with OpenAI API, RAG, and supervised agents, backed by output validation and human review.",
       "tags": ["ai", "llm", "openai", "rag", "agent-supervision", "legaltech"],
       "default": true,
       "sourceRefs": ["content/knowledge-base.md", "content/case-studies/orquestracao-ia-operacao.mdx"]
     },
     {
-      "text": "Diferencial em observabilidade, diagnóstico por evidências e validação pós-mudança com Grafana, Loki e Sentry.",
-      "tags": ["observability", "incident-diagnosis", "evidence-based", "release-validation", "grafana", "loki", "sentry"],
-      "default": true,
-      "sourceRefs": ["content/knowledge-base.md", "content/case-studies/diagnostico-observabilidade-producao.mdx"]
-    },
-    {
-      "text": "Experiência anterior em sistemas internos e automações para operação industrial com mais de 28 mil colaboradores.",
+      "text": "Previously built internal web applications and automation for large-scale industrial operations.",
       "tags": ["scale", "automation", "industrial", "internal-tools", "full-stack"],
       "default": false,
       "sourceRefs": ["content/knowledge-base.md", "config/copy.ts"]
     },
     {
-      "text": "Combina responsabilidade operacional, critérios de aceite e comunicação clara entre produto, suporte e engenharia.",
+      "text": "Combines engineering ownership, clear acceptance criteria, and cross-functional communication across product and operations.",
       "tags": ["ownership", "operational-discipline", "acceptance-criteria", "cross-functional", "communication"],
       "default": false,
       "sourceRefs": ["content/knowledge-base.md", "workspace/professional-context/linkedin-positioning.md"]
@@ -44,7 +44,7 @@
   ],
   "skills": {
     "ai_llm": {
-      "label": "AI e LLMs",
+      "label": "Applied AI",
       "items": [
         {
           "text": "OpenAI API",
@@ -57,34 +57,34 @@
           "sourceRefs": ["content/knowledge-base.md"]
         },
         {
-          "text": "embeddings",
+          "text": "Embeddings",
           "tags": ["embeddings", "semantic-search", "ai"],
           "sourceRefs": ["content/knowledge-base.md"]
         },
         {
-          "text": "prompt engineering",
+          "text": "Structured prompts",
           "tags": ["prompt-engineering", "prompts", "llm"],
           "sourceRefs": ["content/knowledge-base.md"]
         },
         {
-          "text": "agent supervision",
+          "text": "Supervised AI agents",
           "tags": ["agent-supervision", "agents", "ai"],
           "sourceRefs": ["content/knowledge-base.md", "content/case-studies/orquestracao-ia-operacao.mdx"]
         },
         {
-          "text": "MCP tooling",
+          "text": "Model Context Protocol (MCP)",
           "tags": ["mcp", "tooling", "agents"],
           "sourceRefs": ["content/knowledge-base.md", "workspace/professional-context/linkedin-positioning.md"]
         },
         {
-          "text": "JSON repair",
+          "text": "Structured output validation",
           "tags": ["json-repair", "structured-output", "schema-validation"],
           "sourceRefs": ["content/knowledge-base.md", "content/blog/ia-controle-humano.mdx"]
         }
       ]
     },
     "backend": {
-      "label": "Backend e APIs",
+      "label": "Backend & APIs",
       "items": [
         {
           "text": "Python",
@@ -117,14 +117,14 @@
           "sourceRefs": ["content/knowledge-base.md", "workspace/professional-context/linkedin-positioning.md"]
         },
         {
-          "text": "system integrations",
+          "text": "System integrations",
           "tags": ["integrations", "automation", "backend"],
           "sourceRefs": ["content/knowledge-base.md"]
         }
       ]
     },
     "data": {
-      "label": "Dados e Persistência",
+      "label": "Data & Storage",
       "items": [
         {
           "text": "PostgreSQL",
@@ -132,12 +132,12 @@
           "sourceRefs": ["content/knowledge-base.md"]
         },
         {
-          "text": "SQL safety",
+          "text": "SQL",
           "tags": ["sql-safety", "read-only-diagnostics", "database"],
           "sourceRefs": ["content/knowledge-base.md", "content/case-studies/diagnostico-observabilidade-producao.mdx"]
         },
         {
-          "text": "read-only diagnostics",
+          "text": "Read-only diagnostics",
           "tags": ["read-only-diagnostics", "incident-diagnosis", "sql-safety"],
           "sourceRefs": ["content/knowledge-base.md", "content/blog/observabilidade-antes-de-opiniao.mdx"]
         },
@@ -152,14 +152,14 @@
           "sourceRefs": ["content/knowledge-base.md"]
         },
         {
-          "text": "secure configuration",
+          "text": "Data validation",
           "tags": ["secure-configuration", "security", "operations"],
           "sourceRefs": ["content/knowledge-base.md", "content/case-studies/diagnostico-observabilidade-producao.mdx"]
         }
       ]
     },
     "observability": {
-      "label": "Observabilidade",
+      "label": "Observability",
       "items": [
         {
           "text": "Grafana",
@@ -177,17 +177,17 @@
           "sourceRefs": ["content/knowledge-base.md"]
         },
         {
-          "text": "monitoring",
+          "text": "Monitoring",
           "tags": ["monitoring", "observability", "production"],
           "sourceRefs": ["content/knowledge-base.md"]
         },
         {
-          "text": "incident diagnosis",
+          "text": "Production diagnostics",
           "tags": ["incident-diagnosis", "incident-response", "evidence-based"],
           "sourceRefs": ["content/knowledge-base.md", "content/case-studies/diagnostico-observabilidade-producao.mdx"]
         },
         {
-          "text": "production validation",
+          "text": "Release validation",
           "tags": ["production-validation", "release-validation", "observability"],
           "sourceRefs": ["content/knowledge-base.md", "content/case-studies/validacao-criterios-aceite.mdx"]
         }
@@ -229,7 +229,7 @@
       ]
     },
     "devops_delivery": {
-      "label": "DevOps e Entrega",
+      "label": "Cloud & Delivery",
       "items": [
         {
           "text": "Docker",
@@ -237,7 +237,7 @@
           "sourceRefs": ["content/knowledge-base.md"]
         },
         {
-          "text": "AWS S3",
+          "text": "Amazon Web Services (AWS) S3",
           "tags": ["aws-s3", "aws", "storage"],
           "sourceRefs": ["content/knowledge-base.md"]
         },
@@ -257,12 +257,12 @@
           "sourceRefs": ["content/knowledge-base.md"]
         },
         {
-          "text": "runbooks",
+          "text": "Runbooks",
           "tags": ["runbooks", "operations", "documentation"],
           "sourceRefs": ["content/knowledge-base.md", "content/case-studies/orquestracao-ia-operacao.mdx"]
         },
         {
-          "text": "release validation",
+          "text": "Deployment validation",
           "tags": ["release-validation", "acceptance-criteria", "delivery"],
           "sourceRefs": ["content/knowledge-base.md", "content/case-studies/validacao-criterios-aceite.mdx"]
         }
@@ -271,56 +271,56 @@
   },
   "experience": [
     {
-      "company": "SaaS LegalTech",
-      "role": "Desenvolvedor Full Stack",
-      "period": "07/2024 - Presente",
-      "location": "Remoto",
+      "company": "Legal technology SaaS",
+      "role": "Full-Stack Software Engineer",
+      "period": "Jul 2024 - Present",
+      "location": "Remote, Brazil",
       "bullets": [
         {
-          "text": "Desenvolve features full stack em LegalTech SaaS com Python, Node.js, TypeScript, React e PostgreSQL.",
+          "text": "Built full-stack product features across React interfaces, Node.js and Python APIs, and PostgreSQL-backed workflows.",
           "tags": ["full-stack", "legaltech", "python", "nodejs", "typescript", "react", "postgresql", "product-engineering"],
           "sourceRefs": ["content/knowledge-base.md", "config/copy.ts"]
         },
         {
-          "text": "Integra OpenAI, RAG e prompts estruturados em fluxos de produto com validação de saídas.",
+          "text": "Developed applied AI workflows with OpenAI API, RAG, and supervised agents, adding output checks and human review.",
           "tags": ["ai", "llm", "openai", "rag", "prompts", "structured-output", "product-engineering"],
           "sourceRefs": ["content/knowledge-base.md", "content/case-studies/orquestracao-ia-operacao.mdx"]
         },
         {
-          "text": "Supervisiona agentes de IA com critérios de aceite, JSON repair, read-only diagnostics e governança multi-provider.",
-          "tags": ["ai", "agents", "agent-supervision", "acceptance-criteria", "json-repair", "read-only-diagnostics", "multi-provider-governance"],
-          "sourceRefs": ["content/knowledge-base.md", "content/blog/ia-controle-humano.mdx", "content/case-studies/orquestracao-ia-operacao.mdx"]
+          "text": "Connected frontend, backend, and integrations with acceptance criteria and release validation across end-to-end product flows.",
+          "tags": ["full-stack", "frontend", "backend", "integrations", "acceptance-criteria", "release-validation"],
+          "sourceRefs": ["content/knowledge-base.md", "content/case-studies/validacao-criterios-aceite.mdx"]
         },
         {
-          "text": "Conduz diagnósticos de produção com Grafana, Loki, Sentry, SQL seguro e validação pós-mudança.",
+          "text": "Investigated production issues with Grafana, Loki, Sentry, and read-only SQL, then verified changes after deployment.",
           "tags": ["observability", "incident-diagnosis", "grafana", "loki", "sentry", "sql-safety", "production-validation"],
           "sourceRefs": ["content/knowledge-base.md", "content/case-studies/diagnostico-observabilidade-producao.mdx"]
         },
         {
-          "text": "Estrutura runbooks, planos de validação e documentação técnica para reduzir ambiguidade operacional em entregas.",
-          "tags": ["runbooks", "release-validation", "documentation", "operational-discipline", "acceptance-criteria", "delivery"],
+          "text": "Contributed to Docker-based delivery, CI/CD, and AWS S3 storage, validating releases and monitoring production behavior.",
+          "tags": ["docker", "ci-cd", "aws", "s3", "release-validation", "production"],
           "sourceRefs": ["content/knowledge-base.md", "content/case-studies/validacao-criterios-aceite.mdx"]
         }
       ]
     },
     {
       "company": "Grupo Dass",
-      "role": "Desenvolvedor Full Stack",
-      "period": "02/2022 - 07/2024",
-      "location": "Presencial",
+      "role": "Full-Stack Developer",
+      "period": "Feb 2022 - Jul 2024",
+      "location": "On-site, Brazil",
       "bullets": [
         {
-          "text": "Desenvolveu sistemas internos, automações e aplicações web para operação com mais de 28 mil colaboradores.",
+          "text": "Built internal web applications and process automations with Angular, Node.js, PHP, and PostgreSQL for industrial operations.",
           "tags": ["full-stack", "internal-tools", "automation", "scale", "industrial", "web-applications"],
           "sourceRefs": ["content/knowledge-base.md", "config/copy.ts"]
         },
         {
-          "text": "Atuou no ciclo completo com JavaScript, Angular, Node.js, PHP, PostgreSQL e sustentação de aplicações.",
+          "text": "Owned feature work from requirements through frontend and backend implementation, release, and ongoing application support.",
           "tags": ["full-cycle", "javascript", "angular", "nodejs", "php", "postgresql", "support"],
           "sourceRefs": ["content/knowledge-base.md"]
         },
         {
-          "text": "Colaborou com engenharia, operação e PCP em ambiente Lean, Scrum e Kanban.",
+          "text": "Collaborated with engineering and operations teams in Lean, Scrum, and Kanban workflows to turn needs into maintainable software.",
           "tags": ["collaboration", "cross-functional", "lean", "scrum", "kanban", "operations"],
           "sourceRefs": ["content/knowledge-base.md", "config/copy.ts"]
         }
@@ -328,12 +328,12 @@
     },
     {
       "company": "Freelancer",
-      "role": "Desenvolvedor Frontend",
-      "period": "07/2021 - 07/2024",
-      "location": "Remoto",
+      "role": "Frontend Developer (Freelance)",
+      "period": "Jul 2021 - Jul 2024",
+      "location": "Remote, part-time",
       "bullets": [
         {
-          "text": "Desenvolveu websites responsivos e páginas institucionais com React, JavaScript, Bootstrap, HTML5 e CSS3.",
+          "text": "Delivered responsive websites and interfaces with React, JavaScript, Bootstrap, HTML, and CSS for independent clients.",
           "tags": ["frontend", "react", "javascript", "bootstrap", "html5", "css3", "responsive"],
           "sourceRefs": ["content/knowledge-base.md"]
         }
@@ -342,19 +342,19 @@
   ],
   "publicProjects": [
     {
-      "title": "Portfólio Técnico",
-      "role": "Projeto público",
+      "title": "Technical Portfolio",
+      "role": "Public project",
       "url": "https://josivan-amorim.vercel.app",
       "repo": "https://github.com/F1X0N",
       "sourceRefs": ["content/knowledge-base.md", "content/case-studies/orquestracao-ia-operacao.mdx"],
       "bullets": [
         {
-          "text": "Construiu portfólio com Next.js, React, TypeScript, Tailwind, MDX, OpenAI API, Vercel e Lighthouse CI.",
+          "text": "Built this portfolio with Next.js, React, TypeScript, Tailwind CSS, MDX, Vercel, and automated Lighthouse checks.",
           "tags": ["portfolio", "nextjs", "react", "typescript", "tailwind", "mdx", "openai", "vercel", "lighthouse"],
           "sourceRefs": ["content/knowledge-base.md", "content/case-studies/orquestracao-ia-operacao.mdx"]
         },
         {
-          "text": "Publicou cases sobre IA em produção, observabilidade, validação de entregas e agentes supervisionados.",
+          "text": "Documented technical case studies on applied AI, observability, and release validation to explain engineering trade-offs and outcomes.",
           "tags": ["case-studies", "ai", "observability", "release-validation", "agent-supervision", "public-writing"],
           "sourceRefs": ["content/knowledge-base.md", "content/case-studies/diagnostico-observabilidade-producao.mdx", "content/case-studies/validacao-criterios-aceite.mdx"]
         }
@@ -364,28 +364,19 @@
   "education": [
     {
       "institution": "UNIFACS - Universidade Salvador",
-      "degree": "Análise e Desenvolvimento de Sistemas",
+      "degree": "Technologist Degree in Systems Analysis and Development",
       "period": "2021 - 2023",
       "sourceRefs": ["content/knowledge-base.md"]
     }
   ],
-  "certifications": [
-    {
-      "text": "Curso em Vídeo - HTML5, CSS3 e JavaScript",
-      "sourceRefs": ["content/knowledge-base.md"]
-    },
-    {
-      "text": "DIO - Bootcamp Desenvolvimento Frontend com Angular",
-      "sourceRefs": ["content/knowledge-base.md"]
-    }
-  ],
+  "certifications": [],
   "languages": [
     {
-      "text": "Português - Nativo",
+      "text": "Portuguese - Native",
       "sourceRefs": ["content/knowledge-base.md"]
     },
     {
-      "text": "Inglês - Técnico (leitura e escrita)",
+      "text": "English - Working proficiency in technical discussions, reading, and writing",
       "sourceRefs": ["content/knowledge-base.md"]
     }
   ]

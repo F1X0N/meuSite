@@ -124,9 +124,16 @@ type ResumeModalState = {
     loading: boolean
     markdown: string | null
     pdfUrl: string | null
+    emailPdfUrl: string | null
     error: string | null
     sourceJd: string | null
     jobTitle: string | null
+    language: 'pt' | 'en'
+    role: string
+    company: string
+    motivation: string
+    coverLetter: string | null
+    pdfObjectUrl: string | null
     email: EmailState
 }
 
@@ -143,9 +150,16 @@ const initialResumeModal: ResumeModalState = {
     loading: false,
     markdown: null,
     pdfUrl: null,
+    emailPdfUrl: null,
     error: null,
     sourceJd: null,
     jobTitle: null,
+    language: 'en',
+    role: '',
+    company: '',
+    motivation: '',
+    coverLetter: null,
+    pdfObjectUrl: null,
     email: initialEmailState,
 }
 
@@ -160,9 +174,18 @@ export const AITools = () => {
     const [isFocused, setIsFocused] = useState(false)
     const [resumeModal, setResumeModal] = useState<ResumeModalState>(initialResumeModal)
     const [lastJobDescription, setLastJobDescription] = useState<string | null>(null)
+    const resumeAbortControllerRef = useRef<AbortController | null>(null)
 
     const messagesContainerRef = useRef<HTMLDivElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => () => {
+        resumeAbortControllerRef.current?.abort()
+    }, [])
+
+    useEffect(() => () => {
+        if (resumeModal.pdfObjectUrl) URL.revokeObjectURL(resumeModal.pdfObjectUrl)
+    }, [resumeModal.pdfObjectUrl])
     const inputRef = useRef<HTMLTextAreaElement>(null)
 
     const config = modeConfig[mode]
@@ -465,53 +488,79 @@ export const AITools = () => {
         )
     }
 
-    // ============ Targeted Resume — abre PDF em nova aba imediato ============
-    // Estratégia: tenta gerar PDF adaptado (Blob); se indisponível, cai para
-    // o /cv.pdf default (gerado no build a partir do mesmo template). Recrutador
-    // sempre tem um PDF para abrir; o adaptado é melhoria silenciosa quando há Blob.
-    const handleGenerateTargetedResume = async () => {
+    const openResumeModal = () => {
         if (!lastJobDescription) return
-        const defaultPdf = typeof window !== 'undefined' ? `${window.location.origin}/cv.pdf` : '/cv.pdf'
         setResumeModal({
             ...initialResumeModal,
             open: true,
-            loading: true,
             sourceJd: lastJobDescription,
         })
+    }
+
+    const updateResumeDetails = (changes: Partial<Pick<ResumeModalState, 'language' | 'role' | 'company' | 'motivation'>>) => {
+        setResumeModal((previous) => ({
+            ...previous,
+            ...changes,
+            markdown: null,
+            coverLetter: null,
+            pdfUrl: null,
+            pdfObjectUrl: null,
+            emailPdfUrl: null,
+            email: initialEmailState,
+            error: null,
+        }))
+    }
+
+    const handleGenerateTargetedResume = async () => {
+        if (!resumeModal.sourceJd || !resumeModal.role.trim() || resumeModal.loading) return
+        const controller = new AbortController()
+        resumeAbortControllerRef.current = controller
+        setResumeModal((previous) => ({ ...previous, loading: true, error: null, coverLetter: null, markdown: null, pdfUrl: null, pdfObjectUrl: null, emailPdfUrl: null }))
         try {
             const r = await fetch('/api/ai/targeted-resume', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ jobDescription: lastJobDescription, sessionId }),
+                signal: controller.signal,
+                body: JSON.stringify({
+                    jobDescription: resumeModal.sourceJd,
+                    language: resumeModal.language,
+                    role: resumeModal.role,
+                    company: resumeModal.company,
+                    motivation: resumeModal.motivation,
+                    sessionId,
+                }),
             })
             const data = await r.json()
+            if (controller.signal.aborted) return
             if (!r.ok) {
-                // Mesmo em erro, oferecer o CV default
-                window.open(defaultPdf, '_blank', 'noopener,noreferrer')
                 setResumeModal((prev) => ({
                     ...prev,
                     loading: false,
-                    pdfUrl: defaultPdf,
-                    markdown: null,
+                    error: data.error || 'Não foi possível gerar os documentos.',
                 }))
                 return
             }
-            const pdfUrl = data.pdfUrl ?? defaultPdf
-            window.open(pdfUrl, '_blank', 'noopener,noreferrer')
+            const pdfBytes = data.pdfBase64 ? Uint8Array.from(atob(data.pdfBase64), (character) => character.charCodeAt(0)) : null
+            const pdfObjectUrl = pdfBytes ? URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' })) : null
+            const pdfUrl = pdfObjectUrl ?? data.pdfUrl
             setResumeModal((prev) => ({
                 ...prev,
                 loading: false,
                 markdown: data.markdown ?? null,
+                coverLetter: data.coverLetter ?? null,
                 pdfUrl,
+                emailPdfUrl: data.pdfUrl ?? null,
+                pdfObjectUrl,
             }))
         } catch {
-            window.open(defaultPdf, '_blank', 'noopener,noreferrer')
+            if (controller.signal.aborted) return
             setResumeModal((prev) => ({
                 ...prev,
                 loading: false,
-                pdfUrl: defaultPdf,
-                markdown: null,
+                error: 'Erro de conexão ao gerar os documentos.',
             }))
+        } finally {
+            if (resumeAbortControllerRef.current === controller) resumeAbortControllerRef.current = null
         }
     }
 
@@ -537,8 +586,8 @@ export const AITools = () => {
     }
 
     const handleSendEmail = async () => {
-        const { email, pdfUrl } = resumeModal
-        if (!pdfUrl) return
+        const { email, emailPdfUrl } = resumeModal
+        if (!emailPdfUrl) return
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.address)) {
             setResumeModal((prev) => ({ ...prev, email: { ...prev.email, error: 'Email inválido' } }))
             return
@@ -549,7 +598,7 @@ export const AITools = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    pdfUrl,
+                    pdfUrl: emailPdfUrl,
                     recipientEmail: email.address,
                     sessionId,
                     consent: true,
@@ -575,7 +624,10 @@ export const AITools = () => {
         }
     }
 
-    const closeResumeModal = () => setResumeModal(initialResumeModal)
+    const closeResumeModal = () => {
+        resumeAbortControllerRef.current?.abort()
+        setResumeModal(initialResumeModal)
+    }
 
     // ============ Render Job Fit Response ============
     const renderJobFitResponse = (fitData: JobFitResponse) => (
@@ -594,19 +646,18 @@ export const AITools = () => {
             {/* Summary */}
             <p className="text-sm leading-relaxed">{fitData.summary_md}</p>
 
-            {/* CV CTA — apenas quando match é alto */}
-            {fitData.match_score_0_100 >= 75 && lastJobDescription && (
+            {lastJobDescription && (
                 <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
                     <p className="text-xs text-muted-foreground mb-2">
-                        Quer ver o currículo completo de Josivan?
+                        Preparar currículo e carta de apresentação para esta vaga
                     </p>
                     <Button
                         type="button"
                         size="sm"
-                        onClick={handleGenerateTargetedResume}
+                        onClick={openResumeModal}
                         disabled={resumeModal.loading}
                     >
-                        {resumeModal.loading ? 'Abrindo...' : 'Abrir currículo'}
+                        {resumeModal.loading ? 'Gerando...' : 'Preparar candidatura'}
                     </Button>
                 </div>
             )}
@@ -914,21 +965,20 @@ export const AITools = () => {
                 💡 Respostas baseadas no conteúdo público deste site. Quando não houver evidência, será indicado.
             </p>
 
-            {/* Resume Modal — discreto: PDF abre em nova aba, modal serve para opt-in */}
             {resumeModal.open && (
                 <div
                     className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md"
                     onClick={closeResumeModal}
                     role="dialog"
                     aria-modal="true"
-                    aria-label="Currículo de Josivan Amorim"
+                    aria-label="Preparar candidatura de Josivan Amorim"
                 >
                     <div
-                        className="bg-card w-full max-w-md rounded-xl shadow-2xl border border-border flex flex-col overflow-hidden"
+                        className="bg-card w-full max-w-xl max-h-[90vh] rounded-xl shadow-2xl border border-border flex flex-col overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-center justify-between p-4 border-b">
-                            <h3 className="font-semibold text-sm">Currículo de Josivan Amorim</h3>
+                            <h3 className="font-semibold text-sm">Currículo e carta para a vaga</h3>
                             <button
                                 type="button"
                                 onClick={closeResumeModal}
@@ -939,15 +989,61 @@ export const AITools = () => {
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <label className="text-xs font-medium">Idioma
+                                    <select
+                                        value={resumeModal.language}
+                                        onChange={(event) => updateResumeDetails({ language: event.target.value as 'pt' | 'en' })}
+                                        className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                                        disabled={resumeModal.loading}
+                                    >
+                                        <option value="en">English</option>
+                                        <option value="pt">Português</option>
+                                    </select>
+                                </label>
+                                <label className="text-xs font-medium">Cargo da vaga
+                                    <input
+                                        value={resumeModal.role}
+                                        onChange={(event) => updateResumeDetails({ role: event.target.value })}
+                                        maxLength={120}
+                                        placeholder="Full-Stack Engineer"
+                                        className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                                        disabled={resumeModal.loading}
+                                    />
+                                </label>
+                                <label className="text-xs font-medium sm:col-span-2">Empresa (opcional)
+                                    <input
+                                        value={resumeModal.company}
+                                        onChange={(event) => updateResumeDetails({ company: event.target.value })}
+                                        maxLength={120}
+                                        placeholder="Nome confirmado na vaga"
+                                        className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                                        disabled={resumeModal.loading}
+                                    />
+                                </label>
+                                <label className="text-xs font-medium sm:col-span-2">Por que esta vaga interessa a você? (opcional)
+                                    <textarea
+                                        value={resumeModal.motivation}
+                                        onChange={(event) => updateResumeDetails({ motivation: event.target.value })}
+                                        maxLength={350}
+                                        rows={2}
+                                        className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                                        disabled={resumeModal.loading}
+                                    />
+                                </label>
+                            </div>
+                            <Button type="button" size="sm" onClick={handleGenerateTargetedResume} disabled={resumeModal.loading || resumeModal.role.trim().length < 2}>
+                                {resumeModal.loading ? 'Gerando documentos...' : 'Gerar currículo e carta'}
+                            </Button>
                             {resumeModal.loading && (
-                                <p className="text-sm text-muted-foreground">Abrindo o currículo...</p>
+                                <p className="text-sm text-muted-foreground">Selecionando evidências relevantes da vaga...</p>
                             )}
                             {resumeModal.error && (
                                 <p className="text-sm text-destructive">{resumeModal.error}</p>
                             )}
                             {resumeModal.pdfUrl && (
                                 <>
-                                    <p className="text-sm">O currículo foi aberto em uma nova aba. Caso o navegador tenha bloqueado, use o link abaixo.</p>
+                                    <p className="text-sm">Revise os dois documentos antes de enviar a candidatura.</p>
                                     <div className="flex flex-wrap gap-2">
                                         <a
                                             href={resumeModal.pdfUrl}
@@ -955,7 +1051,14 @@ export const AITools = () => {
                                             rel="noopener noreferrer"
                                             className="inline-flex items-center justify-center gap-1.5 h-9 px-3 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm transition-colors"
                                         >
-                                            <GIcon name="open_in_new" size={14} /> Abrir currículo
+                                            <GIcon name="open_in_new" size={14} /> Abrir currículo em PDF
+                                        </a>
+                                        <a
+                                            href={resumeModal.pdfUrl}
+                                            download={`Josivan_Amorim_CV_${resumeModal.language.toUpperCase()}.pdf`}
+                                            className="inline-flex items-center justify-center gap-1.5 h-9 px-3 text-sm font-medium rounded-lg border border-border hover:bg-muted transition-colors"
+                                        >
+                                            Baixar PDF
                                         </a>
                                         {resumeModal.markdown && (
                                             <Button type="button" variant="outline" size="sm" onClick={handleCopyResume}>
@@ -963,7 +1066,29 @@ export const AITools = () => {
                                             </Button>
                                         )}
                                     </div>
-                                    <div className="rounded-lg border border-border p-3 space-y-2">
+                                    {resumeModal.coverLetter && (
+                                        <div className="rounded-lg border border-border p-3 space-y-2">
+                                            <label htmlFor="cover-letter-draft" className="block text-sm font-medium">Carta de apresentação editável</label>
+                                            <textarea
+                                                id="cover-letter-draft"
+                                                value={resumeModal.coverLetter}
+                                                onChange={(event) => setResumeModal((previous) => ({ ...previous, coverLetter: event.target.value }))}
+                                                rows={12}
+                                                className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                                            />
+                                            <div className="flex flex-wrap gap-2">
+                                                <Button type="button" variant="outline" size="sm" onClick={() => navigator.clipboard.writeText(resumeModal.coverLetter ?? '')}>Copiar carta</Button>
+                                                <a
+                                                    href={`data:text/plain;charset=utf-8,${encodeURIComponent(resumeModal.coverLetter)}`}
+                                                    download={`Josivan_Amorim_Cover_Letter_${resumeModal.language.toUpperCase()}.txt`}
+                                                    className="inline-flex items-center justify-center h-9 px-3 text-sm font-medium rounded-lg border border-border hover:bg-muted transition-colors"
+                                                >
+                                                    Baixar carta
+                                                </a>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {resumeModal.emailPdfUrl && <div className="rounded-lg border border-border p-3 space-y-2">
                                         <label className="flex items-start gap-2 text-xs cursor-pointer">
                                             <input
                                                 type="checkbox"
@@ -1005,7 +1130,7 @@ export const AITools = () => {
                                         {resumeModal.email.sent && (
                                             <p className="text-xs text-green-600 dark:text-green-400">✓ Email enviado. Confira sua caixa de entrada.</p>
                                         )}
-                                    </div>
+                                    </div>}
                                 </>
                             )}
                         </div>
