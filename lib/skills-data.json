@@ -55,6 +55,29 @@
     ]
   },
   {
+    "name": "blog-buscar-vagas-engenharia-linkedin",
+    "description": "Use quando o usuário pergunta como pesquisar vagas de engenharia no LinkedIn, montar consultas booleanas ou em linguagem natural, ajustar filtros e criar alertas de vagas.",
+    "triggers": [
+      "buscar vagas",
+      "pesquisar vagas",
+      "query de vagas",
+      "busca booleana",
+      "vagas no LinkedIn",
+      "alerta de vagas",
+      "vagas remotas",
+      "full stack júnior",
+      "backend pleno"
+    ],
+    "linkedContent": "/blog/buscar-vagas-engenharia-linkedin",
+    "linkedType": "blog",
+    "relatedSkills": [],
+    "followups": [
+      "Como ajustar uma busca que trouxe poucas vagas?",
+      "Quando usar busca booleana ou linguagem natural no LinkedIn?",
+      "Como confirmar se uma vaga remota aceita candidatos no Brasil?"
+    ]
+  },
+  {
     "name": "blog-connection-context-serverless",
     "description": "Use quando o usuário pergunta sobre pool de conexão, leak de conexão em serverless, transações ACID, wrapper de request, ou como garantir cleanup de recursos com finally.",
     "triggers": [
