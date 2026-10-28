@@ -1,0 +1,60 @@
+---
+title: "Como organizar buscas de vagas de engenharia no LinkedIn"
+description: "Uma biblioteca de queries para explorar vagas full stack, backend, frontend, cloud e IA aplicada sem depender de um único cargo."
+date: "2026-10-28"
+tags: ["Carreira", "LinkedIn", "Ferramentas"]
+readingTime: "5 min"
+---
+
+## O problema de procurar por um cargo só
+
+Uma vaga que combina com meu trabalho pode aparecer como *full stack engineer*, *backend developer* ou simplesmente *software engineer*. Algumas destacam React e Node.js; outras, Python, cloud ou IA aplicada. Procurar apenas por um título deixa parte dessas oportunidades fora da primeira busca.
+
+Por isso montei uma [biblioteca de buscas para copiar e abrir no LinkedIn](/tools/job-search). Ela reúne consultas em português e inglês, organizadas por área. É um ponto de partida para investigar vagas, não um filtro que decide se uma candidatura faz sentido.
+
+## Dois jeitos de pesquisar
+
+O LinkedIn [documenta a busca booleana](https://www.linkedin.com/help/linkedin/answer/a524336): aspas procuram uma expressão exata; `OR` aceita alternativas; `AND` combina requisitos; parênteses agrupam os termos. Os operadores devem estar em maiúsculas. Também existe `NOT`, mas eu o usaria com cuidado: excluir um termo pode esconder vagas interessantes.
+
+Uma consulta para full stack no Brasil fica assim:
+
+```text
+("desenvolvedor full stack" OR "engenheiro de software full stack") AND (React OR Node.js)
+```
+
+O primeiro grupo aceita dois nomes para o cargo. O segundo pede uma das tecnologias. Se a lista ficar pequena, retiro o grupo de tecnologias e comparo os resultados.
+
+A [busca de vagas com IA do LinkedIn](https://www.linkedin.com/help/linkedin/answer/a6889044/) também entende pedidos em linguagem natural e considera mais do que palavras idênticas às da consulta. Por isso não trato a query booleana como uma regra exata para todos os resultados de Vagas. Quando ela traz resultados estranhos, testo uma descrição simples do que procuro:
+
+```text
+Vagas remotas de engenharia de software full stack no Brasil, nível júnior ou pleno, com React e Node.js, publicadas na última semana
+```
+
+Para oportunidades internacionais, a mesma ideia pode ser escrita em inglês:
+
+```text
+Remote full stack or backend software engineer roles open to candidates in Brazil, with React, Node.js or Python, junior to mid-level
+```
+
+## Como escolhi as consultas
+
+Separei a biblioteca por mercado e área. A busca brasileira de backend combina nomes comuns do cargo com Node.js ou Python. A internacional inclui variações de *software engineer* e *backend engineer*. Há consultas específicas para frontend, produto e cloud, além de IA aplicada.
+
+Esse recorte acompanha meu perfil de engenharia full stack: trabalho com interfaces, serviços, dados e operação de produto. IA é uma das áreas em que atuo, mas não precisa aparecer em toda vaga que considero. A [página da ferramenta](/tools/job-search) mantém as oito consultas completas, com botões para copiar cada uma ou abrir a pesquisa no LinkedIn.
+
+## O filtro vem depois da busca
+
+Depois de abrir a lista em **Vagas**, ajusto localização, modalidade, nível e data. O LinkedIn [oferece filtros](https://www.linkedin.com/help/linkedin/answer/a507441/filter-and-sort-job-search-results?lang=en) para experiência, tipo de contratação e publicações das últimas 24 horas, semana ou mês. Para acompanhar novidades, uma semana dá uma visão inicial; 24 horas ajudam na revisão diária.
+
+“Remoto” não diz, por si só, se uma empresa aceita candidaturas de quem mora no Brasil. Essa confirmação precisa estar na descrição da vaga ou no processo de candidatura. Também vale ler responsabilidades, senioridade e requisitos antes de adaptar o currículo.
+
+Quando uma busca produz resultados úteis com frequência, o LinkedIn permite [criar alertas de vagas](https://www.linkedin.com/help/linkedin/answer/a511279/job-alerts-on-linkedin?intendedLocale=en&lang=en-us) com os critérios atuais. Prefiro alguns alertas distintos — por exemplo, full stack no Brasil e backend internacional — a um alerta enorme que mistura tudo.
+
+## Uma rotina simples
+
+1. Abra uma consulta da [biblioteca](/tools/job-search) e escolha a localização.
+2. Ajuste remoto ou híbrido, júnior ou pleno e a data de publicação.
+3. Leia as vagas promissoras e salve as que merecem uma análise mais cuidadosa.
+4. Revise os termos se a busca estiver ampla demais ou deixar de mostrar vagas relevantes.
+
+A biblioteca resolve a parte repetitiva de lembrar e montar consultas. O julgamento sobre a vaga continua sendo manual: entender o trabalho, a elegibilidade e onde a experiência realmente ajuda.

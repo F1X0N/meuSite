@@ -105,8 +105,7 @@ export default function BlogClient({ initialPosts }) {
           Blog
         </h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-3xl">
-          Artigos técnicos sobre IA, engenharia de software, padrões de
-          arquitetura e lições aprendidas em produção.
+          Artigos sobre engenharia de software, IA, arquitetura e ferramentas práticas.
         </p>
 
         <div className="mt-8">
