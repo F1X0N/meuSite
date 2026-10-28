@@ -5,7 +5,6 @@ import { useState } from 'react'
 import { site } from '@/config/site'
 import { ThemeToggle } from './ThemeToggle'
 import { GIcon } from '@/components/icons/GIcon'
-import { Button } from '@/components/ui/Button'
 
 const buildNavItemClasses = () =>
   'text-sm font-medium text-foreground transition-colors hover:text-primary'
@@ -55,7 +54,7 @@ export const Header = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden xl:flex items-center gap-6">
           {renderPages(site.nav.pages)}
           {renderSections(site.nav.sections)}
           <ThemeToggle />
@@ -63,7 +62,7 @@ export const Header = () => {
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden p-2"
+          className="xl:hidden p-2"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Toggle menu"
         >
@@ -73,7 +72,7 @@ export const Header = () => {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t">
+        <div className="xl:hidden border-t">
           <nav className="container py-4 flex flex-col gap-3">
             {renderPages(site.nav.pages)}
             <div className="border-t pt-3 mt-1 flex flex-col gap-3">
