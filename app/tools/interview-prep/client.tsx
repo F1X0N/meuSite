@@ -29,7 +29,7 @@ const GuideView = ({ guide, generatedAt }: { guide: InterviewGuide; generatedAt:
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Roteiro gerado</p>
           <h2 id="guide-title" className="mt-2 font-display text-3xl font-bold">{guide.role}{guide.company ? ` · ${guide.company}` : ''}</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Gerado em {new Date(generatedAt).toLocaleString('pt-BR')} · base pública do currículo v{guide.profileVersion}
+            Gerado em {new Date(generatedAt).toLocaleString('pt-BR')} · {guide.profileVersion === 'uploaded' ? 'baseado no CV enviado' : `base profissional pública v${guide.profileVersion}`}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -45,7 +45,7 @@ const GuideView = ({ guide, generatedAt }: { guide: InterviewGuide; generatedAt:
       </div>
       <p role="status" aria-live="polite" className="mt-2 min-h-5 text-sm text-muted-foreground">{copyMessage}</p>
       <p className="mt-3 text-sm text-muted-foreground">
-        Use como apoio durante a conversa e responda com suas palavras. Para incluir experiências novas, atualize primeiro a base profissional sanitizada do currículo publicado.
+        Use como apoio durante a conversa e responda com suas palavras. As evidências dependem do CV enviado nesta geração.
       </p>
 
       <GuideNavigation />
@@ -59,6 +59,7 @@ export const InterviewPrepClient = () => {
   const [company, setCompany] = useState('')
   const [language, setLanguage] = useState<'pt' | 'en'>('en')
   const [jobDescription, setJobDescription] = useState('')
+  const [resume, setResume] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState<{ guide: InterviewGuide; generatedAt: string } | null>(null)
@@ -66,15 +67,28 @@ export const InterviewPrepClient = () => {
   const generateGuide = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (loading) return
+    if (!resume) {
+      setError('Envie seu currículo para gerar o roteiro.')
+      return
+    }
+    if (resume.size > 2_000_000) {
+      setError('O currículo deve ter até 2 MB.')
+      return
+    }
     setLoading(true)
     setError('')
     setResult(null)
 
     try {
+      const formData = new window.FormData()
+      formData.set('role', role)
+      formData.set('company', company)
+      formData.set('language', language)
+      formData.set('jobDescription', jobDescription)
+      formData.set('resume', resume)
       const response = await fetch('/api/ai/interview-guide', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role, company, language, jobDescription }),
+        body: formData,
         cache: 'no-store',
       })
       const data = await response.json()
@@ -95,7 +109,7 @@ export const InterviewPrepClient = () => {
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Ferramentas</p>
           <h1 className="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl">Preparar entrevista</h1>
           <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
-            Cole a descrição da vaga para montar um roteiro navegável com apresentação, exemplos profissionais, perguntas prováveis e pontos a esclarecer.
+            Envie seu currículo e cole a descrição da vaga para montar um roteiro navegável com exemplos profissionais, perguntas prováveis e pontos a esclarecer.
           </p>
         </header>
 
@@ -117,7 +131,10 @@ export const InterviewPrepClient = () => {
           <label className="block text-sm font-medium">Descrição da vaga
             <textarea value={jobDescription} onChange={(event) => setJobDescription(event.target.value)} className={`mt-2 min-h-52 ${inputClass}`} required minLength={50} maxLength={10000} placeholder="Cole as responsabilidades, requisitos e informações sobre a oportunidade..." />
           </label>
-          <p className="text-xs leading-relaxed text-muted-foreground">A descrição é enviada ao serviço de IA para identificar prioridades da vaga. O roteiro usa apenas evidências do currículo público sanitizado; o site não salva a descrição nem o roteiro.</p>
+          <label className="block text-sm font-medium">Seu currículo (PDF, DOCX ou TXT; até 2 MB)
+            <input type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" onChange={(event) => setResume(event.target.files?.[0] ?? null)} className={`mt-2 ${inputClass}`} required />
+          </label>
+          <p className="text-xs leading-relaxed text-muted-foreground">A descrição da vaga é enviada ao serviço de IA para identificar prioridades. O CV é lido no servidor para compor o roteiro e não é enviado ao serviço de IA. O site não salva o arquivo, a descrição nem o roteiro. Se o CV corresponder ao de Josivan publicado neste site, o roteiro usa também a base profissional pública sanitizada.</p>
           <button type="submit" disabled={loading} className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground disabled:opacity-60">
             {loading ? 'Montando roteiro...' : 'Gerar roteiro'}
           </button>

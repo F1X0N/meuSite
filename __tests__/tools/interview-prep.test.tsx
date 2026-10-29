@@ -17,7 +17,8 @@ describe('InterviewPrepClient', () => {
     render(<InterviewPrepClient />)
     fireEvent.change(screen.getByLabelText('Cargo'), { target: { value: 'Full-Stack Engineer' } })
     fireEvent.change(screen.getByLabelText('Descrição da vaga'), { target: { value: 'Buscamos uma pessoa para construir interfaces React, APIs e apoiar entregas de produto com a equipe.' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Gerar roteiro' }))
+    fireEvent.change(screen.getByLabelText(/Seu currículo/), { target: { files: [new File(['CV de exemplo'], 'curriculo.txt', { type: 'text/plain' })] } })
+    fireEvent.submit(screen.getByRole('button', { name: 'Gerar roteiro' }).closest('form')!)
 
     expect(await screen.findByRole('heading', { name: 'Full-Stack Engineer' })).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Seções do roteiro' })).toBeInTheDocument()
