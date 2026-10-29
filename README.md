@@ -40,6 +40,9 @@ URL ativa em produção: [josivan-amorim-cvd3xueje-f1x0ns-projects.vercel.app](h
 - **Blog Técnico** com syntax highlighting via rehype-pretty-code + Shiki dual-theme
 - **Knowledge Base** anonimizada (compliance-safe)
 - **CV** gerado dinamicamente via `@react-pdf/renderer` no prebuild
+- **Preparação de entrevista** em `/tools/interview-prep`: a descrição da vaga fornece sinais de prioridade; o roteiro em português ou inglês usa somente evidências de `content/resume-base.json`.
+
+Para incluir experiências novas nos roteiros, atualize localmente o contexto profissional sanitizado, revise a segurança pública, incorpore as evidências aprovadas em `content/resume-base.json` e publique o site. A aplicação em produção não lê resumos privados nem o DOCX usado como referência de estrutura.
 
 ### ⚡ Performance & SEO
 - **SSG/ISR** para páginas de conteúdo

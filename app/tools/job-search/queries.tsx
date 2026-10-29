@@ -23,7 +23,7 @@ export const JobSearchQueries = () => {
   return (
     <div className="py-16 md:py-20 lg:py-24">
       <div className="container max-w-5xl">
-        <BackLink href="/" label="Voltar para a home" />
+        <BackLink href="/tools" label="Voltar para ferramentas" />
 
         <header className="mt-8 max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Ferramentas</p>
