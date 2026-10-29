@@ -31,6 +31,19 @@ beforeEach(() => {
 })
 
 describe('POST /api/ai/interview-guide', () => {
+  it('bloqueia a geração em produção enquanto não há autenticação', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    const { POST } = await import('@/app/api/ai/interview-guide/route')
+    const response = await POST(requestFor({
+      role: 'Full Stack',
+      jobDescription: 'Buscamos uma pessoa para desenvolver interfaces, APIs e revisar entregas de software em produção.',
+    }))
+
+    expect(response.status).toBe(404)
+    expect(createCompletion).not.toHaveBeenCalled()
+    vi.unstubAllEnvs()
+  })
+
   it('rejeita descrições curtas antes de chamar a IA', async () => {
     const { POST } = await import('@/app/api/ai/interview-guide/route')
     const response = await POST(requestFor({ role: 'Full Stack', jobDescription: 'curta' }))

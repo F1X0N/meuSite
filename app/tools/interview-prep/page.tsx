@@ -1,4 +1,5 @@
 import { InterviewPrepClient } from './client'
+import { notFound } from 'next/navigation'
 
 export const metadata = {
   title: 'Preparar entrevista · Ferramentas',
@@ -6,5 +7,6 @@ export const metadata = {
 }
 
 export default function InterviewPrepPage() {
+  if (process.env.NODE_ENV === 'production') notFound()
   return <InterviewPrepClient />
 }

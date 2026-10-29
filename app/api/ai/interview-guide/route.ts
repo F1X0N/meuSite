@@ -31,6 +31,7 @@ const withinLimit = (ipHash: string): boolean => {
 const responseHeaders = { 'Cache-Control': 'no-store' }
 
 export async function POST(request: Request) {
+  if (process.env.NODE_ENV === 'production') return NextResponse.json({ error: 'Rota não disponível.' }, { status: 404, headers: responseHeaders })
   const context = await buildRequestContext().catch(() => null)
   const requestId = context?.request_id ?? null
 
