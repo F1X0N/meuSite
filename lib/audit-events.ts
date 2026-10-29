@@ -55,6 +55,10 @@ export const AUDIT_EVENTS = {
   TARGETED_RESUME_EMAIL_FAILED: 'targeted_resume.email.failed',
   TARGETED_RESUME_EMAIL_RATE_LIMIT_HIT: 'targeted_resume.email.rate_limit.hit',
 
+  INTERVIEW_GUIDE_REQUESTED: 'interview_guide.requested',
+  INTERVIEW_GUIDE_GENERATED: 'interview_guide.generated',
+  INTERVIEW_GUIDE_RATE_LIMIT_HIT: 'interview_guide.rate_limit.hit',
+
   // Catch-all
   API_ERROR_UNHANDLED: 'api.error.unhandled',
 } as const

@@ -82,6 +82,15 @@ Definido em `lib/audit-events.ts`. Resumo:
 |---|---|---|
 | `client.error.captured` | `app/error.tsx` reportou erro client | request_id, ip_hash, path, digest, message, stack_truncated |
 
+### Interview guide (`/api/ai/interview-guide`)
+| Evento | Quando | Campos chave |
+|---|---|---|
+| `interview_guide.requested` | POST válido recebido | request_id, ip_hash, job_description_length |
+| `interview_guide.generated` | Roteiro retornado | request_id, matched_requirements, gaps_count, profile_version |
+| `interview_guide.rate_limit.hit` | Limite de geração atingido | request_id, ip_hash |
+
+A descrição da vaga, o nome da empresa e o roteiro não entram nos logs da rota.
+
 ### Catch-all
 | Evento | Quando | Campos chave |
 |---|---|---|
