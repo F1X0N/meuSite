@@ -2,8 +2,9 @@ import resumeBase from '@/content/resume-base.json'
 
 const maxFileBytes = 2_000_000
 const maxTextLength = 20_000
+type ResumeFile = Pick<File, 'name' | 'type' | 'size' | 'arrayBuffer'>
 
-const fileKind = (file: File): 'pdf' | 'docx' | 'txt' | null => {
+const fileKind = (file: ResumeFile): 'pdf' | 'docx' | 'txt' | null => {
   const name = file.name.toLowerCase()
   if (name.endsWith('.pdf') && ['application/pdf', 'application/octet-stream', ''].includes(file.type)) return 'pdf'
   if (name.endsWith('.docx') && ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/octet-stream', ''].includes(file.type)) return 'docx'
@@ -37,7 +38,7 @@ const readers = {
   txt: async (buffer: Buffer) => buffer.toString('utf8'),
 }
 
-export const extractResumeText = async (file: File): Promise<string> => {
+export const extractResumeText = async (file: ResumeFile): Promise<string> => {
   const kind = fileKind(file)
   if (!kind) throw new Error('Envie um currículo em PDF, DOCX ou TXT.')
   if (file.size === 0 || file.size > maxFileBytes) throw new Error('O arquivo deve ter até 2 MB.')
