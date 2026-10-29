@@ -29,6 +29,7 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ['pdf-parse', '@napi-rs/canvas', 'mammoth'],
   pageExtensions: ['ts', 'tsx', 'mdx'],
   images: {
     formats: ['image/avif', 'image/webp'],

@@ -13,6 +13,12 @@ const tools = [
     description: 'Queries prontas para explorar vagas de engenharia no Brasil e no exterior.',
     action: 'Abrir buscas',
   },
+  {
+    href: '/tools/interview-prep',
+    title: 'Preparar entrevista',
+    description: 'Envie seu currículo e a vaga para criar um roteiro em português ou inglês.',
+    action: 'Criar roteiro',
+  },
 ]
 
 export default function ToolsPage() {
