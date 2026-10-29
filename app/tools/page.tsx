@@ -14,6 +14,12 @@ const tools = [
     action: 'Abrir buscas',
   },
   {
+    href: '/tools/networking',
+    title: 'Encontrar conexões',
+    description: 'Buscas e critérios para conhecer recrutadores e equipes ligados a oportunidades acessíveis.',
+    action: 'Explorar pessoas',
+  },
+  {
     href: '/tools/interview-prep',
     title: 'Preparar entrevista',
     description: 'Envie seu currículo e a vaga para criar um roteiro em português ou inglês.',

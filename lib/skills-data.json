@@ -78,6 +78,29 @@
     ]
   },
   {
+    "name": "blog-conexoes-estrategicas-linkedin",
+    "description": "Use quando o usuário pergunta como encontrar conexões profissionais relevantes no LinkedIn para oportunidades no Brasil ou no exterior.",
+    "triggers": [
+      "conexões no LinkedIn",
+      "conectar com recrutadores",
+      "networking internacional",
+      "buscar pessoas no LinkedIn",
+      "engineering manager no LinkedIn",
+      "conexões no exterior",
+      "contatos de empresas alvo"
+    ],
+    "linkedContent": "/blog/conexoes-estrategicas-linkedin",
+    "linkedType": "blog",
+    "relatedSkills": [
+      "blog-buscar-vagas-engenharia-linkedin"
+    ],
+    "followups": [
+      "Como verificar se uma empresa contrata candidatos no Brasil?",
+      "Quando seguir alguém antes de enviar um convite?",
+      "Como personalizar uma mensagem de conexão?"
+    ]
+  },
+  {
     "name": "blog-connection-context-serverless",
     "description": "Use quando o usuário pergunta sobre pool de conexão, leak de conexão em serverless, transações ACID, wrapper de request, ou como garantir cleanup de recursos com finally.",
     "triggers": [
