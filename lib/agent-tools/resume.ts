@@ -307,6 +307,11 @@ const scoreSkillItem = (item: ResumeSkillItem, prioritySkills: string[]): number
   return scoreSearchableText(searchableText(item.text, item.tags), decodeTargetingSignals(prioritySkills))
 }
 
+export const isVerifiedRequirement = (item: ResumeSkillItem, skill: string): boolean => {
+  const terms = equivalentTerms(skill)
+  return [item.text, ...item.tags].some((value) => terms.includes(normalizeText(value)))
+}
+
 const sortByScore = <T>(items: T[], score: (item: T) => number): T[] =>
   items
     .map((item, index) => ({ item, index, score: score(item) }))
@@ -372,10 +377,23 @@ export const buildTargetedResumeModel = (prioritySkills: string[] = [], language
   const base = resumeBase as ResumeBase
   const activePrioritySkills = shouldTargetResume(prioritySkills, base) ? prioritySkills : []
   const localizedBase = localizeResumeBase(base, language)
+  const requestedSkills = decodeTargetingSignals(activePrioritySkills).mustHaveSkills
+  const verifiedSkills = requestedSkills.filter((skill) =>
+    Object.values(localizedBase.skills).some((group) => group.items.some((item) => isVerifiedRequirement(item, skill))),
+  ).slice(0, 3)
+  const summary = selectSummaryClauses(localizedBase.summaryClauses, activePrioritySkills)
+  const relevance = verifiedSkills.length ? {
+    text: language === 'pt'
+      ? `Experiência com ${verifiedSkills.join(', ')}, competências relevantes para os requisitos desta vaga.`
+      : `Experience with ${verifiedSkills.join(', ')}, aligned with requirements of this role.`,
+    tags: verifiedSkills,
+    default: false,
+    sourceRefs: ['content/resume-base.json'],
+  } : null
 
   return {
     header: localizedBase.header,
-    summaryClauses: selectSummaryClauses(localizedBase.summaryClauses, activePrioritySkills),
+    summaryClauses: relevance ? [summary[0], relevance, ...summary.slice(1, 2)].filter(Boolean) : summary,
     skills: selectSkillGroups(localizedBase.skills, activePrioritySkills),
     experience: localizedBase.experience.map((experience) => ({
       ...experience,
@@ -459,6 +477,17 @@ const allowedSkillLine = (line: string, base: ResumeBase): boolean => {
   return values.split(', ').every((value) => allowedItems.has(value))
 }
 
+const allowedRelevanceLine = (line: string, base: ResumeBase, language: ResumeLanguage): boolean => {
+  const pattern = language === 'pt'
+    ? /^Experiência com (.+), competências relevantes para os requisitos desta vaga\.$/
+    : /^Experience with (.+), aligned with requirements of this role\.$/
+  const match = line.match(pattern)
+  if (!match) return false
+  return match[1].split(', ').every((skill) =>
+    Object.values(base.skills).some((group) => group.items.some((item) => isVerifiedRequirement(item, skill))),
+  )
+}
+
 const allowedMarkdownLines = (base: ResumeBase, language: ResumeLanguage): Set<string> =>
   new Set([
     ...renderHeader(base.header, language).split('\n').map((line) => line.trim()).filter(Boolean),
@@ -488,6 +517,7 @@ export const validateMarkdownIsSubset = (markdown: string, language: ResumeLangu
     .filter(Boolean)
     .filter((line) => !allowedLines.has(line))
     .filter((line) => !allowedSkillLine(line, base))
+    .filter((line) => !allowedRelevanceLine(line, base, language))
 
   return { ok: invalidBullets.length === 0, invalidBullets }
 }

@@ -12,7 +12,7 @@
   },
   "summaryClauses": [
     {
-      "text": "Full-stack software engineer with 4+ years of professional experience across web applications, using React, Node.js, Python, and PostgreSQL.",
+      "text": "Full-stack software engineer with 5+ years of professional experience across web applications, using React, Node.js, Python, and PostgreSQL.",
       "tags": ["software-engineering", "full-stack", "backend", "python", "nodejs", "typescript", "postgresql"],
       "default": true,
       "sourceRefs": ["content/knowledge-base.md", "workspace/professional-context/profile-context.md"]
@@ -306,7 +306,7 @@
     {
       "company": "Grupo Dass",
       "role": "Full-Stack Developer",
-      "period": "Feb 2022 - Jul 2024",
+      "period": "Feb 2021 - Jul 2024",
       "location": "On-site, Brazil",
       "bullets": [
         {
