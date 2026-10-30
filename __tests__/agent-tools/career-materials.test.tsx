@@ -16,6 +16,7 @@ describe('career materials', () => {
     expect(english).not.toContain('Experience with React, Java')
     expect(letter).not.toContain('calls for React, Java')
     expect(validateMarkdownIsSubset(generateTargetedResumeMarkdown(signals)).ok).toBe(true)
+    expect(validateMarkdownIsSubset('Experience with Java, aligned with requirements of this role.').ok).toBe(false)
   })
 
   it('gera PDF com o texto editado da carta', async () => {
