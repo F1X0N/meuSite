@@ -62,7 +62,9 @@ export async function POST(request: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Validação falhou', issues: parsed.error.issues },
+        { error: parsed.error.issues.some((issue) => issue.path[0] === 'jobDescription')
+          ? 'A descrição da vaga precisa ter entre 50 e 10.000 caracteres. Analise a vaga novamente antes de gerar os documentos.'
+          : 'Confira os dados informados: cargo, empresa e motivação devem respeitar os limites dos campos.' },
         { status: 400 },
       )
     }
