@@ -203,7 +203,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Mensagem muito curta' }, { status: 400 })
     }
 
-    const MAX_USER_MESSAGE_CHARS = 5000
+    const MAX_USER_MESSAGE_CHARS = mode === 'job_fit' ? 10000 : 5000
     if (message.length > MAX_USER_MESSAGE_CHARS) {
       return NextResponse.json({
         error: `Texto muito grande (${message.length} chars). Máximo: ${MAX_USER_MESSAGE_CHARS}.`

@@ -38,6 +38,20 @@ describe('POST /api/ai/chat', () => {
     expect(res.status).toBe(400)
   })
 
+  it('aceita descrição de vaga com mais de 5.000 caracteres', async () => {
+    const { POST } = await import('@/app/api/ai/chat/route')
+    const res = await POST(buildRequest({ message: 'vaga '.repeat(1200), mode: 'job_fit', sessionId: 'sess-long-job' }))
+    expect(res.status).toBe(200)
+    expect((await res.json()).type).toBe('job_fit')
+  })
+
+  it('rejeita descrição de vaga acima de 10.000 caracteres', async () => {
+    const { POST } = await import('@/app/api/ai/chat/route')
+    const res = await POST(buildRequest({ message: 'a'.repeat(10001), mode: 'job_fit', sessionId: 'sess-too-long-job' }))
+    expect(res.status).toBe(400)
+    expect((await res.json()).error).toContain('10000')
+  })
+
   it('rejeita request sem sessionId com 400', async () => {
     const { POST } = await import('@/app/api/ai/chat/route')
     const res = await POST(buildRequest({ message: 'pergunta longa o suficiente' }))

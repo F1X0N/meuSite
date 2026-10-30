@@ -44,6 +44,7 @@ type Message = {
     type?: 'answer' | 'job_fit' | 'rate_limit' | 'error'
     askData?: AskAIResponse
     fitData?: JobFitResponse
+    sourceJobDescription?: string
 }
 
 // ============ Config ============
@@ -370,8 +371,11 @@ export const AITools = () => {
                 setMessages(prev => [...prev, { role: 'user', content: originalInput, mode }])
             }
 
-            if (mode === 'job_fit') {
-                setLastJobDescription(messageToSend)
+            const isJobDescription = mode === 'job_fit' && messageToSend.trim().length >= 50 && messageToSend.trim().length <= 10000
+            const sourceJobDescription = isJobDescription ? messageToSend : lastJobDescription
+            if (mode === 'job_fit' && !isJobDescription && !lastJobDescription && messageToSend.length <= 10000) {
+                setMessages(prev => [...prev, { role: 'assistant', content: 'Cole a descrição completa da vaga para iniciar a análise.', mode, type: 'error' }])
+                return
             }
 
             // 2. Send to AI Chat
@@ -382,10 +386,12 @@ export const AITools = () => {
                     message: messageToSend,
                     mode,
                     sessionId,
-                    history: messages
+                    history: [...messages
                         .filter(m => m.type !== 'error' && m.type !== 'rate_limit') // Filter valid history
                         .slice(-6)
                         .map(m => ({ role: m.role, content: m.content })),
+                        ...(mode === 'job_fit' && !isJobDescription && lastJobDescription
+                            ? [{ role: 'user', content: lastJobDescription }] : [])],
                     extractedFromUrl: isExtractedUrl,
                 }),
             })
@@ -405,18 +411,27 @@ export const AITools = () => {
                 return
             }
 
+            if (!response.ok) {
+                setMessages(prev => [...prev, {
+                    role: 'assistant', content: data.error || 'Não foi possível analisar a mensagem. Tente novamente.', mode, type: 'error'
+                }])
+                return
+            }
+
             // 4. Handle Response by Mode
             if (mode === 'job_fit' || data.type === 'job_fit') {
                 const fitData = normalizeJobFitResponse(data)
 
                 // Validate if we have a valid fit response
                 if (fitData && (fitData.match_score_0_100 > 0 || fitData.summary_md)) {
+                    if (isJobDescription) setLastJobDescription(messageToSend)
                     setMessages(prev => [...prev, {
                         role: 'assistant',
                         content: '',
                         mode: 'job_fit',
                         type: 'job_fit',
-                        fitData
+                        fitData,
+                        sourceJobDescription: sourceJobDescription || undefined,
                     }])
                 } else {
                     // Fallback to text if structured data is missing
@@ -488,12 +503,11 @@ export const AITools = () => {
         )
     }
 
-    const openResumeModal = () => {
-        if (!lastJobDescription) return
+    const openResumeModal = (sourceJobDescription: string) => {
         setResumeModal({
             ...initialResumeModal,
             open: true,
-            sourceJd: lastJobDescription,
+            sourceJd: sourceJobDescription,
         })
     }
 
@@ -630,7 +644,7 @@ export const AITools = () => {
     }
 
     // ============ Render Job Fit Response ============
-    const renderJobFitResponse = (fitData: JobFitResponse) => (
+    const renderJobFitResponse = (fitData: JobFitResponse, sourceJobDescription?: string) => (
         <div className="space-y-4">
             {/* Score */}
             <div className="flex items-center gap-3">
@@ -646,7 +660,7 @@ export const AITools = () => {
             {/* Summary */}
             <p className="text-sm leading-relaxed">{fitData.summary_md}</p>
 
-            {lastJobDescription && (
+            {sourceJobDescription && (
                 <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
                     <p className="text-xs text-muted-foreground mb-2">
                         Preparar currículo e carta de apresentação para esta vaga
@@ -654,7 +668,7 @@ export const AITools = () => {
                     <Button
                         type="button"
                         size="sm"
-                        onClick={openResumeModal}
+                        onClick={() => openResumeModal(sourceJobDescription)}
                         disabled={resumeModal.loading}
                     >
                         {resumeModal.loading ? 'Gerando...' : 'Preparar candidatura'}
@@ -718,7 +732,7 @@ export const AITools = () => {
                     }`}
             >
                 {msg.type === 'job_fit' && msg.fitData ? (
-                    renderJobFitResponse(msg.fitData)
+                    renderJobFitResponse(msg.fitData, msg.sourceJobDescription)
                 ) : msg.type === 'rate_limit' ? (
                     <div className="space-y-2">
                         <p className="text-sm">{msg.content}</p>
