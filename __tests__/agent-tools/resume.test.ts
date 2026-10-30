@@ -156,7 +156,7 @@ describe('agent-tools/resume', () => {
   it('validateMarkdownIsSubset detecta summary ou bullet inventado', () => {
     const markdown = generateTargetedResumeMarkdown([])
     const tampered = markdown.replace(
-      'Full-stack software engineer with 4+ years of professional experience across web applications, using React, Node.js, Python, and PostgreSQL.',
+      'Full-stack software engineer with 5+ years of professional experience across web applications, using React, Node.js, Python, and PostgreSQL.',
       'Engenheiro inventado com dez anos de Kubernetes em escala global.',
     )
     const result = validateMarkdownIsSubset(tampered)

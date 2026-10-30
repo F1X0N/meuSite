@@ -1078,13 +1078,14 @@ export const AITools = () => {
                                             />
                                             <div className="flex flex-wrap gap-2">
                                                 <Button type="button" variant="outline" size="sm" onClick={() => navigator.clipboard.writeText(resumeModal.coverLetter ?? '')}>Copiar carta</Button>
-                                                <a
-                                                    href={`data:text/plain;charset=utf-8,${encodeURIComponent(resumeModal.coverLetter)}`}
-                                                    download={`Josivan_Amorim_Cover_Letter_${resumeModal.language.toUpperCase()}.txt`}
-                                                    className="inline-flex items-center justify-center h-9 px-3 text-sm font-medium rounded-lg border border-border hover:bg-muted transition-colors"
-                                                >
-                                                    Baixar carta
-                                                </a>
+                                                <Button type="button" variant="outline" size="sm" onClick={async () => {
+                                                    try {
+                                                        const { downloadCoverLetterPdf } = await import('@/lib/agent-tools/cover-letter-pdf')
+                                                        await downloadCoverLetterPdf(resumeModal.coverLetter ?? '', resumeModal.language)
+                                                    } catch {
+                                                        setResumeModal((previous) => ({ ...previous, error: 'Não foi possível gerar o PDF da carta. Tente novamente.' }))
+                                                    }
+                                                }}>Baixar carta em PDF</Button>
                                             </div>
                                         </div>
                                     )}

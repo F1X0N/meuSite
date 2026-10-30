@@ -32,7 +32,7 @@ Diferencial: combina profundidade técnica com responsabilidade operacional — 
 - Supervisão de agentes de IA aplicada à operação técnica e ao suporte.
 
 ### [Anterior] Desenvolvedor Full Stack — Grupo Dass
-**Período:** Fevereiro 2022 — Julho 2024
+**Período:** Fevereiro 2021 — Julho 2024
 **Foco:** Automação de processos, sustentação de aplicações web em escala corporativa.
 **Stack:** JavaScript, Angular, Node.js, PHP, PostgreSQL.
 
@@ -40,15 +40,6 @@ Diferencial: combina profundidade técnica com responsabilidade operacional — 
 - Desenvolveu sistemas internos, automações e aplicações web para uma operação com mais de 28 mil colaboradores no Brasil e Argentina.
 - Atuou no ciclo completo: requisitos, desenvolvimento (back/front), entrega, apresentação e sustentação.
 - Trabalhou com práticas Lean, Scrum e Kanban em ambiente corporativo de melhoria contínua.
-
-### [Anterior] Cronometrista — Grupo Dass
-**Período:** Fevereiro 2021 — Fevereiro 2022
-**Foco:** Planejamento e melhoria de processos (PCP).
-**Stack:** ZWCAD, Lean, Scrum, Kanban.
-
-**Atuação:**
-- Layouts funcionais e planejamento produtivo no PCP.
-- Melhoria contínua no setor produtivo com metodologias ágeis.
 
 ### [Anterior] Desenvolvedor Frontend — Freelance
 **Período:** Julho 2021 — Julho 2024
@@ -59,9 +50,8 @@ Diferencial: combina profundidade técnica com responsabilidade operacional — 
 
 A trajetória profissional acima tem sobreposição intencional entre o freelance e os papéis no Grupo Dass — o freelance era trabalho complementar (noites/fins de semana) durante o vínculo CLT. Para responder "quantos anos de experiência?", a contagem honesta é:
 
-- **Início profissional:** fevereiro de 2021 (Cronometrista no Grupo Dass).
-- **Tempo total:** "data atual menos fevereiro de 2021" → cerca de 4 a 5 anos de experiência profissional contínua dependendo da data de leitura.
-- **Foco em engenharia de software:** desde julho de 2021 (freelance frontend) e formalmente desde fevereiro de 2022 (dev full stack no Grupo Dass) → ≈ 3 a 4 anos focados em engenharia de software.
+- **Início profissional em desenvolvimento:** fevereiro de 2021, como desenvolvedor no Grupo Dass, durante a faculdade.
+- **Tempo total em engenharia de software:** data atual menos fevereiro de 2021; mais de cinco anos em outubro de 2026.
 - **Foco em IA aplicada:** desde julho de 2024 (SaaS LegalTech atual).
 
 Use a data atual ao calcular o período da posição atual. Não some perídos sobrepostos (ex: freelance + Grupo Dass como dev full stack do mesmo período não dobram tempo de experiência — o freelance é complemento, não trabalho adicional somável).

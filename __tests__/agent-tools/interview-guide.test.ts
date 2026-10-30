@@ -28,7 +28,7 @@ describe('interview guide', () => {
 
     expect(guide.gaps.some((item) => item.includes('Java'))).toBe(true)
     expect(guide.questions.some((item) => item.question.includes('Python'))).toBe(true)
-    expect(guide.introduction).toContain('4+ years of professional experience')
+    expect(guide.introduction).toContain('5+ years of professional experience')
     expect(guide.introduction).not.toContain('4+ years of Python')
     expect(guide.profileVersion).toMatch(/^[a-f0-9]{10}$/)
   })

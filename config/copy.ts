@@ -87,7 +87,7 @@ const createCopyConfig = () => ({
       {
         role: 'Desenvolvedor Full Stack',
         company: 'Grupo Dass',
-        period: 'Fev 2022 — Jul 2024',
+        period: 'Fev 2021 — Jul 2024',
         description:
           'Desenvolvimento e sustentação de aplicações web internas e automações para uma operação com mais de 28 mil colaboradores no Brasil e Argentina.',
         achievements: [
@@ -96,18 +96,6 @@ const createCopyConfig = () => ({
           'Atuação em ambiente Lean com práticas Scrum e Kanban entre áreas.',
         ],
         technologies: ['JavaScript', 'Angular', 'Node.js', 'PHP', 'PostgreSQL', 'Lean', 'Scrum'],
-      },
-      {
-        role: 'Cronometrista',
-        company: 'Grupo Dass',
-        period: 'Fev 2021 — Fev 2022',
-        description:
-          'Planejamento e melhoria contínua no PCP — layouts funcionais e previsões produtivas com metodologias ágeis no chão de fábrica.',
-        achievements: [
-          'Layouts funcionais com ZWCAD e planejamento produtivo no PCP.',
-          'Melhoria contínua no setor produtivo com Scrum, Kanban e Lean.',
-        ],
-        technologies: ['ZWCAD', 'Lean', 'PCP', 'Scrum', 'Kanban'],
       },
     ],
   },
