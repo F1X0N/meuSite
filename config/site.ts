@@ -23,7 +23,8 @@ const createSiteConfig = () => ({
       { label: 'Ferramentas', href: '/tools' },
     ],
     utils: [
-      { label: 'Baixar CV', href: '/cv.pdf' },
+      { label: 'CV em português', href: '/cv-pt.pdf' },
+      { label: 'CV in English', href: '/cv.pdf' },
     ],
   },
 })

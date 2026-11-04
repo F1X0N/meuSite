@@ -9,10 +9,15 @@ import { generateResumePDF } from '../lib/agent-tools/resume-pdf'
 
 async function main() {
   console.log('[gen-default-cv] gerando public/cv.pdf...')
-  const buffer = await generateResumePDF([])
-  const outPath = path.join(process.cwd(), 'public', 'cv.pdf')
-  await writeFile(outPath, buffer)
-  console.log(`[gen-default-cv] gravado: ${outPath} (${buffer.length} bytes)`)
+  await Promise.all(([
+    { language: 'en', filename: 'cv.pdf' },
+    { language: 'pt', filename: 'cv-pt.pdf' },
+  ] as const).map(async ({ language, filename }) => {
+    const buffer = await generateResumePDF([], language)
+    const outPath = path.join(process.cwd(), 'public', filename)
+    await writeFile(outPath, buffer)
+    console.log(`[gen-default-cv] gravado: ${outPath} (${buffer.length} bytes)`)
+  }))
 }
 
 main().catch((err) => {

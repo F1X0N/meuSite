@@ -138,7 +138,8 @@ export const CommandPalette = () => {
     { label: 'Abrir LinkedIn', action: () => openExternal(site.social.linkedin), icon: 'link', group: 'Ações' },
     { label: 'Abrir GitHub', action: () => openExternal(site.social.github), icon: 'code', group: 'Ações' },
     { label: 'Abrir WhatsApp', action: () => openExternal(site.social.whatsapp), icon: 'chat', group: 'Ações' },
-    { label: 'Baixar CV (PDF)', action: () => openExternal('/cv.pdf'), icon: 'download', group: 'Ações' },
+    { label: 'Baixar CV em português (PDF)', action: () => openExternal('/cv-pt.pdf'), icon: 'download', group: 'Ações' },
+    { label: 'Download CV in English (PDF)', action: () => openExternal('/cv.pdf'), icon: 'download', group: 'Ações' },
   ]
 
   // Agrupar itens. Quando o input começa com ":", mostra apenas o grupo Secret.

@@ -62,7 +62,8 @@ const createCopyConfig = () => ({
     ],
     ctas: [
       { label: 'Ver Experiência Completa', href: '/#experience' },
-      { label: 'Baixar CV (PDF)', href: '/cv.pdf' },
+      { label: 'Baixar CV em português (PDF)', href: '/cv-pt.pdf' },
+      { label: 'Download CV in English (PDF)', href: '/cv.pdf' },
     ],
   },
   experience: {
