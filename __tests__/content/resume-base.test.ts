@@ -4,6 +4,7 @@ import { resumeBaseSchema } from '@/lib/resume-schema'
 
 const allowedSourceRefs = new Set([
   'content/knowledge-base.md',
+  'content/resume-evidence.md',
   'workspace/professional-context/profile-context.md',
   'workspace/professional-context/linkedin-positioning.md',
   'content/case-studies/orquestracao-ia-operacao.mdx',

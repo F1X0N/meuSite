@@ -13,7 +13,7 @@ const cleanInput = (value: string | undefined, limit: number): string =>
   (value ?? '').replace(/\s+/g, ' ').trim().slice(0, limit)
 
 const firstPersonVerbs: Record<ResumeLanguage, Record<string, string>> = {
-  en: { Built: 'I built', Developed: 'I developed', Connected: 'I connected', Investigated: 'I investigated', Contributed: 'I contributed' },
+  en: { Built: 'I built', Developed: 'I developed', Added: 'I added', Integrated: 'I integrated', Delivered: 'I delivered', Connected: 'I connected', Investigated: 'I investigated', Contributed: 'I contributed' },
   pt: { Desenvolveu: 'Desenvolvi', Conectou: 'Conectei', Investigou: 'Investiguei', Contribuiu: 'Contribuí' },
 }
 

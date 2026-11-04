@@ -18,13 +18,13 @@
       "sourceRefs": ["content/knowledge-base.md", "workspace/professional-context/profile-context.md"]
     },
     {
-      "text": "Takes features from requirements through release, with CI/CD, cloud storage, and production observability using Grafana, Loki, and Sentry.",
+      "text": "I take features from requirements through release, with CI/CD, cloud storage, and production observability using Grafana, Loki, and Sentry.",
       "tags": ["cloud", "ci-cd", "observability", "release-validation", "grafana", "loki", "sentry"],
       "default": true,
       "sourceRefs": ["content/knowledge-base.md", "content/case-studies/diagnostico-observabilidade-producao.mdx"]
     },
     {
-      "text": "Builds AI workflows with OpenAI API, RAG, and supervised agents, backed by output validation and human review.",
+      "text": "I build AI workflows with OpenAI API, RAG, and supervised agents.",
       "tags": ["ai", "llm", "openai", "rag", "agent-supervision", "legaltech"],
       "default": true,
       "sourceRefs": ["content/knowledge-base.md", "content/case-studies/orquestracao-ia-operacao.mdx"]
@@ -75,11 +75,6 @@
           "text": "Model Context Protocol (MCP)",
           "tags": ["mcp", "tooling", "agents"],
           "sourceRefs": ["content/knowledge-base.md", "workspace/professional-context/linkedin-positioning.md"]
-        },
-        {
-          "text": "Structured output validation",
-          "tags": ["json-repair", "structured-output", "schema-validation"],
-          "sourceRefs": ["content/knowledge-base.md", "content/blog/ia-controle-humano.mdx"]
         }
       ]
     },
@@ -271,7 +266,7 @@
   },
   "experience": [
     {
-      "company": "Legal technology SaaS",
+      "company": "Facilita Jurídico",
       "role": "Full-Stack Software Engineer",
       "period": "Jul 2024 - Present",
       "location": "Remote, Brazil",
@@ -282,14 +277,14 @@
           "sourceRefs": ["content/knowledge-base.md", "config/copy.ts"]
         },
         {
-          "text": "Developed applied AI workflows with OpenAI API, RAG, and supervised agents, adding output checks and human review.",
-          "tags": ["ai", "llm", "openai", "rag", "prompts", "structured-output", "product-engineering"],
-          "sourceRefs": ["content/knowledge-base.md", "content/case-studies/orquestracao-ia-operacao.mdx"]
+          "text": "Built an AI-assisted document workflow with structured extraction, reducing manual handoffs in document processing.",
+          "tags": ["ai", "llm", "product-engineering", "automation"],
+          "sourceRefs": ["content/resume-evidence.md"]
         },
         {
-          "text": "Connected frontend, backend, and integrations with acceptance criteria and release validation across end-to-end product flows.",
-          "tags": ["full-stack", "frontend", "backend", "integrations", "acceptance-criteria", "release-validation"],
-          "sourceRefs": ["content/knowledge-base.md", "content/case-studies/validacao-criterios-aceite.mdx"]
+          "text": "Added cost, token, and latency telemetry to AI calls, enabling model comparisons and investigation of unexpected behavior.",
+          "tags": ["ai", "observability", "monitoring", "llm", "product-engineering"],
+          "sourceRefs": ["content/resume-evidence.md"]
         },
         {
           "text": "Investigated production issues with Grafana, Loki, Sentry, and read-only SQL, then verified changes after deployment.",
@@ -310,19 +305,19 @@
       "location": "On-site, Brazil",
       "bullets": [
         {
-          "text": "Built internal web applications and process automations with Angular, Node.js, PHP, and PostgreSQL for industrial operations.",
-          "tags": ["full-stack", "internal-tools", "automation", "scale", "industrial", "web-applications"],
-          "sourceRefs": ["content/knowledge-base.md", "config/copy.ts"]
+          "text": "Built an RFID tracking and inventory workflow with Python, Node.js, and React, improving traceability from capture to operational use.",
+          "tags": ["python", "nodejs", "react", "full-stack", "automation", "industrial", "integrations"],
+          "sourceRefs": ["content/resume-evidence.md"]
         },
         {
-          "text": "Owned feature work from requirements through frontend and backend implementation, release, and ongoing application support.",
-          "tags": ["full-cycle", "javascript", "angular", "nodejs", "php", "postgresql", "support"],
-          "sourceRefs": ["content/knowledge-base.md"]
+          "text": "Developed a digital prototype catalog and quality-control workflows, reducing manual searches and improving access to production information.",
+          "tags": ["full-stack", "industrial", "automation", "internal-tools", "product-engineering"],
+          "sourceRefs": ["content/resume-evidence.md"]
         },
         {
-          "text": "Collaborated with engineering and operations teams in Lean, Scrum, and Kanban workflows to turn needs into maintainable software.",
-          "tags": ["collaboration", "cross-functional", "lean", "scrum", "kanban", "operations"],
-          "sourceRefs": ["content/knowledge-base.md", "config/copy.ts"]
+          "text": "Integrated internal tools with existing systems and supported adoption with engineering and operations teams using Angular, PHP, and PostgreSQL.",
+          "tags": ["integrations", "collaboration", "angular", "php", "postgresql", "industrial", "full-stack"],
+          "sourceRefs": ["content/resume-evidence.md"]
         }
       ]
     },

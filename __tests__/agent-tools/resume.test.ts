@@ -39,7 +39,7 @@ describe('agent-tools/resume', () => {
     expect(markdown).toContain('## Resumo')
     expect(markdown).toContain('## Experiência')
     expect(markdown).toContain('Engenheiro de Software Full Stack')
-    expect(markdown).toContain('Desenvolveu funcionalidades de produto')
+    expect(markdown).toContain('Desenvolvi funcionalidades de produto')
     expect(markdown).not.toContain('Built full-stack product features')
     expect(validateMarkdownIsSubset(markdown, 'pt').ok).toBe(true)
   })
@@ -55,6 +55,22 @@ describe('agent-tools/resume', () => {
     expect(portuguese.publicProjects.every((project, projectIndex) =>
       project.bullets.every((bullet, bulletIndex) => bullet.text !== english.publicProjects[projectIndex].bullets[bulletIndex].text),
     )).toBe(true)
+  })
+
+  it('inclui entregas concretas e resultados qualitativos nos dois idiomas', () => {
+    const portuguese = generateTargetedResumeMarkdown([], 'pt')
+    const english = generateTargetedResumeMarkdown([], 'en')
+
+    expect(portuguese).toContain('rastreamento e estoque com RFID')
+    expect(portuguese).toContain('catálogo digital de protótipos')
+    expect(portuguese).toContain('telemetria de custo, tokens e latência')
+    expect(portuguese).toContain('reduzindo repasses manuais')
+    expect(portuguese).not.toMatch(/revisão humana|validação de respostas/i)
+    expect(english).toContain('RFID tracking and inventory')
+    expect(english).toContain('digital prototype catalog')
+    expect(english).toContain('cost, token, and latency telemetry')
+    expect(validateMarkdownIsSubset(portuguese, 'pt').ok).toBe(true)
+    expect(validateMarkdownIsSubset(english, 'en').ok).toBe(true)
   })
 
   it('carta usa cargo, empresa e experiência verificada no idioma escolhido', () => {
@@ -116,8 +132,8 @@ describe('agent-tools/resume', () => {
   it('personalizacao reordena summary, skills e filtra bullets irrelevantes', () => {
     const markdown = generateTargetedResumeMarkdown(['llm', 'openai', 'rag'])
 
-    expect(markdown.indexOf('Builds AI workflows')).toBeLessThan(markdown.indexOf('Full-stack software engineer'))
-    expect(markdown.indexOf('Developed applied AI workflows')).toBeLessThan(markdown.indexOf('Built full-stack product features'))
+    expect(markdown.indexOf('I build AI workflows')).toBeLessThan(markdown.indexOf('Full-stack software engineer'))
+    expect(markdown).toContain('Built an AI-assisted document workflow')
     expect(markdown).not.toContain('Contributed to Docker-based delivery')
     expect(markdown).not.toContain('Collaborated with engineering and operations teams')
   })
