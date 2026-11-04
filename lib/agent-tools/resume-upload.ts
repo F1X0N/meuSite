@@ -1,4 +1,6 @@
 import resumeBase from '@/content/resume-base.json'
+import { localizeResumeBase } from './resume-localization'
+import type { ResumeBase } from '@/lib/resume-schema'
 
 const maxFileBytes = 2_000_000
 const maxTextLength = 20_000
@@ -56,8 +58,9 @@ export const isOwnerResumeText = (text: string): boolean => {
   const name = normalize(resumeBase.header.name)
   const email = normalize(resumeBase.header.email)
   const linkedin = resumeBase.header.linkedin.replace('https://www.', '').replace(/\/$/, '')
-  const summaryMatches = resumeBase.summaryClauses
+  const summaries = [resumeBase as ResumeBase, localizeResumeBase(resumeBase as ResumeBase, 'pt')]
+  const matchingSummary = summaries.some((base) => base.summaryClauses
     .filter((clause) => clause.default)
-    .filter((clause) => normalized.includes(normalize(clause.text).slice(0, 55))).length
-  return header.includes(name) && header.includes(email) && header.includes(linkedin) && summaryMatches >= 2
+    .filter((clause) => normalized.includes(normalize(clause.text).slice(0, 55))).length >= 2)
+  return header.includes(name) && header.includes(email) && header.includes(linkedin) && matchingSummary
 }

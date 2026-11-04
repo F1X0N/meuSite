@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer'
+import { Document, Link, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer'
 import { buildTargetedResumeModel, type ResumeRenderModel } from './resume'
 import type { ResumeLanguage } from './resume-localization'
 
@@ -20,6 +20,7 @@ const styles = StyleSheet.create({
   name: { fontSize: 18, fontFamily: 'Helvetica-Bold', color: COLOR_TEXT, marginBottom: 8 },
   title: { fontSize: 10.2, color: COLOR_MUTED, marginBottom: 6 },
   contactLine: { fontSize: 8.4, color: COLOR_MUTED, marginBottom: 3 },
+  link: { color: COLOR_MUTED, textDecoration: 'none' },
   headerBlock: { marginBottom: 8 },
   sectionHeading: {
     fontSize: 10.6,
@@ -72,14 +73,21 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 const renderHeader = (model: ResumeRenderModel) => {
   const header = model.header
   const contactLine = [header.email, header.phone].filter(Boolean).join(' | ')
-  const linksLine = [header.linkedin, header.github, header.portfolio].filter(Boolean).join(' | ')
+  const links = [header.linkedin, header.github, header.portfolio].filter(Boolean)
 
   return (
     <View style={styles.headerBlock}>
       <Text style={styles.name}>{header.name}</Text>
       <Text style={styles.title}>{header.title}</Text>
       <Text style={styles.contactLine}>{contactLine}</Text>
-      <Text style={styles.contactLine}>{linksLine}</Text>
+      <Text style={styles.contactLine}>
+        {links.map((url, index) => (
+          <React.Fragment key={url}>
+            {index > 0 ? ' | ' : ''}
+            <Link src={url} style={styles.link}>{url}</Link>
+          </React.Fragment>
+        ))}
+      </Text>
       {header.location ? <Text style={styles.contactLine}>{header.location}</Text> : null}
     </View>
   )
@@ -127,7 +135,7 @@ const renderProject = (project: ResumeRenderModel['publicProjects'][number]) => 
       {project.title}
       {project.role ? ` (${project.role})` : ''}
     </Text>
-    <Text style={styles.projectUrl}>{project.url}</Text>
+    <Link src={project.url} style={[styles.projectUrl, styles.link]}>{project.url}</Link>
     {project.bullets.map((bullet) => (
       <Bullet key={bullet.text} text={bullet.text} />
     ))}
@@ -150,11 +158,11 @@ export const ResumeDocument = ({ prioritySkills = [], language = 'en' }: { prior
 
         <Section title={titles.summary}>{renderSummary(model)}</Section>
 
-        <Section title={titles.skills}>{renderSkills(model)}</Section>
-
         <Section title={titles.experience}>
           {model.experience.map(renderExperience)}
         </Section>
+
+        <Section title={titles.skills}>{renderSkills(model)}</Section>
 
         <Section title={titles.projects}>
           {model.publicProjects.map(renderProject)}

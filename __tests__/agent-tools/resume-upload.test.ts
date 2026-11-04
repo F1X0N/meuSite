@@ -13,6 +13,14 @@ describe('resume upload', () => {
     expect(isOwnerResumeText(text)).toBe(true)
   })
 
+  it('reconhece o CV público em português', async () => {
+    const buffer = await readFile('public/cv-pt.pdf')
+    const file = new File([buffer], 'cv-pt.pdf', { type: 'application/pdf' })
+    const text = await extractResumeText(file)
+
+    expect(isOwnerResumeText(text)).toBe(true)
+  })
+
   it('não mistura um CV em texto de outra pessoa com o perfil público', async () => {
     const file = new File([
       'Maria Silva\nDesenvolveu interfaces React e APIs em Node.js.\nColaborou com uma equipe de produto para entregar sistemas web em produção.',
