@@ -315,9 +315,9 @@
           "sourceRefs": ["content/resume-evidence.md"]
         },
         {
-          "text": "Integrated internal tools with existing systems and supported adoption with engineering and operations teams using Angular, PHP, and PostgreSQL.",
-          "tags": ["integrations", "collaboration", "angular", "php", "postgresql", "industrial", "full-stack"],
-          "sourceRefs": ["content/resume-evidence.md"]
+          "text": "Integrated internal tools and supported adoption with engineering and operations in an industrial group with over 28,000 employees.",
+          "tags": ["integrations", "collaboration", "industrial", "full-stack", "scale"],
+          "sourceRefs": ["content/resume-evidence.md", "content/knowledge-base.md"]
         }
       ]
     },

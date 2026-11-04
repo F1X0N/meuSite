@@ -12,3 +12,4 @@ Fonte: experiências profissionais publicadas no [LinkedIn de Josivan Amorim](ht
 - Rastreamento e estoque com RFID, Python, Node.js e React: maior rastreabilidade desde a captura até o uso operacional.
 - Catálogo digital de protótipos e fluxos de controle de qualidade: acesso mais fácil às informações de produção e menos buscas manuais.
 - Integração com sistemas existentes e apoio à adoção junto às equipes de engenharia e operações; atuação com Angular, PHP e PostgreSQL.
+- A [base profissional](knowledge-base.md) registra que o grupo industrial tinha mais de 28 mil colaboradores no Brasil e na Argentina. Trata-se da escala da operação, não da quantidade de usuários dos sistemas.
