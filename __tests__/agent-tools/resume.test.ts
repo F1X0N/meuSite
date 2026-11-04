@@ -69,6 +69,7 @@ describe('agent-tools/resume', () => {
     expect(english).toContain('RFID tracking and inventory')
     expect(english).toContain('digital prototype catalog')
     expect(english).toContain('cost, token, and latency telemetry')
+    expect(english).toContain('industrial group with over 28,000 employees')
     expect(validateMarkdownIsSubset(portuguese, 'pt').ok).toBe(true)
     expect(validateMarkdownIsSubset(english, 'en').ok).toBe(true)
   })
